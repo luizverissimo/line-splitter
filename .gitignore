@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+out/
+release/
+coverage/
+.turbo/
+.env
+.env.*
+!.env.example
+
+# estado local do autopilot (o registro .claude/task-ids.json DEVE ser versionado)
+.claude/state/
+.claude/settings.local.json

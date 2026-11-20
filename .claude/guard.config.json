@@ -1,0 +1,27 @@
+{
+  "scanDirs": ["apps", "packages"],
+  "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".svelte"],
+  "ignoreDirs": ["node_modules", "dist", "build", "out", "release", "coverage", ".turbo", ".vite", "android", "ios", "generated"],
+  "testPathPatterns": [
+    "\\.(test|spec)\\.[cm]?[jt]sx?$",
+    "/__tests__/",
+    "/__mocks__/",
+    "/e2e/",
+    "/tests?/",
+    "/fixtures/"
+  ],
+  "forbidden": [
+    { "pattern": "\\b(mock|mocks|mocked|mockData|fake|fakes|faker|dummy|stub|stubs|stubbed)\\b", "flags": "i", "why": "dado ou serviço simulado" },
+    { "pattern": "lorem ipsum", "flags": "i", "why": "texto de enchimento" },
+    { "pattern": "\\b(TODO|FIXME|HACK)\\b", "flags": "", "why": "pendência deixada no código" },
+    { "pattern": "not implemented|n[ãa]o implementad", "flags": "i", "why": "funcionalidade não implementada" },
+    { "pattern": "coming soon|em breve|em constru[çc][ãa]o|under construction", "flags": "i", "why": "funcionalidade adiada" },
+    { "pattern": "@ts-ignore|@ts-nocheck|eslint-disable", "flags": "", "why": "supressão de verificação" },
+    { "pattern": "\\bhard-?coded\\b", "flags": "i", "why": "valor fixo no código" },
+    { "pattern": "on[A-Z]\\w*=\\{\\s*\\(\\)\\s*=>\\s*\\{\\s*\\}\\s*\\}", "flags": "", "why": "handler vazio (botão que não faz nada)" },
+    { "pattern": "new Promise\\(\\s*\\(?\\s*\\w+\\s*\\)?\\s*=>\\s*setTimeout", "flags": "", "why": "latência simulada" }
+  ],
+  "allowMarker": "guard-allow:",
+  "noProgressLimit": 3,
+  "maxStopCycles": 300
+}
