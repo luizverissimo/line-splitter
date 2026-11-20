@@ -71,7 +71,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Concluída quando T-006a e T-006b estiverem `[x]` (a tela de preferências só existe a partir da T-010)
   - Verificar: `pnpm test:e2e`
 
-- [ ] **T-006a** Infraestrutura Playwright `_electron` + E2E UI → IPC → main → SQLite — req: RNF-13 · dep: T-005
+- [x] **T-006a** Infraestrutura Playwright `_electron` + E2E UI → IPC → main → SQLite — req: RNF-13 · dep: T-005
   - Critérios:
     - `playwright.config.ts` e helper que abre o app empacotado com `LINE_SPLITTER_USER_DATA` temporário e isolado por teste
     - E2E: rodapé mostra nome/versão/plataforma vindos do IPC real; banco `line-splitter.db` criado e migrado na pasta do teste
@@ -83,7 +83,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Critérios:
     - E2E altera uma preferência na tela Configurações, fecha o app, reabre e vê o valor salvo
     - O valor é conferido também lendo o `line-splitter.db` real da pasta do teste
-  - Verificar: `pnpm test:e2e -- preferencias`
+  - Verificar: `pnpm test:e2e preferencias`
 
 - [ ] **T-007** Fixtures de áudio gerados com FFmpeg real e helpers de teste — req: RNF-10 · dep: T-001
   - Critérios:
@@ -102,7 +102,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Tela Configurações: escolher pasta (diálogo nativo), bitrate (192/256/320), dispositivo (Auto/GPU/CPU), caminhos de Python e FFmpeg (diálogo nativo), com validação no cliente e no main (caminho existe e é executável/gravável)
     - Estados carregando/erro e confirmação visual ao salvar
     - Testes de integração do repositório de configurações contra SQLite real e teste de componente da tela
-  - Verificar: `pnpm verify && pnpm test:e2e -- configuracoes`
+  - Verificar: `pnpm verify && pnpm test:e2e configuracoes`
 
 - [ ] **T-011** Componentes base de UI e protocolo seguro de mídia — req: RF-16, RNF-04, RNF-07 · dep: T-004
   - Critérios:
@@ -130,7 +130,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Sem Python ou FFmpeg: instruções de instalação para Linux (apt) e Windows (instalador/winget), escolhidas pela plataforma atual, e botão "Verificar de novo" que refaz `engine:status`
     - Estados carregando e erro
     - E2E: caminho de Python inválido nas Configurações leva à tela Motor com Python ✖
-  - Verificar: `pnpm verify && pnpm test:e2e -- motor`
+  - Verificar: `pnpm verify && pnpm test:e2e motor`
 
 - [ ] **T-102** Instalar/reinstalar motor (venv + torch + demucs com log ao vivo) — req: RF-03, RF-24, RN-12 · dep: T-101
   - Critérios:
@@ -167,7 +167,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Após validar, mostra nome, duração, formato e player do original via `media://`
     - Estados carregando (inspecionando), vazio (nenhum arquivo) e erro
     - E2E: escolher fixture WAV mostra metadados corretos; arquivo corrompido mostra erro
-  - Verificar: `pnpm verify && pnpm test:e2e -- envio`
+  - Verificar: `pnpm verify && pnpm test:e2e envio`
 
 ## Fase 4 — Separação
 
@@ -206,7 +206,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Erro mostra mensagem legível e "Ver log técnico" (expansível, com botão copiar)
     - Durante o processamento a UI continua responsiva (navegar para Histórico/Configurações e voltar mantém o progresso)
     - Teste de componente com eventos de progresso, cancelamento e erro
-  - Verificar: `pnpm verify && pnpm test:e2e -- processamento`
+  - Verificar: `pnpm verify && pnpm test:e2e processamento`
 
 - [ ] **T-304** Tela de resultado — req: RF-15, RF-16, RF-17, RF-18 · dep: T-303
   - Critérios:
@@ -214,7 +214,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - "Abrir pasta" (`shell.openPath`) e "Mostrar arquivo" (`shell.showItemInFolder`), aceitos no main só para caminhos registrados
     - "Separar outro instrumento" volta à escolha mantendo o mesmo arquivo; "Novo arquivo" volta ao Início limpo
     - E2E do fluxo completo com fixture: escolher arquivo → Voz → Separar → resultado com 2 arquivos existentes no disco
-  - Verificar: `pnpm verify && pnpm test:e2e -- resultado`
+  - Verificar: `pnpm verify && pnpm test:e2e resultado`
 
 ## Fase 5 — Histórico
 
@@ -225,7 +225,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Ações: ouvir cada faixa (player) e abrir pasta; item com arquivo ausente mostra "arquivo não encontrado" e desabilita ouvir
     - Estado vazio convidando a fazer a primeira separação, com link para Início; estados carregando e erro
     - Testes de integração do IPC contra SQLite real e E2E com um arquivo apagado fora do app
-  - Verificar: `pnpm verify && pnpm test:e2e -- historico`
+  - Verificar: `pnpm verify && pnpm test:e2e historico`
 
 - [ ] **T-401** Remover do histórico (opção de apagar os MP3) — req: RF-21 · dep: T-400
   - Critérios:
@@ -233,7 +233,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - IPC `history:remove({ id, deleteFiles })` remove o registro e, se pedido, apaga só os caminhos registrados daquele item (nunca o original)
     - Lista atualiza após remover; erro ao apagar arquivo é exibido sem perder o registro
     - Testes de integração (com e sem apagar arquivos) e E2E
-  - Verificar: `pnpm verify && pnpm test:e2e -- historico`
+  - Verificar: `pnpm verify && pnpm test:e2e historico`
 
 ## Fase 6 — Recursos de plataforma
 
@@ -243,7 +243,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Nome "Line Splitter" na janela, na barra de tarefas e no `.desktop` do Linux
     - Menu nativo em português (Arquivo › Escolher arquivo…, Abrir pasta de saída, Sair; Ajuda › Sobre) com ações reais
     - Janela com tamanho mínimo que não quebra o layout
-  - Verificar: `pnpm verify && pnpm test:e2e -- menu`
+  - Verificar: `pnpm verify && pnpm test:e2e menu`
 
 - [ ] **T-501** Garantia de privacidade/offline — req: RN-12, RNF-11 · dep: T-301
   - Critérios:
@@ -295,7 +295,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Contraste do tema escuro ≥ 4,5:1 para textos
     - Teste que varre a UI renderizada e falha se houver textos de interface em inglês fora de uma lista de termos técnicos (MP3, GPU, CPU, FFmpeg, Python)
     - Todas as telas conferidas com estados carregando, vazio e erro
-  - Verificar: `pnpm test:e2e -- a11y && pnpm verify`
+  - Verificar: `pnpm test:e2e a11y && pnpm verify`
 
 ## Fase 8 — Entrega
 

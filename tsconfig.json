@@ -9,6 +9,8 @@
     "vitest.config.ts",
     "eslint.config.js",
     "packages/*/vitest.config.ts",
-    "apps/*/vitest.config.ts"
+    "apps/*/vitest.config.ts",
+    "e2e",
+    "playwright.config.ts"
   ]
 }

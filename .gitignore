@@ -12,3 +12,5 @@ coverage/
 # estado local do autopilot (o registro .claude/task-ids.json DEVE ser versionado)
 .claude/state/
 .claude/settings.local.json
+e2e-report/
+e2e-results/

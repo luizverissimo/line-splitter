@@ -46,3 +46,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (Prettier; premissa errada da DEC-009 — o prebuild N-API do better-sqlite3 13 roda nos dois runtimes) → testes voltaram ao Node do sistema, `electron-rebuild` removido, DEC-009 e critério corrigidos → APROVADO.
 - Observações: T-006 dividida em T-006a (infra E2E) e T-006b (preferência pela UI, depende da T-010).
 - Commit: ver `git log` (T-005)
+
+### T-006a — Infraestrutura Playwright `_electron` + E2E UI → IPC → main → SQLite (2026-11-20)
+- Feito: `playwright.config.ts` (forbidOnly, trace/screenshot em falha), `e2e/app.ts` (abre o build de produção com `LINE_SPLITTER_USER_DATA` temporário por teste, fixture que limpa a pasta), `e2e/db.ts` (lê o banco com `node:sqlite`), `e2e/fundacao.spec.ts`; script `pnpm test:e2e`.
+- Verificado: `pnpm verify` OK; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` → 2 passed (rodapé com dados do IPC real; banco criado/migrado; reinício preserva dados sem reaplicar migrações). Teste proposital com falha salvou screenshot e trace.
+- Revisor: APROVADO. Sugestões aplicadas: plataforma/versão do Electron sem valor fixo, try/finally no primeiro launch, `engines.node >=22.5`, convenção de nomes dos E2E (DEC-010).
+- Observações: os E2E só rodam nesta máquina com `LINE_SPLITTER_DEV_NO_SANDBOX=1` (Electron com --no-sandbox) — DEC-008 pendente de aprovação do usuário.
+- Commit: ver `git log` (T-006a)

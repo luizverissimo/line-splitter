@@ -43,4 +43,9 @@ export default tseslint.config(
       'vitest/no-disabled-tests': 'error',
     },
   },
+  {
+    // Fixtures do Playwright exigem o primeiro parâmetro desestruturado, mesmo sem usar outras fixtures.
+    files: ['e2e/**/*.ts'],
+    rules: { 'no-empty-pattern': 'off' },
+  },
 );

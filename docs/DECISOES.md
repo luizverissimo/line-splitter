@@ -59,3 +59,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: usar `better-sqlite3@^13.2`, sem `electron-rebuild`. Os testes do desktop rodam no Node do sistema, junto com os demais. No empacotamento (T-900) o pacote precisa ir junto e `prebuilds/*.node` fora do asar.
 - Aprovado pelo usuário: não se aplica — decisão técnica, não muda escopo nem a stack do PRD.
 - Impacto: T-005, T-900.
+
+### DEC-010 — Convenção dos E2E: um arquivo por área, filtrado pelo nome (2026-11-20)
+- Contexto: `pnpm test:e2e <nome>` repassa o argumento ao Playwright, que filtra pelo nome do arquivo.
+- Decisão: cada tarefa cria `e2e/<nome>.spec.ts` com o nome usado no seu `Verificar:` (ex.: `e2e/configuracoes.spec.ts`). Node ≥ 22.5 exigido (leitura do banco nos E2E com `node:sqlite`).
+- Aprovado pelo usuário: não se aplica — convenção técnica.
+- Impacto: todas as tarefas com `pnpm test:e2e <nome>`.

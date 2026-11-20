@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.34.9",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.5"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json && pnpm -r --if-present typecheck",
@@ -14,16 +14,17 @@
     "test": "vitest run --allowOnly=false",
     "antimock": "node .claude/scripts/anti-mock.mjs",
     "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm antimock",
-    "dev": "node scripts/dev.mjs"
+    "dev": "node scripts/dev.mjs",
+    "test:e2e": "pnpm --filter @line-splitter/desktop build && playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^24",
     "@vitest/eslint-plugin": "^1.6.28",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^16.5.0",
-    "playwright": "^1.65.1",
     "prettier": "^3.10.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.73.0",

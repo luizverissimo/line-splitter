@@ -1,0 +1,17 @@
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './e2e',
+  timeout: 60_000,
+  expect: { timeout: 10_000 },
+  fullyParallel: false,
+  workers: 1,
+  forbidOnly: true,
+  retries: 0,
+  reporter: [['list'], ['html', { open: 'never', outputFolder: 'e2e-report' }]],
+  outputDir: 'e2e-results',
+  use: {
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+});
