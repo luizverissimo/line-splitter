@@ -71,3 +71,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: o app mantém `userData/engine/models/` com `htdemucs_6s.yaml` (`models: ['5c90dfd2']`) e os pesos baixados por ele mesmo de `https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/5c90dfd2-34c22ccb.th` (T-103, com progresso e checksum). Toda separação roda `python -m demucs -n htdemucs_6s --repo <models>` — nunca baixa nada (RN-12, RNF-11). Pacotes: `demucs==4.1.0`, `numpy>=1.26,<3` (o Demucs 4.1 importa numpy mas não o declara — conferido: sem ele a separação falha) e `torch==2.6.0` (índice CUDA 12.4 se houver GPU NVIDIA, senão CPU), sem torchaudio (o 4.1 usa `sphn` para áudio). Conferido nesta máquina: `torch 2.6.0+cu124`, CUDA na RTX 3050, separação `--two-stems=vocals --repo` de 8 s em ~5 s.
 - Aprovado pelo usuário: não se aplica — decisão técnica dentro da stack do PRD (Demucs `htdemucs_6s`).
 - Impacto: T-100, T-102, T-103, T-301, T-501.
+
+### DEC-012 — T-300 e T-301 entregues juntas (2026-11-20)
+- Contexto: o botão "Separar" da T-300 só tem ação real com o serviço de separação da T-301, que por sua vez depende do mapeamento instrumento → stem da T-300. Entregar uma sem a outra deixaria um botão sem efeito (proibido).
+- Decisão: implementar, revisar e commitar T-300 e T-301 no mesmo commit ("T-300, T-301: …"), cada uma com seus critérios conferidos pelo revisor. A tela que mostra o progresso (T-303) e o resultado (T-304) são revisadas nas próprias tarefas.
+- Aprovado pelo usuário: não se aplica — não muda escopo nem ordem das fases; só o agrupamento do commit.
+- Impacto: T-300, T-301.

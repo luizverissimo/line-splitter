@@ -6,4 +6,6 @@ export interface DesktopBridge {
   invoke: IpcTransport;
   /** Assina um evento main → renderer; devolve a função para cancelar a assinatura. */
   on: (event: string, listener: (payload: unknown) => void) => () => void;
+  /** Caminho no disco de um arquivo arrastado para a janela (webUtils.getPathForFile, DEC-006). */
+  pathForFile: (file: File) => string;
 }

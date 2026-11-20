@@ -8,15 +8,18 @@ export function StartupRedirect() {
   const navigate = useNavigate();
   const location = useLocation();
   const decided = useRef(false);
+  // Entrada de histórico da abertura: se o usuário já navegou (mesmo de volta ao Início), não redirecionamos.
+  const initialKey = useRef(location.key);
 
   useEffect(() => {
     // Decide só pela primeira resposta (sucesso ou erro): depois disso o app nunca redireciona sozinho.
     if (decided.current || status.isPending) return;
     decided.current = true;
-    if (status.isSuccess && !status.data.ready && location.pathname === '/') {
+    const untouched = location.key === initialKey.current && location.pathname === '/';
+    if (status.isSuccess && !status.data.ready && untouched) {
       void navigate('/motor', { replace: true });
     }
-  }, [status.isPending, status.isSuccess, status.data, location.pathname, navigate]);
+  }, [status.isPending, status.isSuccess, status.data, location.key, location.pathname, navigate]);
 
   return null;
 }

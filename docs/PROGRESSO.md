@@ -118,3 +118,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (194 testes); `pnpm --filter @line-splitter/desktop test audio` com fixtures reais (6 formatos, corrompido, texto .wav, MP3 como .wma, 501 MB, 31 min, inexistente, pasta, vazio, ffprobe ausente, acentos, maiúsculas, original intacto por hash/mtime, canal com revogação).
 - Revisor: REPROVADO (faltava `.aac`; mensagem "30:00" no limite) → corrigido → APROVADO.
 - Commit: ver `git log` (T-200)
+
+### T-201 — Tela Início: arrastar e soltar, escolher arquivo, metadados e player do original (2026-11-20)
+- Feito: `apps/web/src/pages/HomePage.tsx` (diálogo nativo com filtro + conferência de extensão no cliente, metadados, player do original por `media://`, estados vazio/carregando/erro, contador de requisição), `apps/web/src/state/FileDropContext.tsx` (soltar na janela inteira, overlay, em outra tela leva ao Início, ignora durante a inspeção), `pathForFile` no preload (`webUtils.getPathForFile`). Correção encontrada pelo E2E: `StartupRedirect` não redireciona se o usuário já navegou antes da primeira verificação do motor.
+- Verificado: `pnpm verify` OK (206 testes); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e envio` 4 passed (diálogo + metadados reais + o player toca o original; soltar fora da caixa em outra tela; arrastar FLAC com arquivo real do disco; corrompido e .wma recusados; hash do original igual).
+- Revisor: REPROVADO (soltar só na caixa; inspeções concorrentes; destaque piscando; caminho do diálogo sem validação no cliente) → corrigido → APROVADO. Sugestão aplicada: overlay avisa quando o soltar está bloqueado.
+- Commit: ver `git log` (T-201)

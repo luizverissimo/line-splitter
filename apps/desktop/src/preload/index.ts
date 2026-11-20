@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import { ipc, type DesktopBridge } from '@line-splitter/shared';
 
 // Única superfície exposta ao renderer: canais e eventos do contrato, nada mais.
@@ -14,6 +14,11 @@ const bridge: DesktopBridge = {
     return () => {
       ipcRenderer.removeListener(event, wrapped);
     };
+  },
+  pathForFile: (file) => {
+    const filePath = webUtils.getPathForFile(file);
+    if (!filePath) throw new Error('O arquivo solto não está no disco (arraste um arquivo de uma pasta).');
+    return filePath;
   },
 };
 

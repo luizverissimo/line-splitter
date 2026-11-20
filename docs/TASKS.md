@@ -159,7 +159,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração com os fixtures reais: cada formato válido, corrompido, extensão errada, 31 min
   - Verificar: `pnpm --filter @line-splitter/desktop test audio && pnpm verify`
 
-- [ ] **T-201** Tela Início: arrastar e soltar, escolher arquivo, metadados e player do original — req: RF-07, RF-08, RF-09, RN-01, RN-03, RN-11 · dep: T-200, T-011
+- [x] **T-201** Tela Início: arrastar e soltar, escolher arquivo, metadados e player do original — req: RF-07, RF-08, RF-09, RN-01, RN-03, RN-11 · dep: T-200, T-011
   - Critérios:
     - Área de soltar arquivo (caminho obtido com `webUtils.getPathForFile` no preload) com destaque visual ao arrastar
     - Botão "Escolher arquivo" abre diálogo nativo filtrado pelos formatos aceitos

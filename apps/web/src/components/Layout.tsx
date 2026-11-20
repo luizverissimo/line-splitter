@@ -4,6 +4,7 @@ import { useAppInfo } from '../api/queries';
 import { ErrorBoundary } from './ErrorBoundary';
 import { QueryError } from './QueryError';
 import { StartupRedirect } from './StartupRedirect';
+import { FileDropProvider } from '../state/FileDropContext';
 
 const links = [
   { to: '/', label: 'Início', icon: Home, end: true },
@@ -32,37 +33,39 @@ function AppFooter() {
 export function Layout() {
   const location = useLocation();
   return (
-    <div className="app-shell">
-      <StartupRedirect />
-      <nav className="sidebar" aria-label="Navegação principal">
-        <div className="brand">
-          <AudioLines aria-hidden="true" />
-          <span>Line Splitter</span>
+    <FileDropProvider>
+      <div className="app-shell">
+        <StartupRedirect />
+        <nav className="sidebar" aria-label="Navegação principal">
+          <div className="brand">
+            <AudioLines aria-hidden="true" />
+            <span>Line Splitter</span>
+          </div>
+          <ul>
+            {links.map(({ to, label, icon: Icon, end }) => (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  end={end}
+                  className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+                >
+                  <Icon aria-hidden="true" size={18} />
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className="content">
+          <main className="page">
+            {/* Erro numa página não derruba a navegação; trocar de rota descarta o erro. */}
+            <ErrorBoundary resetKey={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
+          </main>
+          <AppFooter />
         </div>
-        <ul>
-          {links.map(({ to, label, icon: Icon, end }) => (
-            <li key={to}>
-              <NavLink
-                to={to}
-                end={end}
-                className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-              >
-                <Icon aria-hidden="true" size={18} />
-                {label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div className="content">
-        <main className="page">
-          {/* Erro numa página não derruba a navegação; trocar de rota descarta o erro. */}
-          <ErrorBoundary resetKey={location.pathname}>
-            <Outlet />
-          </ErrorBoundary>
-        </main>
-        <AppFooter />
       </div>
-    </div>
+    </FileDropProvider>
   );
 }

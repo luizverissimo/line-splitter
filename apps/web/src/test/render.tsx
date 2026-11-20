@@ -36,6 +36,7 @@ export function bridgeWith(handlers: Record<string, (payload: unknown) => unknow
       return handler(payload);
     },
     on: () => () => undefined,
+    pathForFile: (file) => `/arquivos-soltos/${file.name}`,
   };
 }
 

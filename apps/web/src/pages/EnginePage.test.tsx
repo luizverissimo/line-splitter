@@ -186,4 +186,30 @@ describe('Redirecionamento na abertura', () => {
     expect(screen.getByTestId('location')).toHaveTextContent(/^\/$/);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Início');
   });
+
+  it('se o usuário navegar antes da primeira verificação, não é redirecionado', async () => {
+    const user = userEvent.setup();
+    let release: (v: unknown) => void = () => undefined;
+    renderApp(
+      '/',
+      bridgeWith({
+        'app:info': () => ({ ok: true, data: info('linux') }),
+        'engine:status': () =>
+          new Promise((resolve) => {
+            release = resolve;
+          }),
+      }),
+    );
+    await user.click(screen.getByRole('link', { name: 'Histórico' }));
+    await user.click(screen.getByRole('link', { name: 'Início' }));
+    await act(async () => {
+      release({ ok: true, data: missing });
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await new Promise<void>((resolve) => queueMicrotask(resolve));
+    });
+    expect(screen.getByTestId('location')).toHaveTextContent(/^\/$/);
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Início');
+  });
 });
