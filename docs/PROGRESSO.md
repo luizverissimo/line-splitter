@@ -93,3 +93,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (ffprobe não validado; faltava teste de caminho configurado válido) → corrigido → APROVADO.
 - Observações: DEC-011 (repositório local do modelo; numpy necessário para o Demucs 4.1).
 - Commit: ver `git log` (T-100)
+
+### T-101 — Tela de configuração do motor (2026-11-20)
+- Feito: `apps/web/src/pages/EnginePage.tsx` (resumo, ✔/✖ por item com detalhe, dispositivo em uso, instruções de instalação de Python/FFmpeg pela plataforma do `app:info` — as duas plataformas com aviso se ela não for identificada —, "Verificar de novo", carregando/erro), `StartupRedirect` (na abertura, motor incompleto → Motor; decide só pela primeira resposta), `useEngineStatus`.
+- Verificado: `pnpm verify` OK (143 testes; 11 da tela/redirecionamento — o teste de redirecionamento tardio falha se o bug voltar, conferido); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e motor` 2 passed (status real na abertura; Python inválido → reabrir cai sozinho na tela Motor com ✖ e instruções; volta a ✔ com "Verificar de novo"); tela conferida por screenshot.
+- Revisor: REPROVADO (E2E não provava o redirecionamento; fallback silencioso para Linux) → corrigido → APROVADO; ressalva do teste tardio corrigida.
+- Commit: ver `git log` (T-101)

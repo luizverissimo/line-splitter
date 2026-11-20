@@ -14,14 +14,16 @@ function LocationProbe() {
 export function renderApp(path: string, bridge?: DesktopBridge) {
   if (bridge) window.api = bridge;
   else delete window.api;
-  return render(
-    <App queryClient={createQueryClient()}>
+  const queryClient = createQueryClient();
+  const result = render(
+    <App queryClient={queryClient}>
       <MemoryRouter initialEntries={[path]}>
         <AppRoutes />
         <LocationProbe />
       </MemoryRouter>
     </App>,
   );
+  return { ...result, queryClient };
 }
 
 /** Ponte que responde canais com handlers do próprio teste, no formato de envelope do IPC real. */

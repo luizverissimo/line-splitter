@@ -123,7 +123,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração reais nesta máquina (Python/FFmpeg presentes, caminho configurado inválido → item ✖)
   - Verificar: `pnpm --filter desktop test engine && pnpm verify`
 
-- [ ] **T-101** Tela de configuração do motor — req: RF-02, RF-05, RF-06 · dep: T-100
+- [x] **T-101** Tela de configuração do motor — req: RF-02, RF-05, RF-06 · dep: T-100
   - Critérios:
     - Ao abrir, se algum item estiver ✖, o app vai para a tela Motor; com tudo ✔ vai para Início
     - Lista cada item com ✔/✖ e detalhe (versão ou motivo), e o dispositivo em uso (GPU nome/CPU)

@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router';
 import { useAppInfo } from '../api/queries';
 import { ErrorBoundary } from './ErrorBoundary';
 import { QueryError } from './QueryError';
+import { StartupRedirect } from './StartupRedirect';
 
 const links = [
   { to: '/', label: 'Início', icon: Home, end: true },
@@ -32,6 +33,7 @@ export function Layout() {
   const location = useLocation();
   return (
     <div className="app-shell">
+      <StartupRedirect />
       <nav className="sidebar" aria-label="Navegação principal">
         <div className="brand">
           <AudioLines aria-hidden="true" />
