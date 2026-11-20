@@ -4,8 +4,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { HistoryRepository } from '../history/repository';
 
+/** O que usamos do `shell` do Electron (o gerenciador de arquivos do sistema). */
+export interface FileManager {
+  openPath: (path: string) => Promise<string>;
+  showItemInFolder: (path: string) => void;
+}
+
 /** Abre a pasta / mostra o arquivo no gerenciador do sistema, só para saídas registradas no histórico. */
-export function shellHandlers(history: HistoryRepository) {
+export function shellHandlers(history: HistoryRepository, fileManager: FileManager = shell) {
   const allowed = (filePath: string) => {
     const normalized = path.normalize(filePath);
     if (!path.isAbsolute(normalized) || !history.isKnownOutput(normalized)) {
@@ -17,7 +23,7 @@ export function shellHandlers(history: HistoryRepository) {
     'shell:openFolder': ipc.defineHandler('shell:openFolder', async ({ path: filePath }) => {
       const dir = path.dirname(allowed(filePath));
       if (!fs.existsSync(dir)) throw new AppError('NOT_FOUND', 'A pasta de saída não existe mais.', dir);
-      const error = await shell.openPath(dir);
+      const error = await fileManager.openPath(dir);
       if (error) throw new AppError('IO', 'Não foi possível abrir a pasta.', error);
       return { opened: true as const };
     }),
@@ -25,7 +31,7 @@ export function shellHandlers(history: HistoryRepository) {
       const file = allowed(filePath);
       if (!fs.existsSync(file))
         throw new AppError('NOT_FOUND', 'Arquivo não encontrado. Ele pode ter sido movido ou apagado.', file);
-      shell.showItemInFolder(file);
+      fileManager.showItemInFolder(file);
       return { shown: true as const };
     }),
   };

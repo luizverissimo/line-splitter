@@ -209,7 +209,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste de componente com eventos de progresso, cancelamento e erro
   - Verificar: `pnpm verify && pnpm test:e2e processamento`
 
-- [ ] **T-304** Tela de resultado — req: RF-15, RF-16, RF-17, RF-18 · dep: T-303
+- [x] **T-304** Tela de resultado — req: RF-15, RF-16, RF-17, RF-18 · dep: T-303
   - Critérios:
     - Mostra os nomes dos dois MP3 gerados, cada um com o player (play/pause, posição, volume)
     - "Abrir pasta" (`shell.openPath`) e "Mostrar arquivo" (`shell.showItemInFolder`), aceitos no main só para caminhos registrados

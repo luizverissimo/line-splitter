@@ -16,14 +16,19 @@ interface Props {
 /** Os dois MP3 gerados, com players, abrir pasta/mostrar arquivo e próximos passos. */
 export function SeparationResultPanel({ result, onSeparateAnother, onNewFile }: Props) {
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const label = instrumentOf(result.stem).label;
 
+  // Enquanto o sistema abre a pasta/arquivo, os botões ficam desabilitados (evita pedidos repetidos).
   const act = async (fn: () => Promise<unknown>) => {
     setActionError(null);
+    setPending(true);
     try {
       await fn();
     } catch (err) {
       setActionError(errorMessage(err));
+    } finally {
+      setPending(false);
     }
   };
 
@@ -46,6 +51,7 @@ export function SeparationResultPanel({ result, onSeparateAnother, onNewFile }: 
             <span className="result-file">{baseName(t.path)}</span>
             <Button
               icon={<Search size={16} aria-hidden="true" />}
+              disabled={pending}
               onClick={() => void act(() => call('shell:showFile', { path: t.path }))}
             >
               Mostrar arquivo
@@ -58,6 +64,7 @@ export function SeparationResultPanel({ result, onSeparateAnother, onNewFile }: 
       <div className="actions">
         <Button
           icon={<FolderOpen size={16} aria-hidden="true" />}
+          disabled={pending}
           onClick={() => void act(() => call('shell:openFolder', { path: result.instrumentPath }))}
         >
           Abrir pasta

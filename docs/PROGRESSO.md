@@ -144,3 +144,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (falha de cancelar engolida; testes fracos de andamento/relógio/navegação) → REPROVADO (edição do E2E não aplicada) → APROVADO.
 - Observações: E2E exigem `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
 - Commit: ver `git log` (T-303)
+
+### T-304 — Tela de resultado (2026-11-20)
+- Feito: `SeparationResultPanel` (os dois MP3 com players, "Mostrar arquivo", "Abrir pasta", "Separar outro instrumento", "Novo arquivo"; botões desabilitados enquanto o sistema responde), `handlers/shell.ts` (só saídas registradas no histórico; gerenciador de arquivos injetável para teste).
+- Verificado: `pnpm verify` OK (248); `shell.test.ts` 4 testes (recusa /etc/passwd, original, `../`, relativo; NOT_FOUND; IO); `SeparationResultPanel.test.tsx` 5 testes; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e resultado` (motor real: 2 MP3 no disco e no SQLite, player da faixa carrega pelo `media://` com duração de 8 s e toca, abrir/mostrar chegam ao main com os caminhos certos, segunda separação e "Novo arquivo").
+- Revisor: REPROVADO (duração da faixa não conferida no E2E) → corrigido → APROVADO.
+- Commit: ver `git log` (T-304)

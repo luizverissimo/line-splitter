@@ -59,32 +59,47 @@ test.describe('Fluxo completo de separação', () => {
         'musica-curta - sem Voz.mp3',
       ]);
 
-      // Player da faixa do instrumento toca de verdade pelo media://.
-      await result.getByRole('button', { name: 'Tocar musica-curta - Voz.mp3' }).click();
+      // Player da faixa do instrumento: metadados carregados pelo media://, duração correta e toca de verdade.
+      const player = result.getByRole('group', { name: 'Player: musica-curta - Voz.mp3' });
+      const audio = player.locator('audio');
       await expect
-        .poll(() => page.evaluate(() => document.querySelectorAll('audio')[1]?.currentTime ?? 0), {
-          timeout: 10_000,
-        })
+        .poll(() => audio.evaluate((a: HTMLAudioElement) => a.readyState), { timeout: 10_000 })
+        .toBeGreaterThanOrEqual(1);
+      expect(await audio.evaluate((a: HTMLAudioElement) => a.duration)).toBeCloseTo(8, 0);
+      await expect(player).toContainText('0:08');
+      await player.getByRole('button', { name: 'Tocar musica-curta - Voz.mp3' }).click();
+      await expect
+        .poll(() => audio.evaluate((a: HTMLAudioElement) => a.currentTime), { timeout: 10_000 })
         .toBeGreaterThan(0.3);
       await result.getByRole('button', { name: 'Pausar musica-curta - Voz.mp3' }).click();
 
       await result.getByRole('button', { name: 'Mostrar arquivo' }).first().click();
       await result.getByRole('button', { name: 'Abrir pasta' }).click();
-      const calls = await app.evaluate(() => {
-        const g = globalThis as { __shown?: string[]; __opened?: string[] };
-        return { shown: g.__shown, opened: g.__opened };
-      });
-      expect(calls).toEqual({ shown: [path.join(outputDir, 'musica-curta - Voz.mp3')], opened: [outputDir] });
+      await expect
+        .poll(() =>
+          app.evaluate(() => {
+            const g = globalThis as { __shown?: string[]; __opened?: string[] };
+            return { shown: g.__shown, opened: g.__opened };
+          }),
+        )
+        .toEqual({ shown: [path.join(outputDir, 'musica-curta - Voz.mp3')], opened: [outputDir] });
 
       await result.getByRole('button', { name: 'Separar outro instrumento' }).click();
       await expect(
         page.getByLabel('Arquivo escolhido').getByRole('heading', { name: 'musica-curta.wav' }),
       ).toBeVisible();
       await expect(page.getByRole('group', { name: 'Qual instrumento você quer separar?' })).toBeVisible();
-      await page
-        .getByRole('button', { name: 'Novo arquivo' })
-        .click()
-        .catch(() => undefined);
+      // O mesmo arquivo, outro instrumento; depois "Novo arquivo" volta ao Início limpo.
+      await page.locator('label.selectable-card', { hasText: 'Linha de baixo' }).click();
+      await expect(page.getByRole('radio', { name: /Baixo/ })).toBeChecked();
+      await page.getByRole('button', { name: 'Separar' }).click();
+      await expect(result.getByRole('heading', { name: 'Pronto! Dois arquivos gerados' })).toBeVisible({
+        timeout: 10 * 60_000,
+      });
+      await expect(result).toContainText('musica-curta - Baixo.mp3');
+      await result.getByRole('button', { name: 'Novo arquivo' }).click();
+      await expect(page.getByText('Nenhum arquivo escolhido')).toBeVisible();
+      await expect(page.getByLabel('Arquivo escolhido')).toHaveCount(0);
     } finally {
       await app.close();
     }
@@ -98,6 +113,12 @@ test.describe('Fluxo completo de separação', () => {
           instrument: 'vocals',
           instrument_output: path.join(outputDir, 'musica-curta - Voz.mp3'),
           rest_output: path.join(outputDir, 'musica-curta - sem Voz.mp3'),
+          device: 'cpu',
+        },
+        {
+          instrument: 'bass',
+          instrument_output: path.join(outputDir, 'musica-curta - Baixo.mp3'),
+          rest_output: path.join(outputDir, 'musica-curta - sem Baixo.mp3'),
           device: 'cpu',
         },
       ]);
