@@ -137,3 +137,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (236); `apps/desktop/src/main/separation/cancel.test.ts` 8 testes com motor real: cancelar durante o Demucs (grupo de processos some em < 800 ms, nenhuma fase depois) e durante o FFmpeg (morto por SIGKILL), cancelar no início, processo morto de fora, arquivo trocado, entrada que o próprio Demucs rejeita (LoadAudioError), motor incompleto — sem saída nem histórico. Mutação com `killTree` vazio faz os dois testes de cancelamento falharem.
 - Revisor: REPROVADO (testes não provavam a morte dos processos; faltava rejeição real do Demucs; ENGINE_MISSING sem log) → REPROVADO (teste do FFmpeg e histórico no cancelar inicial) → APROVADO.
 - Commit: ver `git log` (T-302)
+
+### T-303 — Tela de processamento (2026-11-20)
+- Feito: `SeparationProgressPanel` (barra com o progresso real do evento, tempo decorrido a cada segundo, Cancelar com andamento e sem repetir o pedido, falha ao cancelar exibida no painel, erro com "Ver log técnico" e "Copiar log"), `SeparationContext` (ignora progresso fora de execução ativa), estado acima das rotas. Fixture `musica-longa.wav` (~64 s) e `e2e/global-setup.ts` gerando as fixtures antes dos E2E.
+- Verificado: `pnpm verify` OK (239); `SeparationProgressPanel.test.tsx` 5 testes (relógio por segundo com timers falsos, andamento do Cancelar, falha ao cancelar, erro/copiar); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e processamento` 2 passed com o motor real (barra avança, tempo muda, trocar de tela em < 1 s e voltar com o progresso maior; Cancelar não grava nada e volta ao seletor).
+- Revisor: REPROVADO (falha de cancelar engolida; testes fracos de andamento/relógio/navegação) → REPROVADO (edição do E2E não aplicada) → APROVADO.
+- Observações: E2E exigem `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
+- Commit: ver `git log` (T-303)

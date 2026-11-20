@@ -26,6 +26,8 @@ export const fixtures = {
   m4a: path.join(FIXTURES_DIR, 'musica-curta.m4a'),
   ogg: path.join(FIXTURES_DIR, 'musica-curta.ogg'),
   aac: path.join(FIXTURES_DIR, 'musica-curta.aac'),
+  /** O clipe repetido 8 vezes (~64 s), para testes que precisam de uma separação mais demorada. */
+  longMusic: path.join(FIXTURES_DIR, 'musica-longa.wav'),
   corrupted: path.join(FIXTURES_DIR, 'corrompido.mp3'),
   wrongExtension: path.join(FIXTURES_DIR, 'audio-valido.wma'),
   notAudio: path.join(FIXTURES_DIR, 'texto-com-extensao.wav'),
@@ -93,6 +95,9 @@ export function generateFixtures({ long = false } = {}) {
   ];
   for (const [out, codec] of encodes) {
     if (!fresh(out, [fixtures.wav])) ffmpegTo(out, ['-i', fixtures.wav, ...codec]);
+  }
+  if (!fresh(fixtures.longMusic, [fixtures.wav])) {
+    ffmpegTo(fixtures.longMusic, ['-stream_loop', '7', '-i', fixtures.wav, '-c', 'copy']);
   }
   if (!fs.existsSync(fixtures.corrupted)) {
     // Cabeçalho ID3 válido seguido de lixo: parece MP3 pela extensão, mas não decodifica.

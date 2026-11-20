@@ -21,6 +21,8 @@ export interface SeparationState {
   /** Momento (ms) em que a separação começou, para o tempo decorrido. */
   startedAt: number | null;
   error: unknown;
+  /** Falha ao pedir o cancelamento (a separação continua rodando). */
+  cancelError: unknown;
   result: SeparationResult | null;
   start: (stem: Stem) => void;
   cancel: () => void;
@@ -39,18 +41,25 @@ export function SeparationProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState<SeparationProgress | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const [cancelError, setCancelError] = useState<unknown>(null);
   const [result, setResult] = useState<SeparationResult | null>(null);
   const runId = useRef(0);
+  const active = useRef(false);
 
   useEffect(() => {
     if (!window.api) return undefined;
-    return subscribe('separation:progress', setProgress);
+    // Eventos atrasados de uma execução já encerrada não voltam a preencher a barra.
+    return subscribe('separation:progress', (p) => {
+      if (active.current) setProgress(p);
+    });
   }, []);
 
   const start = useCallback(
     (selected: Stem) => {
       const id = (runId.current += 1);
+      active.current = true;
       setRunning(true);
+      setCancelError(null);
       setCancelling(false);
       setStem(selected);
       setProgress(null);
@@ -66,6 +75,7 @@ export function SeparationProvider({ children }: { children: ReactNode }) {
         })
         .finally(() => {
           if (runId.current !== id) return;
+          active.current = false;
           setRunning(false);
           setCancelling(false);
           void queryClient.invalidateQueries({ queryKey: ['history'] });
@@ -76,13 +86,16 @@ export function SeparationProvider({ children }: { children: ReactNode }) {
 
   const cancel = useCallback(() => {
     setCancelling(true);
+    setCancelError(null);
     call('separation:cancel', undefined).catch((err: unknown) => {
       setCancelling(false);
-      setError(err);
+      setCancelError(err);
     });
   }, []);
 
   const reset = useCallback(() => {
+    active.current = false;
+    setCancelError(null);
     setStem(null);
     setProgress(null);
     setStartedAt(null);
@@ -91,8 +104,20 @@ export function SeparationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ running, cancelling, stem, progress, startedAt, error, result, start, cancel, reset }),
-    [running, cancelling, stem, progress, startedAt, error, result, start, cancel, reset],
+    () => ({
+      running,
+      cancelling,
+      stem,
+      progress,
+      startedAt,
+      error,
+      cancelError,
+      result,
+      start,
+      cancel,
+      reset,
+    }),
+    [running, cancelling, stem, progress, startedAt, error, cancelError, result, start, cancel, reset],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

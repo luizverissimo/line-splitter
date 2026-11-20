@@ -20,6 +20,10 @@ describe('fixtures de áudio gerados pelo FFmpeg', () => {
     expect(info.durationS).toBeLessThan(SHORT_DURATION_S + 0.2);
   });
 
+  it('clipe longo tem ~64 s', () => {
+    expect(probe(fixtures.longMusic).durationS).toBeCloseTo(64, 0);
+  });
+
   it('mp3 informa bitrate', () => {
     expect(probe(fixtures.mp3).bitRate).toBe(192000);
   });

@@ -200,7 +200,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração reais: cancelar no meio, processo morto externamente, entrada que o Demucs rejeita
   - Verificar: `pnpm --filter @line-splitter/desktop test separation && pnpm verify`
 
-- [ ] **T-303** Tela de processamento — req: RF-12, RF-13, RF-14, RNF-05 · dep: T-302
+- [x] **T-303** Tela de processamento — req: RF-12, RF-13, RF-14, RNF-05 · dep: T-302
   - Critérios:
     - Barra com o progresso real recebido por evento IPC e tempo decorrido atualizado a cada segundo
     - Botão "Cancelar" com retorno visual até o cancelamento terminar, voltando à escolha de instrumento

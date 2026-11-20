@@ -9,6 +9,7 @@ import { Button, ErrorAlert, ProgressBar } from './ui';
 export function SeparationProgressPanel({ onBack }: { onBack: () => void }) {
   const sep = useSeparation();
   const [now, setNow] = useState(() => Date.now());
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sep.running) return undefined;
@@ -41,6 +42,13 @@ export function SeparationProgressPanel({ onBack }: { onBack: () => void }) {
             Cancelar
           </Button>
         </div>
+        {Boolean(sep.cancelError) && (
+          <ErrorAlert
+            title="Não foi possível cancelar"
+            message={`${errorMessage(sep.cancelError)} A separação continua; tente cancelar de novo.`}
+            details={errorDetails(sep.cancelError)}
+          />
+        )}
       </div>
     );
   }
@@ -70,7 +78,14 @@ export function SeparationProgressPanel({ onBack }: { onBack: () => void }) {
               {details && (
                 <Button
                   icon={<Copy size={16} aria-hidden="true" />}
-                  onClick={() => void navigator.clipboard.writeText(details)}
+                  onClick={() => {
+                    navigator.clipboard
+                      .writeText(details)
+                      .then(() => setCopyStatus('Log copiado.'))
+                      .catch((err: unknown) =>
+                        setCopyStatus(`Não foi possível copiar: ${errorMessage(err)}`),
+                      );
+                  }}
                 >
                   Copiar log
                 </Button>
@@ -79,6 +94,11 @@ export function SeparationProgressPanel({ onBack }: { onBack: () => void }) {
             </>
           }
         />
+        {copyStatus && (
+          <p className="field-hint" role="status">
+            {copyStatus}
+          </p>
+        )}
       </div>
     );
   }
