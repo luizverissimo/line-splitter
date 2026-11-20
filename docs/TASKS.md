@@ -28,7 +28,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - `pnpm verify` = typecheck + lint + testes + `node .claude/scripts/anti-mock.mjs`, e falha se qualquer etapa falhar
   - Verificar: `pnpm install && pnpm verify`
 
-- [ ] **T-002** `packages/shared`: schemas Zod e contrato IPC tipado — req: RNF-03, RNF-04 · dep: T-001
+- [x] **T-002** `packages/shared`: schemas Zod e contrato IPC tipado — req: RNF-03, RNF-04 · dep: T-001
   - Critérios:
     - Define o contrato dos canais IPC (nome do canal → schema de entrada e de saída) e dos eventos main → renderer
     - Helpers `defineHandler` (main) e `invoke` (renderer) que validam entrada e saída com Zod nos dois lados
