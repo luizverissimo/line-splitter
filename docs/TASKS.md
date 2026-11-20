@@ -220,7 +220,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 5 — Histórico
 
-- [ ] **T-400** Tela de histórico — req: RF-19, RF-20, RF-22, RF-23 · dep: T-304
+- [x] **T-400** Tela de histórico — req: RF-19, RF-20, RF-22, RF-23 · dep: T-304
   - Critérios:
     - IPC `history:list` lê `separations` do SQLite, mais recente primeiro, e confere no disco se cada saída existe
     - Lista data, arquivo original, instrumento, duração do processamento e caminhos das saídas
@@ -229,7 +229,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração do IPC contra SQLite real e E2E com um arquivo apagado fora do app
   - Verificar: `pnpm verify && pnpm test:e2e historico`
 
-- [ ] **T-401** Remover do histórico (opção de apagar os MP3) — req: RF-21 · dep: T-400
+- [x] **T-401** Remover do histórico (opção de apagar os MP3) — req: RF-21 · dep: T-400
   - Critérios:
     - Diálogo de confirmação com caixa "Apagar também os arquivos MP3"
     - IPC `history:remove({ id, deleteFiles })` remove o registro e, se pedido, apaga só os caminhos registrados daquele item (nunca o original)

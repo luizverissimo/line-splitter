@@ -9,3 +9,4 @@ export * from './model';
 export * from './audio';
 export * from './instruments';
 export * from './separation';
+export * from './history';

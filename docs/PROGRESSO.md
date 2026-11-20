@@ -150,3 +150,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (248); `shell.test.ts` 4 testes (recusa /etc/passwd, original, `../`, relativo; NOT_FOUND; IO); `SeparationResultPanel.test.tsx` 5 testes; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e resultado` (motor real: 2 MP3 no disco e no SQLite, player da faixa carrega pelo `media://` com duração de 8 s e toca, abrir/mostrar chegam ao main com os caminhos certos, segunda separação e "Novo arquivo").
 - Revisor: REPROVADO (duração da faixa não conferida no E2E) → corrigido → APROVADO.
 - Commit: ver `git log` (T-304)
+
+### T-400 + T-401 — Histórico e remoção (2026-11-20, DEC-014)
+- Feito: `packages/shared/src/history.ts`, canais `history:list`/`history:remove`, `handlers/history.ts` (lista do SQLite mais recente primeiro, existência no disco, `media://` só para o que existe, um uso por arquivo liberado ao remover; remoção apaga só os dois MP3 do item quando pedido, nunca o original, erro mantém o registro e cita o que já foi apagado), `HistoryPage` (campos, ouvir, abrir pasta, "Arquivo não encontrado", vazio com link, carregando/erro, diálogo de remoção com "Apagar também os arquivos MP3").
+- Verificado: `pnpm verify` OK (263); `pnpm --filter @line-splitter/desktop test history` 8 testes com SQLite real; `HistoryPage.test.tsx` 7 testes; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e historico` com motor real (vazio → separar → item → ouvir → abrir pasta → arquivo apagado fora do app → remover apagando MP3 → disco e banco vazios, original intacto).
+- Revisor: APROVADO (as duas). Sugestões aplicadas: uso único no `media://` liberado ao remover, mensagem cita arquivos já apagados, proteção extra contra apagar o original, caixa desabilitada durante o envio, sem região de anúncio por item.
+- Commit: ver `git log` (T-400, T-401)

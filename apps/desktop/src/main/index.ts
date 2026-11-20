@@ -10,6 +10,7 @@ import { engineHandlers } from './handlers/engine';
 import { audioHandlers, CurrentInput } from './handlers/audio';
 import { separationHandlers } from './handlers/separation';
 import { shellHandlers } from './handlers/shell';
+import { historyHandlers } from './handlers/history';
 import { HistoryRepository } from './history/repository';
 import { SeparationService } from './separation/service';
 import { enginePaths } from './engine/paths';
@@ -121,6 +122,7 @@ if (!app.requestSingleInstanceLock()) {
         ...audioHandlers(settings, currentInput),
         ...separationHandlers(separation),
         ...shellHandlers(history),
+        ...historyHandlers(history, mediaRegistry),
       },
       (url) => isAllowedNavigation(url, origin),
     );

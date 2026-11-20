@@ -4,6 +4,7 @@ import { settingsSchema, settingsUpdateSchema } from '../settings';
 import { engineStatusSchema } from '../engine';
 import { modelDownloadResultSchema, modelProgressSchema } from '../model';
 import { audioInfoSchema, audioInspectInputSchema } from '../audio';
+import { historyItemSchema, historyRemoveInputSchema, historyRemoveResultSchema } from '../history';
 import { separationProgressSchema, separationResultSchema, separationStartInputSchema } from '../separation';
 import {
   installInputSchema,
@@ -47,6 +48,8 @@ export const ipcChannels = {
   'engine:cancelInstall': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
   'engine:downloadModel': { input: z.undefined(), output: modelDownloadResultSchema },
   'audio:inspect': { input: audioInspectInputSchema, output: audioInfoSchema },
+  'history:list': { input: z.undefined(), output: z.array(historyItemSchema) },
+  'history:remove': { input: historyRemoveInputSchema, output: historyRemoveResultSchema },
   'separation:start': { input: separationStartInputSchema, output: separationResultSchema },
   'separation:cancel': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
   'shell:openFolder': {

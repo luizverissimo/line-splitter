@@ -83,3 +83,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: nos nomes de arquivo a barra vira hífen: "Guitarra-Violão" e "Piano-Teclado" (ex.: `Música - sem Guitarra-Violão.mp3`). Voz, Bateria e Baixo ficam iguais ao rótulo da tela.
 - Aprovado pelo usuário: não se aplica — adaptação técnica do mesmo nome, sem mudar escopo.
 - Impacto: T-300, T-301, T-304.
+
+### DEC-014 — T-400 e T-401 entregues juntas (2026-11-20)
+- Contexto: a remoção (T-401) é uma ação de cada item da lista (T-400), na mesma tela e no mesmo conjunto de canais (`history:list`/`history:remove`).
+- Decisão: implementar, revisar (veredito separado por tarefa) e commitar as duas juntas ("T-400, T-401: …").
+- Aprovado pelo usuário: não se aplica — só o agrupamento do commit, sem mudar escopo nem ordem das fases.
+- Impacto: T-400, T-401.
