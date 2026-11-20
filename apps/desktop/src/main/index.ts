@@ -4,6 +4,10 @@ import { resolveDevUrl, resolveUserDataOverride } from './env';
 import { hardenApp } from './hardening';
 import { registerIpcHandlers } from './ipc';
 import { appInfoHandler } from './handlers/app';
+import { dialogHandlers } from './handlers/dialog';
+import { settingsHandlers } from './handlers/settings';
+import { SettingsRepository } from './settings/repository';
+import { defaultSettings } from './settings/defaults';
 import { openDatabase, type Db } from './db/database';
 import { registerAppSchemes, serveMediaProtocol, serveRenderer } from './renderer-protocol';
 import { MediaRegistry } from './media/registry';
@@ -75,7 +79,12 @@ if (!app.requestSingleInstanceLock()) {
 
     serveMediaProtocol(mediaRegistry);
 
-    registerIpcHandlers({ 'app:info': appInfoHandler }, (url) => isAllowedNavigation(url, origin));
+    const settings = new SettingsRepository(db, defaultSettings());
+
+    registerIpcHandlers(
+      { 'app:info': appInfoHandler, ...settingsHandlers(settings), ...dialogHandlers() },
+      (url) => isAllowedNavigation(url, origin),
+    );
 
     createMainWindow(devUrl ? devUrl.toString() : `${APP_ORIGIN}/index.html`, __dirname);
   });

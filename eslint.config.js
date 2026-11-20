@@ -14,6 +14,8 @@ export default tseslint.config(
       '**/coverage/**',
       'fixtures/**',
       '.claude/**',
+      'e2e-report/**',
+      'e2e-results/**',
     ],
   },
   js.configs.recommended,

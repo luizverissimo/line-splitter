@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createIpc, type ChannelMap, type EventMap } from './ipc';
+import { settingsSchema, settingsUpdateSchema } from '../settings';
 
 export const appInfoSchema = z.object({
   name: z.string().min(1),
@@ -9,9 +10,28 @@ export const appInfoSchema = z.object({
 });
 export type AppInfo = z.infer<typeof appInfoSchema>;
 
+export const chooseDirectoryInputSchema = z.object({
+  title: z.string().min(1),
+  defaultPath: z.string().optional(),
+});
+export const chooseFileInputSchema = z.object({
+  title: z.string().min(1),
+  defaultPath: z.string().optional(),
+  /** Filtros do diálogo nativo, ex.: [{ name: 'Áudio', extensions: ['mp3'] }]. */
+  filters: z
+    .array(z.object({ name: z.string().min(1), extensions: z.array(z.string().min(1)).min(1) }))
+    .optional(),
+});
+/** Caminho escolhido, ou null se o usuário cancelou o diálogo. */
+export const chosenPathSchema = z.string().min(1).nullable();
+
 /** Contrato dos canais IPC renderer → main. Cada funcionalidade acrescenta os seus canais aqui. */
 export const ipcChannels = {
   'app:info': { input: z.undefined(), output: appInfoSchema },
+  'settings:get': { input: z.undefined(), output: settingsSchema },
+  'settings:update': { input: settingsUpdateSchema, output: settingsSchema },
+  'dialog:chooseDirectory': { input: chooseDirectoryInputSchema, output: chosenPathSchema },
+  'dialog:chooseFile': { input: chooseFileInputSchema, output: chosenPathSchema },
 } satisfies ChannelMap;
 
 /** Eventos main → renderer. */

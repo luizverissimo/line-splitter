@@ -95,7 +95,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 1 — Núcleo
 
-- [ ] **T-010** Configurações persistidas (IPC + tela) — req: RF-24, RF-25, RN-07, RN-08 · dep: T-005, T-006a, T-011
+- [x] **T-010** Configurações persistidas (IPC + tela) — req: RF-24, RF-25, RN-07, RN-08 · dep: T-005, T-006a, T-011
   - Critérios:
     - IPC `settings:get` e `settings:update` validados com Zod no main; valores salvos no SQLite
     - Padrões: pasta de saída `app.getPath('music')/Line Splitter`, bitrate 320, dispositivo Auto, caminhos de Python e FFmpeg vazios (= detectar no PATH)

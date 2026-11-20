@@ -66,3 +66,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (typecheck do E2E sem lib DOM; asserção fraca; id fixo; UX do volume/arrasto) → corrigido → APROVADO.
 - Observações: tocar faixa liberada no Electron real virou critério da T-304 (as telas que liberam arquivos vêm nas T-201/T-304).
 - Commit: ver `git log` (T-011)
+
+### T-010 — Configurações persistidas (IPC + tela) (2026-11-20)
+- Feito: `packages/shared/src/settings.ts` (schema com mensagens pt-BR, caminhos absolutos Linux/Windows); canais `settings:get`, `settings:update`, `dialog:chooseDirectory`, `dialog:chooseFile`; `apps/desktop/src/main/settings/` (repositório SQLite com padrões do PRD, validação de pasta gravável/criável e executáveis no disco); tela Configurações (pasta e executáveis por diálogo nativo, bitrate, dispositivo, detecção automática, validação no cliente, formulário bloqueado durante o envio, envia só o que mudou, carregando/erro/confirmação).
+- Verificado: `pnpm verify` OK (113 testes; 10 de integração com SQLite real, 9 de componente); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e configuracoes` 2 passed (padrões, diálogo, gravação no banco, Python inválido recusado pelo main); tela conferida por screenshot.
+- Revisor: REPROVADO (formulário editável durante o salvamento) → corrigido → APROVADO.
+- Observações: E2E depende de `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
+- Commit: ver `git log` (T-010)
