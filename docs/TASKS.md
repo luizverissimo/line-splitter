@@ -36,7 +36,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de unidade cobrem payload válido, inválido e resposta fora do schema
   - Verificar: `pnpm --filter shared test && pnpm verify`
 
-- [ ] **T-003** `apps/web`: React + Vite, rotas, layout base escuro, TanStack Query sobre IPC — req: RNF-07, RNF-08, RNF-09 · dep: T-002
+- [x] **T-003** `apps/web`: React + Vite, rotas, layout base escuro, TanStack Query sobre IPC — req: RNF-07, RNF-08, RNF-09 · dep: T-002
   - Critérios:
     - Rotas (React Router, hash router para funcionar via arquivo empacotado): Início, Motor, Histórico, Configurações
     - Layout com navegação lateral, tema escuro e todos os textos em português

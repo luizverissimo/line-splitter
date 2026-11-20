@@ -1,0 +1,38 @@
+import { render } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router';
+import type { DesktopBridge } from '@line-splitter/shared';
+import { App, AppRoutes } from '../App';
+import { createQueryClient } from '../api/queryClient';
+
+/** Expõe o caminho atual para os testes conferirem a navegação. */
+function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="location">{location.pathname}</output>;
+}
+
+/** Renderiza o app inteiro numa rota, com a ponte IPC fornecida pelo teste. */
+export function renderApp(path: string, bridge?: DesktopBridge) {
+  if (bridge) window.api = bridge;
+  else delete window.api;
+  return render(
+    <App queryClient={createQueryClient()}>
+      <MemoryRouter initialEntries={[path]}>
+        <AppRoutes />
+        <LocationProbe />
+      </MemoryRouter>
+    </App>,
+  );
+}
+
+/** Ponte que responde canais com handlers do próprio teste, no formato de envelope do IPC real. */
+export function bridgeWith(handlers: Record<string, (payload: unknown) => unknown>): DesktopBridge {
+  return {
+    invoke: async (channel, payload) => {
+      const handler = handlers[channel];
+      if (!handler)
+        return { ok: false, error: { code: 'NOT_FOUND', message: `Canal ${channel} sem handler` } };
+      return handler(payload);
+    },
+    on: () => () => undefined,
+  };
+}

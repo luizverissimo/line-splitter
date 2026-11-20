@@ -1,0 +1,223 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --bg-elevated: #171a21;
+  --bg-hover: #1f232c;
+  --border: #2a2f3a;
+  --text: #e8eaf0;
+  --text-muted: #a3a9b7;
+  --accent: #7c9cff;
+  --accent-strong: #5b7cfa;
+  --accent-text: #0b0d12;
+  --danger: #ff7b7b;
+  --danger-bg: #2a1517;
+  --success: #6fdc8c;
+  --radius: 10px;
+  --focus: 0 0 0 3px rgba(124, 156, 255, 0.55);
+  font-family:
+    Inter,
+    'Segoe UI',
+    Roboto,
+    Ubuntu,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 0 0 0.25rem;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  border-radius: 6px;
+}
+
+.app-shell {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 0.75rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0 0.5rem 1.25rem;
+  color: var(--accent);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.nav-link.active {
+  background: var(--bg-hover);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.page {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 2.5rem;
+}
+
+.page-intro {
+  color: var(--text-muted);
+  margin: 0 0 1.5rem;
+}
+
+.app-footer {
+  padding: 0.5rem 1.25rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.app-footer-error {
+  color: var(--danger);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-hover);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.query-error,
+.fatal-error {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.page .fatal-error {
+  margin: 0;
+}
+
+.fatal-error {
+  margin: 3rem auto;
+  max-width: 640px;
+}
+
+.query-error p,
+.fatal-error p {
+  margin: 0;
+}
+
+details pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  max-height: 240px;
+  overflow: auto;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.query-error-compact {
+  color: var(--danger);
+}

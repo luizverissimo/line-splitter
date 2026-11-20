@@ -1,3 +1,4 @@
 export * from './errors';
 export * from './ipc';
 export * from './contract';
+export * from './bridge';
