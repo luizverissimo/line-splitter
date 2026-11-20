@@ -3,11 +3,15 @@ import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { APP_HOST, APP_SCHEME, PROD_CSP } from './security';
 import { mimeFor, resolveStaticPath } from './static-files';
+import { MEDIA_SCHEME, type MediaRegistry } from './media/registry';
+import { serveMedia } from './media/serve';
 
 /** Precisa rodar antes do `app.ready`. */
 export function registerAppSchemes(): void {
   protocol.registerSchemesAsPrivileged([
     { scheme: APP_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true } },
+    // stream: true permite ao <audio> buscar trechos (Range) e avançar/voltar na faixa.
+    { scheme: MEDIA_SCHEME, privileges: { secure: true, stream: true, supportFetchAPI: true } },
   ]);
 }
 
@@ -35,4 +39,9 @@ export function serveRenderer(rendererDir: string): void {
       },
     });
   });
+}
+
+/** Serve os áudios liberados no registro em media://audio/<token>. */
+export function serveMediaProtocol(registry: MediaRegistry): void {
+  protocol.handle(MEDIA_SCHEME, (request) => serveMedia(request, registry));
 }

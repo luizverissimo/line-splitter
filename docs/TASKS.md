@@ -104,7 +104,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração do repositório de configurações contra SQLite real e teste de componente da tela
   - Verificar: `pnpm verify && pnpm test:e2e configuracoes`
 
-- [ ] **T-011** Componentes base de UI e protocolo seguro de mídia — req: RF-16, RNF-04, RNF-07 · dep: T-004
+- [x] **T-011** Componentes base de UI e protocolo seguro de mídia — req: RF-16, RNF-04, RNF-07 · dep: T-004
   - Critérios:
     - Componentes: botão, cartão selecionável, barra de progresso, diálogo de confirmação, alerta de erro com detalhes expansíveis, estado vazio, spinner
     - Player de áudio com play/pause, barra de posição arrastável, tempo atual/total e volume
@@ -214,6 +214,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - "Abrir pasta" (`shell.openPath`) e "Mostrar arquivo" (`shell.showItemInFolder`), aceitos no main só para caminhos registrados
     - "Separar outro instrumento" volta à escolha mantendo o mesmo arquivo; "Novo arquivo" volta ao Início limpo
     - E2E do fluxo completo com fixture: escolher arquivo → Voz → Separar → resultado com 2 arquivos existentes no disco
+    - E2E toca uma faixa liberada via `media://` no Electron real (metadados carregam, duração correta, play avança o tempo)
   - Verificar: `pnpm verify && pnpm test:e2e resultado`
 
 ## Fase 5 — Histórico

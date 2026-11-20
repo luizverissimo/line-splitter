@@ -59,3 +59,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (62 testes, 9 de fixtures: codec, 44,1 kHz, estéreo, ~8 s, bitrate, inválidos rejeitados, limites). Apagando `fixtures/`, o globalSetup recria tudo. Pico do clipe −1,9 dB (sem clipping).
 - Revisor: APROVADO. Sugestões aplicadas: `/fixtures/` só na raiz, ganho/limiter sem normalização, escrita atômica.
 - Commit: ver `git log` (T-007)
+
+### T-011 — Componentes base de UI e protocolo seguro de mídia (2026-11-20)
+- Feito: `apps/web/src/components/ui/` — Button (loading/aria-busy), SelectableCard (radio nativo), ProgressBar (determinado/indeterminado), ConfirmDialog (`<dialog>` nativo, useId), ErrorAlert, EmptyState, Spinner/LoadingState, AudioPlayer (play/pause, posição arrastável, tempo, volume/silenciar, erro). `apps/desktop/src/main/media/` — `MediaRegistry` (URL opaca `media://audio/<token>` por arquivo liberado) e `serveMedia` (403/404/405, Range 206/416); esquema registrado com `stream: true` e handler no main.
+- Verificado: `pnpm verify` OK (90 testes; protocolo testado com WAV real: bytes RIFF, Range "WAVE"); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 3 passed (no Electron real: handler `media` registrado e `<audio>` com erro 4 para mídia não liberada).
+- Revisor: REPROVADO (typecheck do E2E sem lib DOM; asserção fraca; id fixo; UX do volume/arrasto) → corrigido → APROVADO.
+- Observações: tocar faixa liberada no Electron real virou critério da T-304 (as telas que liberam arquivos vêm nas T-201/T-304).
+- Commit: ver `git log` (T-011)

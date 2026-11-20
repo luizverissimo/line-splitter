@@ -5,7 +5,8 @@ import { hardenApp } from './hardening';
 import { registerIpcHandlers } from './ipc';
 import { appInfoHandler } from './handlers/app';
 import { openDatabase, type Db } from './db/database';
-import { registerAppSchemes, serveRenderer } from './renderer-protocol';
+import { registerAppSchemes, serveMediaProtocol, serveRenderer } from './renderer-protocol';
+import { MediaRegistry } from './media/registry';
 import { APP_ORIGIN, isAllowedNavigation } from './security';
 import { createMainWindow } from './window';
 
@@ -16,6 +17,9 @@ function fatal(message: string): never {
 }
 
 app.setName('Line Splitter');
+
+/** Arquivos de áudio que o renderer pode tocar (entrada atual e saídas registradas). */
+const mediaRegistry = new MediaRegistry();
 
 let devUrl: URL | null;
 try {
@@ -68,6 +72,8 @@ if (!app.requestSingleInstanceLock()) {
     app.on('will-quit', () => {
       if (db.open) db.close();
     });
+
+    serveMediaProtocol(mediaRegistry);
 
     registerIpcHandlers({ 'app:info': appInfoHandler }, (url) => isAllowedNavigation(url, origin));
 
