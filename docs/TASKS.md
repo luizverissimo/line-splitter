@@ -151,7 +151,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 3 — Envio de áudio
 
-- [ ] **T-200** Validação do arquivo de entrada no processo principal — req: RN-01, RN-02, RN-03 · dep: T-100, T-007
+- [x] **T-200** Validação do arquivo de entrada no processo principal — req: RN-01, RN-02, RN-03 · dep: T-100, T-007
   - Critérios:
     - IPC `audio:inspect(path)` valida extensão (mp3, wav, flac, m4a, aac, ogg), tamanho ≤ 500 MB, leitura pelo `ffprobe` e duração ≤ 30 min
     - Retorna nome, duração, formato/codec, sample rate e canais; erros com códigos e mensagens em português (ex.: "Arquivo corrompido ou formato não suportado")
@@ -185,6 +185,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Converte as duas faixas com FFmpeg para MP3 no bitrate configurado, 44,1 kHz, estéreo
     - Move para a pasta de saída como `<nome> - <Instrumento>.mp3` e `<nome> - sem <Instrumento>.mp3`, com sufixo ` (2)`, ` (3)`… se já existirem; cria a pasta se faltar
     - Garante exatamente dois arquivos; o original tem o mesmo hash antes e depois
+    - Saídas liberadas no `media://`; revogar a entrada atual não revoga a URL de uma saída com o mesmo caminho (contagem de referências no MediaRegistry, com teste)
     - Segunda chamada enquanto uma roda é recusada com erro "Já existe uma separação em andamento"
     - Ao concluir grava em `separations` (data, original, instrumento, duração do processamento, caminhos)
     - Teste de integração real com fixture de 8 s: 2 MP3 conferidos por `ffprobe` (codec mp3, bitrate, 44100 Hz, 2 canais), nomes, sufixo de conflito e registro no SQLite

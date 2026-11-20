@@ -3,6 +3,7 @@ import { createIpc, type ChannelMap, type EventMap } from './ipc';
 import { settingsSchema, settingsUpdateSchema } from '../settings';
 import { engineStatusSchema } from '../engine';
 import { modelDownloadResultSchema, modelProgressSchema } from '../model';
+import { audioInfoSchema, audioInspectInputSchema } from '../audio';
 import {
   installInputSchema,
   installLogSchema,
@@ -44,6 +45,7 @@ export const ipcChannels = {
   'engine:install': { input: installInputSchema, output: installResultSchema },
   'engine:cancelInstall': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
   'engine:downloadModel': { input: z.undefined(), output: modelDownloadResultSchema },
+  'audio:inspect': { input: audioInspectInputSchema, output: audioInfoSchema },
   'engine:cancelDownload': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
 } satisfies ChannelMap;
 

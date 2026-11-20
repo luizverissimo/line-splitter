@@ -6,3 +6,4 @@ export * from './settings';
 export * from './engine';
 export * from './engine-install';
 export * from './model';
+export * from './audio';

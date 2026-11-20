@@ -7,7 +7,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RF-01 | Ao abrir, verificar se o motor está pronto: Python ≥ 3.9, pacote `demucs`, FFmpeg e pesos do `htdemucs_6s` | §5.1 "Ao abrir, o app verifica…" | T-100 | feito |
 | RF-02 | Tela de configuração do motor com status ✔/✖ de cada item | §5.1 "tela de configuração com o status de cada item" | T-101, T-601 | pendente |
 | RF-03 | Botão "Instalar motor": cria venv gerenciado em `userData/engine` e instala `demucs` + `torch` via pip, com log ao vivo | §5.1 "Botão Instalar motor" | T-102 | feito |
-| RF-04 | Download dos pesos do modelo com barra de progresso | §5.1 "Download dos pesos do modelo" | T-103 | pendente |
+| RF-04 | Download dos pesos do modelo com barra de progresso | §5.1 "Download dos pesos do modelo" | T-103 | feito |
 | RF-05 | Sem Python/FFmpeg no sistema: mensagem com instruções para Linux e Windows e botão "Verificar de novo" | §5.1 "Se Python ou FFmpeg não existirem…" | T-101, T-601 | pendente |
 | RF-06 | Detectar GPU (CUDA) e usar quando disponível, senão CPU; mostrar qual está em uso | §5.1 "Detecta GPU (CUDA)…" | T-100, T-101 | feito |
 | RF-07 | Enviar áudio arrastando e soltando o arquivo na janela | §5.2 "Arrastar e soltar" | T-201, T-600 | pendente |

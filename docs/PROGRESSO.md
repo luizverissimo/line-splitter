@@ -112,3 +112,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (erro de disco sem tratamento travava o download) → corrigido → APROVADO.
 - Observações: texto do `Verificar:` corrigido para `pnpm --filter @line-splitter/desktop` também em tarefas já concluídas (só texto).
 - Commit: ver `git log` (T-103)
+
+### T-200 — Validação do arquivo de entrada no processo principal (2026-11-20)
+- Feito: `packages/shared/src/audio.ts` (extensões aceitas, limites de 500 MB e 30 min, validação rápida para o cliente, mensagens pt-BR, schema de entrada/saída), canal `audio:inspect`, `apps/desktop/src/main/audio/inspect.ts` (stat, extensão, tamanho antes do ffprobe, leitura pelo ffprobe validada com Zod, duração), `handlers/audio.ts` (`CurrentInput`: libera no protocolo `media://` só o arquivo atual). Fixtures ganharam `.aac` (ADTS) e tipos JSDoc.
+- Verificado: `pnpm verify` OK (194 testes); `pnpm --filter @line-splitter/desktop test audio` com fixtures reais (6 formatos, corrompido, texto .wav, MP3 como .wma, 501 MB, 31 min, inexistente, pasta, vazio, ffprobe ausente, acentos, maiúsculas, original intacto por hash/mtime, canal com revogação).
+- Revisor: REPROVADO (faltava `.aac`; mensagem "30:00" no limite) → corrigido → APROVADO.
+- Commit: ver `git log` (T-200)

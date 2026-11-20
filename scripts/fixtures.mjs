@@ -25,6 +25,7 @@ export const fixtures = {
   flac: path.join(FIXTURES_DIR, 'musica-curta.flac'),
   m4a: path.join(FIXTURES_DIR, 'musica-curta.m4a'),
   ogg: path.join(FIXTURES_DIR, 'musica-curta.ogg'),
+  aac: path.join(FIXTURES_DIR, 'musica-curta.aac'),
   corrupted: path.join(FIXTURES_DIR, 'corrompido.mp3'),
   wrongExtension: path.join(FIXTURES_DIR, 'audio-valido.wma'),
   notAudio: path.join(FIXTURES_DIR, 'texto-com-extensao.wav'),
@@ -34,7 +35,11 @@ export const fixtures = {
 
 export const SHORT_DURATION_S = 8;
 
-/** Gera `out` num arquivo temporário e renomeia no fim: execução interrompida nunca deixa arquivo truncado. */
+/**
+ * Gera `out` num arquivo temporário e renomeia no fim: execução interrompida nunca deixa arquivo truncado.
+ * @param {string} out
+ * @param {string[]} args
+ */
 function ffmpegTo(out, args) {
   const ext = path.extname(out);
   const tmp = `${out.slice(0, -ext.length)}.parcial${ext}`;
@@ -42,17 +47,23 @@ function ffmpegTo(out, args) {
   fs.renameSync(tmp, out);
 }
 
+/**
+ * @param {string} out
+ * @param {string | Buffer} data
+ */
 function writeAtomic(out, data) {
   fs.writeFileSync(`${out}.parcial`, data);
   fs.renameSync(`${out}.parcial`, out);
 }
 
+/** @param {string[]} args */
 function ffmpeg(args) {
   const r = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', ...args], { encoding: 'utf8' });
   if (r.error) throw new Error(`FFmpeg não encontrado no PATH: ${r.error.message}`);
   if (r.status !== 0) throw new Error(`FFmpeg falhou (${args.join(' ')}):\n${r.stderr}`);
 }
 
+/** @type {(file: string, deps: string[]) => boolean} */
 const fresh = (file, deps) =>
   fs.existsSync(file) &&
   deps.every((d) => fs.existsSync(d) && fs.statSync(d).mtimeMs <= fs.statSync(file).mtimeMs);
@@ -71,11 +82,13 @@ export function generateFixtures({ long = false } = {}) {
       'pcm_s16le',
     ]);
   }
+  /** @type {[string, string[]][]} */
   const encodes = [
     [fixtures.mp3, ['-c:a', 'libmp3lame', '-b:a', '192k']],
     [fixtures.flac, ['-c:a', 'flac']],
     [fixtures.m4a, ['-c:a', 'aac', '-b:a', '192k']],
     [fixtures.ogg, ['-c:a', 'libvorbis', '-q:a', '5']],
+    [fixtures.aac, ['-c:a', 'aac', '-b:a', '192k', '-f', 'adts']],
     [fixtures.wrongExtension, ['-c:a', 'libmp3lame', '-b:a', '128k', '-f', 'mp3']],
   ];
   for (const [out, codec] of encodes) {

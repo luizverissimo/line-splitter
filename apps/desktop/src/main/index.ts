@@ -7,6 +7,7 @@ import { appInfoHandler } from './handlers/app';
 import { dialogHandlers } from './handlers/dialog';
 import { settingsHandlers } from './handlers/settings';
 import { engineHandlers } from './handlers/engine';
+import { audioHandlers, CurrentInput } from './handlers/audio';
 import { enginePaths } from './engine/paths';
 import { EngineInstaller } from './engine/install';
 import { ModelDownloader } from './engine/model';
@@ -102,6 +103,7 @@ if (!app.requestSingleInstanceLock()) {
         ...settingsHandlers(settings),
         ...dialogHandlers(),
         ...engineHandlers(settings, paths, installer, downloader),
+        ...audioHandlers(settings, new CurrentInput(mediaRegistry)),
       },
       (url) => isAllowedNavigation(url, origin),
     );

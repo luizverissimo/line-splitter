@@ -10,6 +10,7 @@ describe('fixtures de áudio gerados pelo FFmpeg', () => {
     ['flac', fixtures.flac, 'flac'],
     ['m4a', fixtures.m4a, 'aac'],
     ['ogg', fixtures.ogg, 'vorbis'],
+    ['aac', fixtures.aac, 'aac'],
   ])('%s é estéreo 44,1 kHz de ~8 s', (_name, file, codec) => {
     const info = probe(file);
     expect(info.codec).toBe(codec);
