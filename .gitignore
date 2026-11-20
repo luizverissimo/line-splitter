@@ -14,3 +14,4 @@ coverage/
 .claude/settings.local.json
 e2e-report/
 e2e-results/
+/fixtures/

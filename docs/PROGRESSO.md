@@ -53,3 +53,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: APROVADO. Sugestões aplicadas: plataforma/versão do Electron sem valor fixo, try/finally no primeiro launch, `engines.node >=22.5`, convenção de nomes dos E2E (DEC-010).
 - Observações: os E2E só rodam nesta máquina com `LINE_SPLITTER_DEV_NO_SANDBOX=1` (Electron com --no-sandbox) — DEC-008 pendente de aprovação do usuário.
 - Commit: ver `git log` (T-006a)
+
+### T-007 — Fixtures de áudio gerados com FFmpeg real e helpers de teste (2026-11-20)
+- Feito: `scripts/fixtures.mjs` (clipe sintético de 8 s — baixo, melodia, bumbo, chimbal — em WAV/MP3/FLAC/M4A/OGG; corrompido; MP3 salvo como `.wma`; texto salvo como `.wav`; arquivo esparso de 501 MB; WAV de 31 min com `--long`; escrita atômica), `apps/desktop/src/test/audio.ts` (`probe` com ffprobe real), `global-setup.ts` no Vitest do desktop, `pnpm fixtures`. `/fixtures/` git-ignorado.
+- Verificado: `pnpm verify` OK (62 testes, 9 de fixtures: codec, 44,1 kHz, estéreo, ~8 s, bitrate, inválidos rejeitados, limites). Apagando `fixtures/`, o globalSetup recria tudo. Pico do clipe −1,9 dB (sem clipping).
+- Revisor: APROVADO. Sugestões aplicadas: `/fixtures/` só na raiz, ganho/limiter sem normalização, escrita atômica.
+- Commit: ver `git log` (T-007)

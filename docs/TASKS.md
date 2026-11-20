@@ -85,7 +85,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - O valor é conferido também lendo o `line-splitter.db` real da pasta do teste
   - Verificar: `pnpm test:e2e preferencias`
 
-- [ ] **T-007** Fixtures de áudio gerados com FFmpeg real e helpers de teste — req: RNF-10 · dep: T-001
+- [x] **T-007** Fixtures de áudio gerados com FFmpeg real e helpers de teste — req: RNF-10 · dep: T-001
   - Critérios:
     - Script gera em `fixtures/` (git-ignorado) clipes curtos sintéticos (tons + ruído + percussão sintetizada, ~8 s) em MP3, WAV, FLAC, M4A e OGG
     - Gera também um arquivo corrompido, um com extensão errada e um WAV de 31 min (gerado sob demanda) para os testes de limite

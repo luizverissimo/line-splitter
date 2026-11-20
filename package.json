@@ -15,7 +15,8 @@
     "antimock": "node .claude/scripts/anti-mock.mjs",
     "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm antimock",
     "dev": "node scripts/dev.mjs",
-    "test:e2e": "pnpm --filter @line-splitter/desktop build && playwright test"
+    "test:e2e": "pnpm --filter @line-splitter/desktop build && playwright test",
+    "fixtures": "node scripts/fixtures.mjs --long"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

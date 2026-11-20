@@ -5,5 +5,6 @@ export default defineProject({
     name: 'desktop',
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    globalSetup: ['src/test/global-setup.ts'],
   },
 });
