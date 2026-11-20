@@ -36,7 +36,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RN-05 | Botão "Separar" só habilitado com um instrumento escolhido | §5.3 | T-300 | pendente |
 | RN-06 | Uma separação por vez | §5.4 | T-301 | pendente |
 | RN-07 | MP3 320 kbps por padrão (opções 192/256/320), 44,1 kHz, estéreo | §5.5 "Saída em MP3" | T-010, T-301 | pendente |
-| RN-08 | Pasta de saída padrão `~/Música/Line Splitter` (equivalente no Windows), alterável | §5.5 "Pasta de saída" | T-010 | pendente |
+| RN-08 | Pasta de saída padrão `~/Música/Line Splitter` (equivalente no Windows), alterável | §5.5 "Pasta de saída" | T-010 | feito |
 | RN-09 | Nome repetido na saída ganha sufixo ` (2)`, ` (3)`… | §5.5 | T-301 | pendente |
 | RN-10 | Toda separação gera exatamente dois arquivos | §6 | T-301 | pendente |
 | RN-11 | O arquivo original nunca é modificado nem movido | §6 | T-201, T-301 | pendente |

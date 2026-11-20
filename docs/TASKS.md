@@ -63,7 +63,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração contra arquivo SQLite real temporário (migração do zero, migração idempotente, leitura/escrita)
   - Verificar: `pnpm --filter desktop test db && pnpm verify`
 
-- [ ] **T-006** Playwright para Electron com um E2E real — req: RNF-13 · dep: T-006a, T-006b
+- [x] **T-006** Playwright para Electron com um E2E real — req: RNF-13 · dep: T-006a, T-006b
   - Critérios:
     - Playwright `_electron` abre o app empacotado em modo teste com `LINE_SPLITTER_USER_DATA` temporário
     - E2E grava uma preferência pela UI, reinicia o app e confirma que ela veio do SQLite real
@@ -79,7 +79,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - `pnpm test:e2e` na raiz builda e roda; `forbidOnly`; screenshots/trace em falha
   - Verificar: `pnpm test:e2e`
 
-- [ ] **T-006b** E2E de preferência gravada pela UI sobrevivendo ao reinício — req: RNF-13 · dep: T-006a, T-010
+- [x] **T-006b** E2E de preferência gravada pela UI sobrevivendo ao reinício — req: RNF-13 · dep: T-006a, T-010
   - Critérios:
     - E2E altera uma preferência na tela Configurações, fecha o app, reabre e vê o valor salvo
     - O valor é conferido também lendo o `line-splitter.db` real da pasta do teste

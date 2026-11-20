@@ -73,3 +73,16 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (formulário editável durante o salvamento) → corrigido → APROVADO.
 - Observações: E2E depende de `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
 - Commit: ver `git log` (T-010)
+
+### T-006b — E2E de preferência gravada pela UI sobrevivendo ao reinício (2026-11-20)
+- Feito: `e2e/preferencias.spec.ts` — confere o padrão 320, troca para 192 na tela Configurações, salva, fecha, reabre (novo processo, mesma pasta de dados), vê 192 e confere `settings.bitrateKbps` no `line-splitter.db` real.
+- Verificado: `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e preferencias` 1 passed; suíte completa 6 passed; `pnpm verify` OK.
+- Revisor: APROVADO.
+- Observações: E2E exigem `LINE_SPLITTER_DEV_NO_SANDBOX=1` nesta máquina (DEC-008 pendente de aprovação do usuário).
+- Commit: ver `git log` (T-006b)
+
+### T-006 — Playwright para Electron com um E2E real (2026-11-20)
+- Feito: concluída via T-006a (infraestrutura + fundação) e T-006b (preferência pela UI persistida).
+- Verificado: `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 6 passed.
+- Revisor: APROVADO.
+- Commit: mesmo commit da T-006b.
