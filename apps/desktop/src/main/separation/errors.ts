@@ -6,7 +6,11 @@ export function explainEngineFailure(log: string): string {
   if (/MemoryError|Cannot allocate memory|std::bad_alloc|DefaultCPUAllocator: can't allocate/i.test(log)) {
     return 'Memória RAM insuficiente para separar esta música. Feche outros programas e tente de novo.';
   }
-  if (/Could not load file|Invalid data found|Error opening input|could not open/i.test(log)) {
+  if (
+    /LoadAudioError|Could not load file|could not read the file|Invalid data found|Error opening input|could not open/i.test(
+      log,
+    )
+  ) {
     return 'O motor não conseguiu ler este arquivo de áudio. Ele pode estar corrompido.';
   }
   if (/No module named|ModuleNotFoundError/i.test(log)) {

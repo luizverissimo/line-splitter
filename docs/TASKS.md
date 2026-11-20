@@ -191,7 +191,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste de integração real com fixture de 8 s: 2 MP3 conferidos por `ffprobe` (codec mp3, bitrate, 44100 Hz, 2 canais), nomes, sufixo de conflito e registro no SQLite
   - Verificar: `pnpm --filter @line-splitter/desktop test separation && pnpm verify`
 
-- [ ] **T-302** Cancelamento e tratamento de erros do motor — req: RF-13, RF-14, RN-13 · dep: T-301
+- [x] **T-302** Cancelamento e tratamento de erros do motor — req: RF-13, RF-14, RN-13 · dep: T-301
   - Critérios:
     - `separation:cancel` encerra a árvore de processos (Demucs e FFmpeg) e apaga a pasta temporária
     - Cancelada ou com erro: nenhum arquivo na pasta de saída e nenhum registro concluído em `separations`

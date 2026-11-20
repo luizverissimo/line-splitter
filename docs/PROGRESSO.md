@@ -132,5 +132,8 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (re-registro da entrada atual mantinha arquivo antigo liberado; "Separar" sem explicação durante verificação do motor; rótulo de arquivo sem decisão; estado perdido ao navegar) → corrigido → APROVADO (as duas).
 - Commit: ver `git log` (T-300, T-301)
 
-### T-302 — Cancelamento e tratamento de erros do motor (em preparação)
-- Código já presente desde a T-301 (`separation/service.ts`: cancelar mata a árvore de processos e apaga a pasta temporária; `separation/errors.ts`: memória da GPU/RAM, arquivo ilegível, motor incompleto, processo encerrado; log técnico no `details`). Testes reais em `apps/desktop/src/main/separation/cancel.test.ts` (6 passando): cancelar durante o Demucs e logo no início sem deixar arquivos nem histórico, processo morto de fora (SIGKILL), arquivo trocado por lixo, motor incompleto.
+### T-302 — Cancelamento e tratamento de erros do motor (2026-11-20)
+- Feito: `separation/service.ts` (cancelar mata a árvore de processos do Demucs/FFmpeg, apaga a pasta temporária, ignora progresso depois do Cancelar; ENGINE_MISSING com o detalhe dos itens), `separation/errors.ts` (memória GPU/RAM, `LoadAudioError`/arquivo ilegível, motor incompleto, processo encerrado; log técnico no `details`).
+- Verificado: `pnpm verify` OK (236); `apps/desktop/src/main/separation/cancel.test.ts` 8 testes com motor real: cancelar durante o Demucs (grupo de processos some em < 800 ms, nenhuma fase depois) e durante o FFmpeg (morto por SIGKILL), cancelar no início, processo morto de fora, arquivo trocado, entrada que o próprio Demucs rejeita (LoadAudioError), motor incompleto — sem saída nem histórico. Mutação com `killTree` vazio faz os dois testes de cancelamento falharem.
+- Revisor: REPROVADO (testes não provavam a morte dos processos; faltava rejeição real do Demucs; ENGINE_MISSING sem log) → REPROVADO (teste do FFmpeg e histórico no cancelar inicial) → APROVADO.
+- Commit: ver `git log` (T-302)

@@ -14,7 +14,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RF-08 | Enviar áudio pelo botão "Escolher arquivo" (diálogo nativo) | §5.2 "botão Escolher arquivo" | T-201, T-600 | pendente |
 | RF-09 | Após carregar, mostrar nome, duração, formato e player do original | §5.2 "Após carregar, mostra nome, duração…" | T-201, T-600 | pendente |
 | RF-10 | Pedir a escolha do instrumento: seleção única, cartões com ícone (Voz, Bateria, Baixo, Guitarra/Violão, Piano/Teclado) | §5.3 | T-300, T-600 | pendente |
-| RF-11 | Executar o Demucs `htdemucs_6s` no modo `--two-stems=<stem>` gerando instrumento e "resto" | §5.4 "Executa o Demucs no modo de duas faixas" | T-301 | pendente |
+| RF-11 | Executar o Demucs `htdemucs_6s` no modo `--two-stems=<stem>` gerando instrumento e "resto" | §5.4 "Executa o Demucs no modo de duas faixas" | T-301 | feito |
 | RF-12 | Barra de progresso real (lida da saída do Demucs) e tempo decorrido | §5.4 "Barra de progresso real" | T-303, T-600 | pendente |
 | RF-13 | Botão "Cancelar": encerra o processo filho e apaga arquivos parciais | §5.4 "Botão Cancelar" | T-302, T-303, T-601 | pendente |
 | RF-14 | Erros do motor (memória, arquivo inválido, processo encerrado) em mensagem legível, com opção de ver o log técnico | §5.4 "Erros do motor…" | T-302, T-303, T-601 | pendente |
@@ -32,14 +32,14 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RN-01 | Formatos aceitos: MP3, WAV, FLAC, M4A/AAC, OGG | §5.2 "Formatos aceitos" | T-200, T-201 | feito |
 | RN-02 | Limites: até 500 MB e até 30 minutos | §5.2 "Limites" | T-200, T-601 | pendente |
 | RN-03 | Validar extensão, legibilidade pelo FFmpeg e duração, com erro claro se inválido | §5.2 "Validação" | T-200, T-201, T-601 | pendente |
-| RN-04 | Mapeamento instrumento → stem: Voz=vocals, Bateria=drums, Baixo=bass, Guitarra/Violão=guitar, Piano/Teclado=piano | §5.3 tabela | T-300 | pendente |
-| RN-05 | Botão "Separar" só habilitado com um instrumento escolhido | §5.3 | T-300 | pendente |
-| RN-06 | Uma separação por vez | §5.4 | T-301 | pendente |
-| RN-07 | MP3 320 kbps por padrão (opções 192/256/320), 44,1 kHz, estéreo | §5.5 "Saída em MP3" | T-010, T-301 | pendente |
+| RN-04 | Mapeamento instrumento → stem: Voz=vocals, Bateria=drums, Baixo=bass, Guitarra/Violão=guitar, Piano/Teclado=piano | §5.3 tabela | T-300 | feito |
+| RN-05 | Botão "Separar" só habilitado com um instrumento escolhido | §5.3 | T-300 | feito |
+| RN-06 | Uma separação por vez | §5.4 | T-301 | feito |
+| RN-07 | MP3 320 kbps por padrão (opções 192/256/320), 44,1 kHz, estéreo | §5.5 "Saída em MP3" | T-010, T-301 | feito |
 | RN-08 | Pasta de saída padrão `~/Música/Line Splitter` (equivalente no Windows), alterável | §5.5 "Pasta de saída" | T-010 | feito |
-| RN-09 | Nome repetido na saída ganha sufixo ` (2)`, ` (3)`… | §5.5 | T-301 | pendente |
-| RN-10 | Toda separação gera exatamente dois arquivos | §6 | T-301 | pendente |
-| RN-11 | O arquivo original nunca é modificado nem movido | §6 | T-201, T-301 | pendente |
+| RN-09 | Nome repetido na saída ganha sufixo ` (2)`, ` (3)`… | §5.5 | T-301 | feito |
+| RN-10 | Toda separação gera exatamente dois arquivos | §6 | T-301 | feito |
+| RN-11 | O arquivo original nunca é modificado nem movido | §6 | T-201, T-301 | feito |
 | RN-12 | Nenhum áudio sai do computador; rede só para instalar motor/modelo | §6 | T-102, T-103, T-501 | pendente |
 | RN-13 | Separação cancelada/com erro não deixa parciais na saída nem entra como concluída no histórico | §6 | T-302, T-601 | pendente |
 | RNF-01 | Linux como plataforma principal, instaladores AppImage e .deb | §3, §7 | T-500, T-900 | pendente |
@@ -51,7 +51,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RNF-07 | Estados de carregando, vazio e erro em todas as telas | §7 | T-003, T-011, T-604 | pendente |
 | RNF-08 | Tema escuro | §7 | T-003, T-604 | pendente |
 | RNF-09 | Interface em português | §7 | T-003, T-500, T-604 | pendente |
-| RNF-10 | Testes de integração com Demucs e FFmpeg reais em áudio curto livre (sem mock do motor) | §4, §7 | T-007, T-301 | pendente |
+| RNF-10 | Testes de integração com Demucs e FFmpeg reais em áudio curto livre (sem mock do motor) | §4, §7 | T-007, T-301 | feito |
 | RNF-11 | Funciona offline após a configuração inicial | §2 | T-103, T-501 | pendente |
 | RNF-12 | Usuário único: sem login, sem nuvem, sem cobrança | §2 | T-004, T-902 | pendente |
 | RNF-13 | Testes E2E com Playwright para Electron | §4 | T-006, T-600 | pendente |

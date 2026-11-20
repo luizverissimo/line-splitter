@@ -70,7 +70,15 @@ export class SeparationService {
       const settings = this.deps.settings();
       const engine = await detectEngine(settings, this.deps.paths);
       if (!engine.ready || !engine.ffmpeg.path || !engine.ffmpeg.ffprobePath) {
-        throw new AppError('ENGINE_MISSING', 'O motor de separação não está pronto. Confira a tela Motor.');
+        const problems = [engine.python, engine.ffmpeg, engine.demucs, engine.model]
+          .filter((item) => !item.ok)
+          .map((item) => item.detail)
+          .join('\n');
+        throw new AppError(
+          'ENGINE_MISSING',
+          'O motor de separação não está pronto. Confira a tela Motor.',
+          problems,
+        );
       }
       const audio = await inspectAudio(input, engine.ffmpeg.ffprobePath);
       const device = engine.device.effective;
@@ -186,6 +194,8 @@ export class SeparationService {
   }
 
   private progress(phase: SeparationProgress['phase'], percent: number) {
+    // Depois do Cancelar a barra não anda mais, mesmo que chegue saída atrasada do processo.
+    if (this.cancelled) return;
     this.deps.onProgress({ phase, percent: Math.min(100, Math.max(0, percent)) });
   }
 
