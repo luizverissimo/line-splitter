@@ -19,6 +19,7 @@ import {
 import { findInPath } from './exec';
 import { HTDEMUCS_6S, enginePaths } from './paths';
 import { EngineInstaller } from './install';
+import { ModelDownloader } from './model';
 
 // Requisitos do ambiente de desenvolvimento (README): Python ≥ 3.9 e FFmpeg no PATH.
 let tmp: string;
@@ -240,6 +241,7 @@ describe('detectEngine e canal engine:status', () => {
         repo,
         enginePaths(userData),
         new EngineInstaller(enginePaths(userData), { step: () => undefined, log: () => undefined }),
+        new ModelDownloader(enginePaths(userData), () => undefined),
       );
       const res = await h['engine:status'](undefined);
       expect(res).toMatchObject({

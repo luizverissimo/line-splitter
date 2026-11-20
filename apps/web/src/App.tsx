@@ -4,6 +4,7 @@ import { useRoutes } from 'react-router';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { routes } from './routes';
 import { EngineInstallProvider } from './state/EngineInstallContext';
+import { ModelDownloadProvider } from './state/ModelDownloadContext';
 
 /** Árvore de rotas; o roteador (hash no app, memória nos testes) é fornecido por quem renderiza. */
 export function AppRoutes() {
@@ -19,7 +20,9 @@ export function App({ queryClient, children }: Props) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <EngineInstallProvider>{children}</EngineInstallProvider>
+        <EngineInstallProvider>
+          <ModelDownloadProvider>{children}</ModelDownloadProvider>
+        </EngineInstallProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

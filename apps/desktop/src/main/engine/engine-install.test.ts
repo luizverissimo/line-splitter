@@ -10,6 +10,7 @@ import { engineHandlers } from '../handlers/engine';
 import { SettingsRepository } from '../settings/repository';
 import { findInPath } from './exec';
 import { EngineInstaller, explainInstallFailure, hasNvidiaGpu } from './install';
+import { ModelDownloader } from './model';
 import { enginePaths } from './paths';
 
 const tmpDirs: string[] = [];
@@ -80,7 +81,12 @@ describe('canal engine:install', () => {
         ffmpegPath: '',
       });
       const paths = enginePaths(userData);
-      const h = engineHandlers(repo, paths, new EngineInstaller(paths, recorder().events));
+      const h = engineHandlers(
+        repo,
+        paths,
+        new EngineInstaller(paths, recorder().events),
+        new ModelDownloader(paths, () => undefined),
+      );
       await expect(h['engine:install']({ reinstall: true })).resolves.toMatchObject({
         ok: false,
         error: { code: 'ENGINE_MISSING', message: expect.stringContaining('/bin/false') },

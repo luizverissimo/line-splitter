@@ -9,6 +9,7 @@ import { settingsHandlers } from './handlers/settings';
 import { engineHandlers } from './handlers/engine';
 import { enginePaths } from './engine/paths';
 import { EngineInstaller } from './engine/install';
+import { ModelDownloader } from './engine/model';
 import { broadcast } from './events';
 import { SettingsRepository } from './settings/repository';
 import { defaultSettings } from './settings/defaults';
@@ -89,14 +90,18 @@ if (!app.requestSingleInstanceLock()) {
       step: (step) => broadcast('engine:installStep', step),
       log: (log) => broadcast('engine:installLog', log),
     });
-    app.on('before-quit', () => installer.cancel());
+    const downloader = new ModelDownloader(paths, (progress) => broadcast('engine:modelProgress', progress));
+    app.on('before-quit', () => {
+      installer.cancel();
+      downloader.cancel();
+    });
 
     registerIpcHandlers(
       {
         'app:info': appInfoHandler,
         ...settingsHandlers(settings),
         ...dialogHandlers(),
-        ...engineHandlers(settings, paths, installer),
+        ...engineHandlers(settings, paths, installer, downloader),
       },
       (url) => isAllowedNavigation(url, origin),
     );

@@ -2,6 +2,7 @@ import type { EngineItem, EngineStatus } from '@line-splitter/shared';
 import { CheckCircle2, Cpu, RefreshCw, XCircle } from 'lucide-react';
 import { useAppInfo, useEngineStatus } from '../api/queries';
 import { EngineInstallPanel } from '../components/EngineInstallPanel';
+import { ModelDownloadPanel } from '../components/ModelDownloadPanel';
 import { QueryError } from '../components/QueryError';
 import { Button, LoadingState } from '../components/ui';
 
@@ -153,6 +154,7 @@ export function EnginePage() {
           {!status.data.ffmpeg.ok &&
             platforms.map((p) => <InstallHelp key={`ffmpeg-${p}`} which="ffmpeg" platform={p} />)}
           <EngineInstallPanel pythonOk={status.data.python.ok} installed={status.data.demucs.ok} />
+          <ModelDownloadPanel downloaded={status.data.model.ok} />
         </div>
       )}
 

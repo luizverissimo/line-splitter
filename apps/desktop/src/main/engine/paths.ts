@@ -39,4 +39,6 @@ export const HTDEMUCS_6S = {
   sizeBytes: 54_996_327,
   url: 'https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/5c90dfd2-34c22ccb.th',
   sha256Prefix: '34c22ccb',
+  /** SHA-256 completo do arquivo oficial (conferido no download real). */
+  sha256: '34c22ccb381c6f9fdbf324f04e1e2fe21aaaf293f5ded163a162697ff9a02ddd',
 } as const;

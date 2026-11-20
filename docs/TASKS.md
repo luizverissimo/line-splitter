@@ -61,7 +61,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Migrações versionadas criam as tabelas `settings` e `separations`; rodam automaticamente ao abrir
     - Módulo nativo carrega no Electron e no Node dos testes (prebuild N-API do `better-sqlite3@13`, sem recompilação — DEC-009)
     - Testes de integração contra arquivo SQLite real temporário (migração do zero, migração idempotente, leitura/escrita)
-  - Verificar: `pnpm --filter desktop test db && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test db && pnpm verify`
 
 - [x] **T-006** Playwright para Electron com um E2E real — req: RNF-13 · dep: T-006a, T-006b
   - Critérios:
@@ -121,7 +121,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Detecta CUDA via `torch.cuda.is_available()` no venv e resolve o dispositivo efetivo a partir da configuração (Auto/GPU/CPU)
     - IPC `engine:status` retorna um objeto por item `{ ok, detalhe }`; validado com Zod
     - Testes de integração reais nesta máquina (Python/FFmpeg presentes, caminho configurado inválido → item ✖)
-  - Verificar: `pnpm --filter desktop test engine && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test engine && pnpm verify`
 
 - [x] **T-101** Tela de configuração do motor — req: RF-02, RF-05, RF-06 · dep: T-100
   - Critérios:
@@ -141,13 +141,13 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste de integração real cria o venv numa pasta temporária e importa `demucs` (marcado como lento, executado no `pnpm verify`)
   - Verificar: `pnpm --filter @line-splitter/desktop test engine-install && pnpm verify`
 
-- [ ] **T-103** Download dos pesos do `htdemucs_6s` com progresso — req: RF-04, RN-12, RNF-11 · dep: T-102
+- [x] **T-103** Download dos pesos do `htdemucs_6s` com progresso — req: RF-04, RN-12, RNF-11 · dep: T-102
   - Critérios:
     - Baixa os pesos para o cache do torch do motor com barra de progresso real (bytes recebidos/total)
     - Confere o checksum esperado pelo Demucs; arquivo incompleto/corrompido é apagado e o erro aparece com "Tentar de novo"
     - Com os pesos presentes, `engine:status` fica todo ✔ e o app segue para Início sem precisar de rede
     - Teste de integração real do download e da verificação de integridade
-  - Verificar: `pnpm --filter desktop test model && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test model && pnpm verify`
 
 ## Fase 3 — Envio de áudio
 
@@ -157,7 +157,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Retorna nome, duração, formato/codec, sample rate e canais; erros com códigos e mensagens em português (ex.: "Arquivo corrompido ou formato não suportado")
     - Arquivo de entrada só é lido; nada é escrito ao lado dele
     - Testes de integração com os fixtures reais: cada formato válido, corrompido, extensão errada, 31 min
-  - Verificar: `pnpm --filter desktop test audio && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test audio && pnpm verify`
 
 - [ ] **T-201** Tela Início: arrastar e soltar, escolher arquivo, metadados e player do original — req: RF-07, RF-08, RF-09, RN-01, RN-03, RN-11 · dep: T-200, T-011
   - Critérios:
@@ -188,7 +188,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Segunda chamada enquanto uma roda é recusada com erro "Já existe uma separação em andamento"
     - Ao concluir grava em `separations` (data, original, instrumento, duração do processamento, caminhos)
     - Teste de integração real com fixture de 8 s: 2 MP3 conferidos por `ffprobe` (codec mp3, bitrate, 44100 Hz, 2 canais), nomes, sufixo de conflito e registro no SQLite
-  - Verificar: `pnpm --filter desktop test separation && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test separation && pnpm verify`
 
 - [ ] **T-302** Cancelamento e tratamento de erros do motor — req: RF-13, RF-14, RN-13 · dep: T-301
   - Critérios:
@@ -197,7 +197,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Erros traduzidos para mensagens legíveis: falta de memória (RAM/VRAM), arquivo inválido, processo encerrado inesperadamente, motor ausente
     - Log técnico completo (stderr) retornado junto ao erro
     - Testes de integração reais: cancelar no meio, processo morto externamente, entrada que o Demucs rejeita
-  - Verificar: `pnpm --filter desktop test separation && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test separation && pnpm verify`
 
 - [ ] **T-303** Tela de processamento — req: RF-12, RF-13, RF-14, RNF-05 · dep: T-302
   - Critérios:
@@ -251,7 +251,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Renderer bloqueia qualquer requisição de rede (`session.webRequest`), exceto `media://` e os arquivos do app
     - Separação executada com variáveis que impedem download (`TORCH_HOME` do motor, sem pip) e falha com mensagem clara se o modelo faltar, em vez de baixar
     - Teste de integração: separação completa com a rede do processo filho bloqueada funciona com o modelo presente
-  - Verificar: `pnpm --filter desktop test offline && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test offline && pnpm verify`
 
 ## Fase 7 — Qualidade
 
@@ -280,7 +280,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Navegação, `window.open`, `webview` e permissões (câmera, microfone etc.) negados por padrão
     - `media://`, `shell.openPath`, `showItemInFolder` e exclusão de arquivos só aceitam caminhos registrados (teste com path traversal)
     - Processos filhos chamados com `spawn` e lista de argumentos (sem shell); `pnpm audit` sem vulnerabilidades altas
-  - Verificar: `pnpm --filter desktop test security && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test security && pnpm verify`
 
 - [ ] **T-603** Desempenho — req: RNF-05, RNF-06 · dep: T-600
   - Critérios:
