@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createIpc, type ChannelMap, type EventMap } from './ipc';
 import { settingsSchema, settingsUpdateSchema } from '../settings';
+import { engineStatusSchema } from '../engine';
 
 export const appInfoSchema = z.object({
   name: z.string().min(1),
@@ -32,6 +33,7 @@ export const ipcChannels = {
   'settings:update': { input: settingsUpdateSchema, output: settingsSchema },
   'dialog:chooseDirectory': { input: chooseDirectoryInputSchema, output: chosenPathSchema },
   'dialog:chooseFile': { input: chooseFileInputSchema, output: chosenPathSchema },
+  'engine:status': { input: z.undefined(), output: engineStatusSchema },
 } satisfies ChannelMap;
 
 /** Eventos main → renderer. */

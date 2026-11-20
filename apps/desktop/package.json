@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@line-splitter/shared": "workspace:*",
-    "better-sqlite3": "^13.2.0"
+    "better-sqlite3": "^13.2.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",

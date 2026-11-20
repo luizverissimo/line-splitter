@@ -86,3 +86,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 6 passed.
 - Revisor: APROVADO.
 - Commit: mesmo commit da T-006b.
+
+### T-100 — Detecção do ambiente do motor (Python, demucs, FFmpeg, modelo, GPU) (2026-11-20)
+- Feito: `apps/desktop/src/main/engine/` — `paths.ts` (venv, TORCH_HOME e repositório local de modelos em `userData/engine`), `exec.ts` (execução sem shell com tempo limite, busca no PATH com PATHEXT), `detect.ts` (Python ≥ 3.9, FFmpeg + ffprobe executados com versão, Demucs/PyTorch/CUDA por sonda validada com Zod, modelo por tamanho e yaml exato, dispositivo efetivo a partir de Auto/GPU/CPU); canal `engine:status`.
+- Verificado: `pnpm verify` OK (132 testes; 19 de detecção reais: Python/FFmpeg do sistema e por caminho configurado, ffprobe quebrado, venv real sem demucs, sonda inválida, modelo ausente/incompleto/yaml errado). Numa venv de teste com torch 2.6.0+cu124 + demucs 4.1.0: CUDA na RTX 3050 detectada e separação real com `--repo` em ~5 s.
+- Revisor: REPROVADO (ffprobe não validado; faltava teste de caminho configurado válido) → corrigido → APROVADO.
+- Observações: DEC-011 (repositório local do modelo; numpy necessário para o Demucs 4.1).
+- Commit: ver `git log` (T-100)

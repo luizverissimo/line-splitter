@@ -114,10 +114,10 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 2 — Motor de separação
 
-- [ ] **T-100** Detecção do ambiente do motor (Python, demucs, FFmpeg, modelo, GPU) — req: RF-01, RF-06, RF-24 · dep: T-010
+- [x] **T-100** Detecção do ambiente do motor (Python, demucs, FFmpeg, modelo, GPU) — req: RF-01, RF-06, RF-24 · dep: T-010
   - Critérios:
     - Localiza Python ≥ 3.9 e FFmpeg/ffprobe no PATH ou no caminho configurado, informando versão encontrada
-    - Verifica o venv gerenciado em `userData/engine`, se `demucs` importa nele e se os pesos do `htdemucs_6s` estão no cache do torch
+    - Verifica o venv gerenciado em `userData/engine`, se `demucs` importa nele e se os pesos do `htdemucs_6s` estão no cache do torch (repositório local `userData/engine/models` usado com `--repo`, DEC-011)
     - Detecta CUDA via `torch.cuda.is_available()` no venv e resolve o dispositivo efetivo a partir da configuração (Auto/GPU/CPU)
     - IPC `engine:status` retorna um objeto por item `{ ok, detalhe }`; validado com Zod
     - Testes de integração reais nesta máquina (Python/FFmpeg presentes, caminho configurado inválido → item ✖)
@@ -134,7 +134,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 - [ ] **T-102** Instalar/reinstalar motor (venv + torch + demucs com log ao vivo) — req: RF-03, RF-24, RN-12 · dep: T-101
   - Critérios:
-    - "Instalar motor" cria venv em `userData/engine` e instala torch/torchaudio (build CUDA se `nvidia-smi` detectar GPU, CPU caso contrário) e `demucs`, com versões fixadas registradas em DECISOES
+    - "Instalar motor" cria venv em `userData/engine` e instala torch (build CUDA se `nvidia-smi` detectar GPU, CPU caso contrário) e `demucs`, com versões fixadas registradas em DECISOES (DEC-011: torch 2.6.0 + demucs 4.1.0, sem torchaudio)
     - Saída do pip transmitida ao vivo para a tela por evento IPC; botão de cancelar instalação que encerra o processo e deixa o venv removido
     - Falha (sem internet, pip com erro) mostra mensagem legível e o log completo
     - "Reinstalar motor" nas Configurações apaga e recria o venv, com confirmação

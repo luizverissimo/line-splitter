@@ -30,7 +30,7 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 
 ### DEC-004 — Instalação do torch: build CUDA quando `nvidia-smi` existe, senão CPU; versões fixadas (2026-11-20)
 - Contexto: Demucs 4.x depende de torch/torchaudio; versões novas do torchaudio mudaram o backend de gravação.
-- Decisão: escolher o índice do pip (CUDA ou CPU) pela presença de GPU NVIDIA e fixar versões compatíveis com o Demucs, registradas aqui quando a T-102 for feita.
+- Decisão: escolher o índice do pip (CUDA ou CPU) pela presença de GPU NVIDIA e fixar versões compatíveis com o Demucs (versões em DEC-011).
 - Impacto: T-102.
 
 ### DEC-005 — Áudio de teste sintético gerado com FFmpeg (2026-11-20)
@@ -65,3 +65,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: cada tarefa cria `e2e/<nome>.spec.ts` com o nome usado no seu `Verificar:` (ex.: `e2e/configuracoes.spec.ts`). Node ≥ 22.5 exigido (leitura do banco nos E2E com `node:sqlite`).
 - Aprovado pelo usuário: não se aplica — convenção técnica.
 - Impacto: todas as tarefas com `pnpm test:e2e <nome>`.
+
+### DEC-011 — Demucs 4.1.0 com repositório local de modelos (`--repo`) (2026-11-20)
+- Contexto: o Demucs 4.1.0 (atual no PyPI) procura modelos primeiro no HuggingFace e cai no repositório AWS legado; com `--repo <pasta>` ele carrega só da pasta local (`LocalRepo` + yaml do modelo), sem rede. O `htdemucs_6s` é um único modelo (`5c90dfd2-34c22ccb.th`, 54.996.327 bytes; o sufixo são os 8 primeiros hex do SHA-256, conferidos pelo próprio Demucs).
+- Decisão: o app mantém `userData/engine/models/` com `htdemucs_6s.yaml` (`models: ['5c90dfd2']`) e os pesos baixados por ele mesmo de `https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/5c90dfd2-34c22ccb.th` (T-103, com progresso e checksum). Toda separação roda `python -m demucs -n htdemucs_6s --repo <models>` — nunca baixa nada (RN-12, RNF-11). Pacotes: `demucs==4.1.0`, `numpy>=1.26,<3` (o Demucs 4.1 importa numpy mas não o declara — conferido: sem ele a separação falha) e `torch==2.6.0` (índice CUDA 12.4 se houver GPU NVIDIA, senão CPU), sem torchaudio (o 4.1 usa `sphn` para áudio). Conferido nesta máquina: `torch 2.6.0+cu124`, CUDA na RTX 3050, separação `--two-stems=vocals --repo` de 8 s em ~5 s.
+- Aprovado pelo usuário: não se aplica — decisão técnica dentro da stack do PRD (Demucs `htdemucs_6s`).
+- Impacto: T-100, T-102, T-103, T-301, T-501.

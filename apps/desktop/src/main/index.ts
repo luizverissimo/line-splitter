@@ -6,6 +6,8 @@ import { registerIpcHandlers } from './ipc';
 import { appInfoHandler } from './handlers/app';
 import { dialogHandlers } from './handlers/dialog';
 import { settingsHandlers } from './handlers/settings';
+import { engineHandlers } from './handlers/engine';
+import { enginePaths } from './engine/paths';
 import { SettingsRepository } from './settings/repository';
 import { defaultSettings } from './settings/defaults';
 import { openDatabase, type Db } from './db/database';
@@ -82,7 +84,12 @@ if (!app.requestSingleInstanceLock()) {
     const settings = new SettingsRepository(db, defaultSettings());
 
     registerIpcHandlers(
-      { 'app:info': appInfoHandler, ...settingsHandlers(settings), ...dialogHandlers() },
+      {
+        'app:info': appInfoHandler,
+        ...settingsHandlers(settings),
+        ...dialogHandlers(),
+        ...engineHandlers(settings, enginePaths(app.getPath('userData'))),
+      },
       (url) => isAllowedNavigation(url, origin),
     );
 
