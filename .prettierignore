@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+out
+release
+coverage
+fixtures
+pnpm-lock.yaml
+.claude
+docs
+CLAUDE.md
+README.md

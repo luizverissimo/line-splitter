@@ -20,7 +20,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 0 — Fundação
 
-- [ ] **T-001** Monorepo pnpm + TS strict + ESLint + Prettier + Vitest + `pnpm verify` — req: RNF-03
+- [x] **T-001** Monorepo pnpm + TS strict + ESLint + Prettier + Vitest + `pnpm verify` — req: RNF-03
   - Critérios:
     - `pnpm-workspace.yaml` com `apps/*` e `packages/*`; `tsconfig.base.json` com `strict: true` herdado por todos os pacotes
     - ESLint (flat config, typescript-eslint) e Prettier configurados na raiz; `pnpm lint` e `pnpm format:check` passam
