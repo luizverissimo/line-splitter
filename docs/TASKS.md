@@ -45,7 +45,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste de componente do layout e do error boundary
   - Verificar: `pnpm --filter web test && pnpm --filter web build && pnpm verify`
 
-- [ ] **T-004** `apps/desktop`: Electron seguro carregando o web (dev e build) — req: RNF-04, RNF-12 · dep: T-003
+- [x] **T-004** `apps/desktop`: Electron seguro carregando o web (dev e build) — req: RNF-04, RNF-12 · dep: T-003
   - Critérios:
     - `BrowserWindow` com `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`; preload expõe só `window.api` tipado
     - CSP restritiva aplicada ao renderer; navegação externa e `window.open` bloqueados
@@ -260,6 +260,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Critérios:
     - Teste automatizado confere `contextIsolation`, `sandbox`, `nodeIntegration: false` e CSP em todas as janelas
     - Todo canal IPC tem schema Zod de entrada; teste percorre o contrato e envia payload inválido a cada canal
+    - Teste automatizado da recusa de IPC vindo de origem não confiável (`FORBIDDEN`) e de `SECURE_WEB_PREFERENCES`
     - Navegação, `window.open`, `webview` e permissões (câmera, microfone etc.) negados por padrão
     - `media://`, `shell.openPath`, `showItemInFolder` e exclusão de arquivos só aceitam caminhos registrados (teste com path traversal)
     - Processos filhos chamados com `spawn` e lista de argumentos (sem shell); `pnpm audit` sem vulnerabilidades altas
@@ -287,6 +288,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Critérios:
     - `pnpm dist:linux` (electron-builder) gera AppImage e .deb em `release/`
     - Módulo nativo `better-sqlite3` funciona no app empacotado
+    - Build do web copiado para `resources/renderer` (`extraResources`), que é onde o main o procura quando empacotado
     - AppImage executado nesta máquina: abre, detecta o motor e completa uma separação real
   - Verificar: `pnpm dist:linux` e executar o AppImage gerado
 

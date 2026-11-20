@@ -47,3 +47,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Contexto: o desenvolvimento é em Linux; RNF-02 pede instalador NSIS funcional no Windows.
 - Decisão: gerar NSIS via electron-builder (wine) no Linux. Se não houver Windows disponível para executar, T-901 fica `[!]` com o bloqueio descrito, sem cortar o requisito.
 - Impacto: T-901.
+
+### DEC-008 — Sandbox do Chromium no Electron de desenvolvimento em Linux com AppArmor (2026-11-20)
+- Contexto: nesta máquina (Ubuntu com `kernel.apparmor_restrict_unprivileged_userns=1`) o Electron de `node_modules` aborta se `chrome-sandbox` não for SUID root. Corrigir exige `sudo`, que a IA não tem.
+- Decisão proposta: `apps/desktop/scripts/sandbox.mjs` detecta a situação e, por padrão, falha mostrando o comando de correção (`sudo chown root:root …/chrome-sandbox && sudo chmod 4755 …`). Só com `LINE_SPLITTER_DEV_NO_SANDBOX=1` os scripts de dev/teste lançam com `--no-sandbox`. As `webPreferences` continuam com `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`. O app empacotado não usa essa opção.
+- Aprovado pelo usuário: NÃO — pendente. Enquanto o usuário não decidir (rodar o comando de correção ou aprovar o uso de `LINE_SPLITTER_DEV_NO_SANDBOX=1`), as verificações locais da IA usam `--no-sandbox` apenas para executar testes, e isso será informado no relatório.
+- Impacto: T-004, T-006 e os E2E; T-900.

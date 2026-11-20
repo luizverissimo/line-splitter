@@ -1,0 +1,22 @@
+{
+  "name": "@line-splitter/desktop",
+  "productName": "Line Splitter",
+  "version": "0.1.0",
+  "description": "Separa um instrumento de uma m\u00fasica, localmente.",
+  "private": true,
+  "type": "module",
+  "main": "out/main.cjs",
+  "scripts": {
+    "build": "pnpm --filter @line-splitter/web build && node scripts/build.mjs",
+    "start": "node scripts/start.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@line-splitter/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "esbuild": "^0.28.2"
+  }
+}
