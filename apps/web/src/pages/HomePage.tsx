@@ -7,17 +7,20 @@ import {
   type AudioInfo,
 } from '@line-splitter/shared';
 import { FileAudio, FolderOpen, Upload } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFileDrop } from '../state/FileDropContext';
 import { call } from '../api/client';
 import { errorDetails, errorMessage } from '../api/errors';
+import { Scissors } from 'lucide-react';
+import { Link } from 'react-router';
+import { useEngineStatus } from '../api/queries';
+import { InstrumentPicker } from '../components/InstrumentPicker';
+import { SeparationProgressPanel } from '../components/SeparationProgressPanel';
+import { SeparationResultPanel } from '../components/SeparationResultPanel';
 import { AudioPlayer, Button, EmptyState, ErrorAlert, LoadingState } from '../components/ui';
-
-type State =
-  | { kind: 'empty' }
-  | { kind: 'inspecting'; fileName: string }
-  | { kind: 'error'; title: string; error: unknown }
-  | { kind: 'ready'; audio: AudioInfo };
+import { useSeparation } from '../state/SeparationContext';
+import { useHomeState } from '../state/HomeStateContext';
+import { QueryError } from '../components/QueryError';
 
 const CONTAINER_LABELS: Record<string, string> = {
   mp3: 'MP3',
@@ -36,14 +39,21 @@ export function audioFormatLabel(audio: AudioInfo): string {
 }
 
 export function HomePage() {
-  const [state, setState] = useState<State>({ kind: 'empty' });
+  const { state, setState, stem, setStem } = useHomeState();
   const drop = useFileDrop();
   // Só a resposta da última inspeção pedida vale (evita que uma resposta antiga sobrescreva a nova).
   const requestId = useRef(0);
   const inspecting = state.kind === 'inspecting';
+  const sep = useSeparation();
+  const engine = useEngineStatus();
+  const busy = inspecting || sep.running;
+  const showResult = Boolean(sep.result) && !sep.running;
+  const showProgress = sep.running || Boolean(sep.error);
 
   const inspect = async (filePath: string, fileName: string) => {
     const id = (requestId.current += 1);
+    sep.reset();
+    setStem(null);
     setState({ kind: 'inspecting', fileName });
     try {
       const audio = await call('audio:inspect', { path: filePath });
@@ -56,9 +66,9 @@ export function HomePage() {
 
   // Enquanto inspeciona, soltar outro arquivo é ignorado.
   useEffect(() => {
-    drop.setAccepting(!inspecting);
+    drop.setAccepting(!busy);
     return () => drop.setAccepting(true);
-  }, [drop, inspecting]);
+  }, [drop, busy]);
 
   // Arquivo solto em qualquer lugar da janela (a navegação para o Início é feita pelo FileDropProvider).
   const inspectRef = useRef(inspect);
@@ -72,7 +82,7 @@ export function HomePage() {
         if (file.kind === 'file') void inspectRef.current(file.path, file.fileName);
         else setState({ kind: 'error', title: file.title, error: new Error(file.message) });
       }),
-    [subscribe],
+    [subscribe, setState],
   );
 
   const choose = async () => {
@@ -119,7 +129,7 @@ export function HomePage() {
           variant="primary"
           icon={<FolderOpen size={16} aria-hidden="true" />}
           onClick={() => void choose()}
-          disabled={inspecting}
+          disabled={busy}
         >
           Escolher arquivo
         </Button>
@@ -159,6 +169,48 @@ export function HomePage() {
           </dl>
           <AudioPlayer src={state.audio.mediaUrl} title={`original: ${state.audio.fileName}`} />
         </div>
+      )}
+      {state.kind === 'ready' && !showResult && !showProgress && (
+        <div className="separate-step">
+          <InstrumentPicker value={stem} onChange={setStem} />
+          {engine.isPending && <LoadingState message="Verificando o motor de separação…" />}
+          {engine.isError && (
+            <QueryError
+              compact
+              error={engine.error}
+              onRetry={() => void engine.refetch()}
+              title="Não foi possível verificar o motor"
+            />
+          )}
+          {engine.isSuccess && !engine.data.ready && (
+            <p className="engine-warning" role="status">
+              O motor de separação ainda não está pronto. <Link to="/motor">Abrir a tela Motor</Link>
+            </p>
+          )}
+          <Button
+            variant="primary"
+            icon={<Scissors size={16} aria-hidden="true" />}
+            disabled={!stem || !engine.isSuccess || !engine.data.ready}
+            onClick={() => stem && sep.start(stem)}
+          >
+            Separar
+          </Button>
+        </div>
+      )}
+      {state.kind === 'ready' && showProgress && <SeparationProgressPanel onBack={() => sep.reset()} />}
+      {state.kind === 'ready' && showResult && sep.result && (
+        <SeparationResultPanel
+          result={sep.result}
+          onSeparateAnother={() => {
+            sep.reset();
+            setStem(null);
+          }}
+          onNewFile={() => {
+            sep.reset();
+            setStem(null);
+            setState({ kind: 'empty' });
+          }}
+        />
       )}
     </section>
   );

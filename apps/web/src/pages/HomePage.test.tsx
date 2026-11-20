@@ -1,5 +1,5 @@
 import type { AudioInfo } from '@line-splitter/shared';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { bridgeWith, renderApp } from '../test/render';
@@ -189,5 +189,123 @@ describe('Tela Início', () => {
       await screen.findByText('Formato não suportado. Envie um arquivo MP3, WAV, FLAC, M4A/AAC ou OGG.'),
     ).toBeInTheDocument();
     expect(inspect).not.toHaveBeenCalled();
+  });
+
+  it('Separar só habilita com instrumento escolhido e motor pronto, e inicia a separação', async () => {
+    const user = userEvent.setup();
+    const start = vi.fn(() => new Promise(() => undefined));
+    const engineReady = {
+      python: { ok: true, detail: 'Python 3.12.3', path: '/usr/bin/python3' },
+      ffmpeg: {
+        ok: true,
+        detail: 'FFmpeg 6.1 · ffprobe 6.1',
+        path: '/usr/bin/ffmpeg',
+        ffprobePath: '/usr/bin/ffprobe',
+      },
+      demucs: { ok: true, detail: 'Demucs 4.1.0' },
+      model: { ok: true, detail: 'Modelo htdemucs_6s (52 MB)' },
+      device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
+      engineDir: '/d/engine',
+      ready: true,
+    };
+    setup({
+      'dialog:chooseFile': () => ({ ok: true, data: audio.path }),
+      'audio:inspect': () => ({ ok: true, data: audio }),
+      'engine:status': () => ({ ok: true, data: engineReady }),
+      'separation:start': start,
+    });
+    await user.click(screen.getByRole('button', { name: 'Escolher arquivo' }));
+    const separar = await screen.findByRole('button', { name: 'Separar' });
+    expect(screen.getByRole('group', { name: 'Qual instrumento você quer separar?' })).toBeInTheDocument();
+    expect(separar).toBeDisabled();
+    await user.click(screen.getByRole('radio', { name: /Guitarra\/Violão/ }));
+    await waitFor(() => expect(separar).toBeEnabled());
+    await user.click(separar);
+    expect(start).toHaveBeenCalledWith({ stem: 'guitar' });
+    expect(await screen.findByRole('heading', { name: 'Separando: Guitarra/Violão' })).toBeInTheDocument();
+  });
+
+  it('com o motor incompleto o botão fica desabilitado e aponta para a tela Motor', async () => {
+    const user = userEvent.setup();
+    setup({
+      'dialog:chooseFile': () => ({ ok: true, data: audio.path }),
+      'audio:inspect': () => ({ ok: true, data: audio }),
+      'engine:status': () => ({
+        ok: true,
+        data: {
+          python: { ok: true, detail: 'x', path: '/p' },
+          ffmpeg: { ok: true, detail: 'x', path: '/f', ffprobePath: '/fp' },
+          demucs: { ok: false, detail: 'Motor não instalado.' },
+          model: { ok: false, detail: 'Sem modelo.' },
+          device: {
+            preference: 'auto',
+            effective: 'cpu',
+            cudaAvailable: false,
+            gpuName: null,
+            warning: null,
+          },
+          engineDir: '/d/engine',
+          ready: false,
+        },
+      }),
+    });
+    // Na abertura, motor incompleto leva à tela Motor; o usuário volta ao Início.
+    expect(await screen.findByRole('heading', { level: 1, name: 'Motor de separação' })).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: 'Início' }));
+    await user.click(screen.getByRole('button', { name: 'Escolher arquivo' }));
+    await user.click(await screen.findByRole('radio', { name: /Voz/ }));
+    expect(screen.getByRole('button', { name: 'Separar' })).toBeDisabled();
+    expect(screen.getByRole('link', { name: 'Abrir a tela Motor' })).toBeInTheDocument();
+  });
+
+  it('enquanto o motor é verificado e se a verificação falha, explica por que Separar está desabilitado', async () => {
+    const user = userEvent.setup();
+    let fail = false;
+    let releaseStatus: (v: unknown) => void = () => undefined;
+    setup({
+      'dialog:chooseFile': () => ({ ok: true, data: audio.path }),
+      'audio:inspect': () => ({ ok: true, data: audio }),
+      'engine:status': () =>
+        fail
+          ? { ok: false, error: { code: 'INTERNAL', message: 'Falha ao executar o Python.' } }
+          : new Promise((r) => {
+              releaseStatus = r;
+            }),
+    });
+    await user.click(screen.getByRole('button', { name: 'Escolher arquivo' }));
+    expect(await screen.findByText('Verificando o motor de separação…')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Separar' })).toBeDisabled();
+    fail = true;
+    releaseStatus({ ok: false, error: { code: 'INTERNAL', message: 'Falha ao executar o Python.' } });
+    expect(await screen.findByText('Falha ao executar o Python.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tentar de novo' })).toBeInTheDocument();
+  });
+
+  it('sair do Início durante a separação e voltar mantém o arquivo e o progresso', async () => {
+    const user = userEvent.setup();
+    const engineReady = {
+      python: { ok: true, detail: 'x', path: '/p' },
+      ffmpeg: { ok: true, detail: 'x', path: '/f', ffprobePath: '/fp' },
+      demucs: { ok: true, detail: 'Demucs 4.1.0' },
+      model: { ok: true, detail: 'Modelo' },
+      device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
+      engineDir: '/d/engine',
+      ready: true,
+    };
+    setup({
+      'dialog:chooseFile': () => ({ ok: true, data: audio.path }),
+      'audio:inspect': () => ({ ok: true, data: audio }),
+      'engine:status': () => ({ ok: true, data: engineReady }),
+      'separation:start': () => new Promise(() => undefined),
+    });
+    await user.click(screen.getByRole('button', { name: 'Escolher arquivo' }));
+    await user.click(await screen.findByRole('radio', { name: /Bateria/ }));
+    await user.click(screen.getByRole('button', { name: 'Separar' }));
+    expect(await screen.findByRole('heading', { name: 'Separando: Bateria' })).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: 'Histórico' }));
+    await user.click(screen.getByRole('link', { name: 'Início' }));
+    expect(screen.getByRole('heading', { name: 'Separando: Bateria' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'minha música.flac' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Escolher arquivo' })).toBeDisabled();
   });
 });

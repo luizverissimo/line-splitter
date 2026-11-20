@@ -756,3 +756,77 @@ details pre {
   font-weight: 600;
   color: var(--text);
 }
+
+.instrument-picker {
+  border: 0;
+  padding: 0;
+  margin: 1.5rem 0 1rem;
+  min-width: 0;
+}
+
+.instrument-picker legend {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 0.75rem;
+}
+
+.instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  max-width: 820px;
+}
+
+.separate-step,
+.separation-panel,
+.result-panel {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 820px;
+  margin-top: 1.25rem;
+  justify-items: start;
+}
+
+.separation-panel,
+.result-panel {
+  padding: 1rem 1.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  justify-items: stretch;
+}
+
+.separation-panel h2,
+.result-panel h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.elapsed {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.elapsed span {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-track {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.result-track-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.result-file {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  flex: 1;
+  word-break: break-word;
+}

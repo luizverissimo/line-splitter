@@ -7,3 +7,5 @@ export * from './engine';
 export * from './engine-install';
 export * from './model';
 export * from './audio';
+export * from './instruments';
+export * from './separation';

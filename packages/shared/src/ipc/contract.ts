@@ -4,6 +4,7 @@ import { settingsSchema, settingsUpdateSchema } from '../settings';
 import { engineStatusSchema } from '../engine';
 import { modelDownloadResultSchema, modelProgressSchema } from '../model';
 import { audioInfoSchema, audioInspectInputSchema } from '../audio';
+import { separationProgressSchema, separationResultSchema, separationStartInputSchema } from '../separation';
 import {
   installInputSchema,
   installLogSchema,
@@ -46,6 +47,16 @@ export const ipcChannels = {
   'engine:cancelInstall': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
   'engine:downloadModel': { input: z.undefined(), output: modelDownloadResultSchema },
   'audio:inspect': { input: audioInspectInputSchema, output: audioInfoSchema },
+  'separation:start': { input: separationStartInputSchema, output: separationResultSchema },
+  'separation:cancel': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
+  'shell:openFolder': {
+    input: z.object({ path: z.string().min(1) }),
+    output: z.object({ opened: z.literal(true) }),
+  },
+  'shell:showFile': {
+    input: z.object({ path: z.string().min(1) }),
+    output: z.object({ shown: z.literal(true) }),
+  },
   'engine:cancelDownload': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
 } satisfies ChannelMap;
 
@@ -54,6 +65,7 @@ export const ipcEvents = {
   'engine:installStep': installStepSchema,
   'engine:installLog': installLogSchema,
   'engine:modelProgress': modelProgressSchema,
+  'separation:progress': separationProgressSchema,
 } satisfies EventMap;
 
 export const ipc = createIpc(ipcChannels, ipcEvents);

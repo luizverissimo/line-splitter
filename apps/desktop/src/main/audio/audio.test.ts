@@ -165,4 +165,23 @@ describe('canal audio:inspect', () => {
       db.close();
     }
   });
+
+  it('trocar a entrada não revoga a URL de uma saída com o mesmo caminho', () => {
+    const media = new MediaRegistry();
+    const outputUrl = media.register(fixtures.mp3);
+    const input = new CurrentInput(media);
+    input.set(fixtures.mp3);
+    input.set(fixtures.wav);
+    expect(media.resolve(outputUrl)).toBe(fixtures.mp3);
+  });
+
+  it('reinspecionar o mesmo arquivo e depois trocar revoga a entrada antiga', () => {
+    const media = new MediaRegistry();
+    const input = new CurrentInput(media);
+    const first = input.set(fixtures.mp3);
+    expect(input.set(fixtures.mp3)).toBe(first);
+    input.set(fixtures.wav);
+    expect(media.resolve(first)).toBeNull();
+    expect(media.has(fixtures.wav)).toBe(true);
+  });
 });

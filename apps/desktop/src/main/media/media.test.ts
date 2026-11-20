@@ -24,6 +24,21 @@ describe('MediaRegistry', () => {
     expect(reg.resolve('lixo')).toBeNull();
   });
 
+  it('um arquivo liberado por dois usos continua servido até o último sair', () => {
+    const reg = new MediaRegistry();
+    const asInput = reg.register(fixtures.mp3);
+    const asOutput = reg.register(fixtures.mp3);
+    expect(asOutput).toBe(asInput);
+    reg.unregister(fixtures.mp3);
+    expect(reg.resolve(asInput)).toBe(fixtures.mp3);
+    reg.unregister(fixtures.mp3);
+    expect(reg.resolve(asInput)).toBeNull();
+    reg.register(fixtures.wav);
+    reg.register(fixtures.wav);
+    reg.revoke(fixtures.wav);
+    expect(reg.has(fixtures.wav)).toBe(false);
+  });
+
   it('revogar invalida a URL', () => {
     const reg = new MediaRegistry();
     const url = reg.register(fixtures.mp3);

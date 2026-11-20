@@ -11,6 +11,8 @@ export const MEDIA_HOST = 'audio';
 export class MediaRegistry {
   private readonly byToken = new Map<string, string>();
   private readonly byPath = new Map<string, string>();
+  /** Quantos usos liberaram cada arquivo (entrada atual, resultado, histórico…). */
+  private readonly refs = new Map<string, number>();
 
   /** Libera um arquivo (caminho absoluto) e devolve a URL para o renderer. Idempotente por caminho. */
   register(filePath: string): string {
@@ -22,13 +24,26 @@ export class MediaRegistry {
       this.byPath.set(normalized, token);
       this.byToken.set(token, normalized);
     }
+    this.refs.set(normalized, (this.refs.get(normalized) ?? 0) + 1);
     return `${MEDIA_SCHEME}://${MEDIA_HOST}/${token}`;
   }
 
-  /** Revoga a liberação de um arquivo. */
+  /** Desfaz um `register`; o arquivo só deixa de ser servido quando nenhum uso o mantém liberado. */
   unregister(filePath: string): void {
     const normalized = path.normalize(filePath);
+    const count = (this.refs.get(normalized) ?? 0) - 1;
+    if (count > 0) {
+      this.refs.set(normalized, count);
+      return;
+    }
+    this.revoke(normalized);
+  }
+
+  /** Revoga de vez, independentemente de quantos usos (ex.: arquivo apagado). */
+  revoke(filePath: string): void {
+    const normalized = path.normalize(filePath);
     const token = this.byPath.get(normalized);
+    this.refs.delete(normalized);
     if (!token) return;
     this.byPath.delete(normalized);
     this.byToken.delete(token);

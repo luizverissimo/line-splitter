@@ -7,12 +7,16 @@ import type { SettingsRepository } from '../settings/repository';
 /** Arquivo de entrada escolhido atualmente (o único que o renderer pode tocar além das saídas registradas). */
 export class CurrentInput {
   private current: string | null = null;
+  private url: string | null = null;
   constructor(private readonly media: MediaRegistry) {}
 
+  /** Troca a entrada atual; a mesma entrada de novo não conta um novo uso no registro de mídia. */
   set(filePath: string): string {
-    if (this.current && this.current !== filePath) this.media.unregister(this.current);
+    if (this.current === filePath && this.url) return this.url;
+    if (this.current) this.media.unregister(this.current);
     this.current = filePath;
-    return this.media.register(filePath);
+    this.url = this.media.register(filePath);
+    return this.url;
   }
 
   get path(): string | null {

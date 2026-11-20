@@ -77,3 +77,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: implementar, revisar e commitar T-300 e T-301 no mesmo commit ("T-300, T-301: …"), cada uma com seus critérios conferidos pelo revisor. A tela que mostra o progresso (T-303) e o resultado (T-304) são revisadas nas próprias tarefas.
 - Aprovado pelo usuário: não se aplica — não muda escopo nem ordem das fases; só o agrupamento do commit.
 - Impacto: T-300, T-301.
+
+### DEC-013 — Rótulo do instrumento nos nomes dos MP3 (2026-11-20)
+- Contexto: PRD §5.5/RF-15 pede `<nome> - <Instrumento>.mp3`, mas "Guitarra/Violão" e "Piano/Teclado" têm "/", proibido em nomes de arquivo (Linux e Windows).
+- Decisão: nos nomes de arquivo a barra vira hífen: "Guitarra-Violão" e "Piano-Teclado" (ex.: `Música - sem Guitarra-Violão.mp3`). Voz, Bateria e Baixo ficam iguais ao rótulo da tela.
+- Aprovado pelo usuário: não se aplica — adaptação técnica do mesmo nome, sem mudar escopo.
+- Impacto: T-300, T-301, T-304.

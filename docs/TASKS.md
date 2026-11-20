@@ -171,7 +171,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 4 — Separação
 
-- [ ] **T-300** Escolha do instrumento — req: RF-10, RN-04, RN-05 · dep: T-201
+- [x] **T-300** Escolha do instrumento — req: RF-10, RN-04, RN-05 · dep: T-201
   - Critérios:
     - Após carregar o arquivo, aparecem 5 cartões com ícone: Voz, Bateria, Baixo, Guitarra/Violão, Piano/Teclado; seleção única, operável por teclado
     - Mapeamento instrumento → stem definido em `packages/shared` e validado com Zod no main
@@ -179,7 +179,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste de unidade do mapeamento e de componente da seleção
   - Verificar: `pnpm verify`
 
-- [ ] **T-301** Serviço de separação real (Demucs → MP3 → pasta de saída → histórico) — req: RF-11, RF-15, RF-19, RN-06, RN-07, RN-09, RN-10, RN-11, RNF-10 · dep: T-300, T-103
+- [x] **T-301** Serviço de separação real (Demucs → MP3 → pasta de saída → histórico) — req: RF-11, RF-15, RF-19, RN-06, RN-07, RN-09, RN-10, RN-11, RNF-10 · dep: T-300, T-103
   - Critérios:
     - Executa `python -m demucs -n htdemucs_6s --two-stems=<stem> -d <cuda|cpu>` do venv numa pasta temporária, emitindo progresso (%) lido da saída por evento IPC
     - Converte as duas faixas com FFmpeg para MP3 no bitrate configurado, 44,1 kHz, estéreo

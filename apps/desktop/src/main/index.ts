@@ -8,6 +8,10 @@ import { dialogHandlers } from './handlers/dialog';
 import { settingsHandlers } from './handlers/settings';
 import { engineHandlers } from './handlers/engine';
 import { audioHandlers, CurrentInput } from './handlers/audio';
+import { separationHandlers } from './handlers/separation';
+import { shellHandlers } from './handlers/shell';
+import { HistoryRepository } from './history/repository';
+import { SeparationService } from './separation/service';
 import { enginePaths } from './engine/paths';
 import { EngineInstaller } from './engine/install';
 import { ModelDownloader } from './engine/model';
@@ -92,7 +96,18 @@ if (!app.requestSingleInstanceLock()) {
       log: (log) => broadcast('engine:installLog', log),
     });
     const downloader = new ModelDownloader(paths, (progress) => broadcast('engine:modelProgress', progress));
+    const currentInput = new CurrentInput(mediaRegistry);
+    const history = new HistoryRepository(db);
+    const separation = new SeparationService({
+      paths,
+      settings: () => settings.get(),
+      history,
+      media: mediaRegistry,
+      currentInput: () => currentInput.path,
+      onProgress: (progress) => broadcast('separation:progress', progress),
+    });
     app.on('before-quit', () => {
+      separation.cancel();
       installer.cancel();
       downloader.cancel();
     });
@@ -103,7 +118,9 @@ if (!app.requestSingleInstanceLock()) {
         ...settingsHandlers(settings),
         ...dialogHandlers(),
         ...engineHandlers(settings, paths, installer, downloader),
-        ...audioHandlers(settings, new CurrentInput(mediaRegistry)),
+        ...audioHandlers(settings, currentInput),
+        ...separationHandlers(separation),
+        ...shellHandlers(history),
       },
       (url) => isAllowedNavigation(url, origin),
     );
