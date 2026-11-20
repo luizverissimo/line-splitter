@@ -117,7 +117,7 @@ const torchInfoSchema = z.object({
 type TorchInfo = z.infer<typeof torchInfoSchema>;
 
 const PROBE_SCRIPT = [
-  'import json, demucs, torch',
+  'import json, demucs, numpy, torch',
   'cuda = torch.cuda.is_available()',
   "print(json.dumps({'demucs': demucs.__version__, 'torch': torch.__version__, 'cuda': cuda,",
   "  'gpu': torch.cuda.get_device_name(0) if cuda else None}))",

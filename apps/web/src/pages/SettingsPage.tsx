@@ -12,7 +12,9 @@ import { call } from '../api/client';
 import { errorDetails, errorMessage } from '../api/errors';
 import { useSettings, useUpdateSettings } from '../api/queries';
 import { QueryError } from '../components/QueryError';
-import { Button, ErrorAlert, LoadingState } from '../components/ui';
+import { Button, ConfirmDialog, ErrorAlert, LoadingState } from '../components/ui';
+import { useEngineInstall } from '../state/EngineInstallContext';
+import { useNavigate } from 'react-router';
 
 type FieldErrors = Partial<Record<keyof Settings, string>>;
 
@@ -207,6 +209,40 @@ function SettingsForm({ initial }: { initial: Settings }) {
   );
 }
 
+function ReinstallEngine() {
+  const install = useEngineInstall();
+  const navigate = useNavigate();
+  const [confirming, setConfirming] = useState(false);
+  return (
+    <div className="field reinstall">
+      <h2>Motor de separação</h2>
+      <p className="field-hint">
+        Apaga o ambiente Python do Line Splitter e instala o PyTorch e o Demucs de novo. Os pesos do modelo
+        são mantidos.
+      </p>
+      <div>
+        <Button variant="danger" onClick={() => setConfirming(true)} disabled={install.running}>
+          {install.running ? 'Instalação em andamento…' : 'Reinstalar motor…'}
+        </Button>
+      </div>
+      <ConfirmDialog
+        open={confirming}
+        title="Reinstalar o motor?"
+        confirmLabel="Reinstalar"
+        danger
+        onCancel={() => setConfirming(false)}
+        onConfirm={() => {
+          setConfirming(false);
+          install.start(true);
+          void navigate('/motor');
+        }}
+      >
+        <p>O ambiente atual será apagado e baixado de novo (alguns GB). Isso pode levar vários minutos.</p>
+      </ConfirmDialog>
+    </div>
+  );
+}
+
 export function SettingsPage() {
   const settings = useSettings();
   return (
@@ -222,6 +258,7 @@ export function SettingsPage() {
         />
       )}
       {settings.isSuccess && <SettingsForm initial={settings.data} />}
+      <ReinstallEngine />
     </section>
   );
 }

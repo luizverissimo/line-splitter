@@ -634,3 +634,47 @@ details pre {
 .engine-actions {
   margin-top: 1.25rem;
 }
+
+.install-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.install-panel h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.install-panel .page-intro {
+  margin: 0;
+}
+
+.install-log {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.reinstall {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  max-width: 760px;
+}
+
+.reinstall h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}

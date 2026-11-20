@@ -8,6 +8,8 @@ import { dialogHandlers } from './handlers/dialog';
 import { settingsHandlers } from './handlers/settings';
 import { engineHandlers } from './handlers/engine';
 import { enginePaths } from './engine/paths';
+import { EngineInstaller } from './engine/install';
+import { broadcast } from './events';
 import { SettingsRepository } from './settings/repository';
 import { defaultSettings } from './settings/defaults';
 import { openDatabase, type Db } from './db/database';
@@ -82,13 +84,19 @@ if (!app.requestSingleInstanceLock()) {
     serveMediaProtocol(mediaRegistry);
 
     const settings = new SettingsRepository(db, defaultSettings());
+    const paths = enginePaths(app.getPath('userData'));
+    const installer = new EngineInstaller(paths, {
+      step: (step) => broadcast('engine:installStep', step),
+      log: (log) => broadcast('engine:installLog', log),
+    });
+    app.on('before-quit', () => installer.cancel());
 
     registerIpcHandlers(
       {
         'app:info': appInfoHandler,
         ...settingsHandlers(settings),
         ...dialogHandlers(),
-        ...engineHandlers(settings, enginePaths(app.getPath('userData'))),
+        ...engineHandlers(settings, paths, installer),
       },
       (url) => isAllowedNavigation(url, origin),
     );

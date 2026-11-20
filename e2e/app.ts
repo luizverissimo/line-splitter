@@ -23,11 +23,11 @@ export function makeUserData(): string {
 }
 
 /** Abre o app empacotado (out/ + web/dist) com uma pasta de dados própria. */
-export async function launchApp(userData: string): Promise<LaunchedApp> {
+export async function launchApp(userData: string, extraEnv: NodeJS.ProcessEnv = {}): Promise<LaunchedApp> {
   const app = await _electron.launch({
     executablePath: electronBinary,
     args: [...devElectronArgs(electronBinary), desktopDir],
-    env: { ...process.env, LINE_SPLITTER_USER_DATA: userData, LINE_SPLITTER_DEV_URL: '' },
+    env: { ...process.env, LINE_SPLITTER_USER_DATA: userData, LINE_SPLITTER_DEV_URL: '', ...extraEnv },
   });
   const page = await app.firstWindow();
   await page.waitForLoadState('domcontentloaded');

@@ -38,3 +38,21 @@ export function bridgeWith(handlers: Record<string, (payload: unknown) => unknow
     on: () => () => undefined,
   };
 }
+
+/** Ponte de teste que também emite eventos main → renderer, como o webContents.send faria. */
+export function eventBridge(handlers: Record<string, (payload: unknown) => unknown>) {
+  const listeners = new Map<string, Set<(payload: unknown) => void>>();
+  const bridge: DesktopBridge = {
+    ...bridgeWith(handlers),
+    on: (event, listener) => {
+      const set = listeners.get(event) ?? new Set();
+      set.add(listener);
+      listeners.set(event, set);
+      return () => set.delete(listener);
+    },
+  };
+  const emit = (event: string, payload: unknown) => {
+    for (const listener of listeners.get(event) ?? []) listener(payload);
+  };
+  return { bridge, emit };
+}

@@ -2,6 +2,12 @@ import { z } from 'zod';
 import { createIpc, type ChannelMap, type EventMap } from './ipc';
 import { settingsSchema, settingsUpdateSchema } from '../settings';
 import { engineStatusSchema } from '../engine';
+import {
+  installInputSchema,
+  installLogSchema,
+  installResultSchema,
+  installStepSchema,
+} from '../engine-install';
 
 export const appInfoSchema = z.object({
   name: z.string().min(1),
@@ -34,10 +40,15 @@ export const ipcChannels = {
   'dialog:chooseDirectory': { input: chooseDirectoryInputSchema, output: chosenPathSchema },
   'dialog:chooseFile': { input: chooseFileInputSchema, output: chosenPathSchema },
   'engine:status': { input: z.undefined(), output: engineStatusSchema },
+  'engine:install': { input: installInputSchema, output: installResultSchema },
+  'engine:cancelInstall': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
 } satisfies ChannelMap;
 
 /** Eventos main → renderer. */
-export const ipcEvents = {} satisfies EventMap;
+export const ipcEvents = {
+  'engine:installStep': installStepSchema,
+  'engine:installLog': installLogSchema,
+} satisfies EventMap;
 
 export const ipc = createIpc(ipcChannels, ipcEvents);
 export type IpcChannel = keyof typeof ipcChannels;

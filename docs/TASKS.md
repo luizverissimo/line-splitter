@@ -132,14 +132,14 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - E2E: caminho de Python inválido nas Configurações leva à tela Motor com Python ✖
   - Verificar: `pnpm verify && pnpm test:e2e motor`
 
-- [ ] **T-102** Instalar/reinstalar motor (venv + torch + demucs com log ao vivo) — req: RF-03, RF-24, RN-12 · dep: T-101
+- [x] **T-102** Instalar/reinstalar motor (venv + torch + demucs com log ao vivo) — req: RF-03, RF-24, RN-12 · dep: T-101
   - Critérios:
     - "Instalar motor" cria venv em `userData/engine` e instala torch (build CUDA se `nvidia-smi` detectar GPU, CPU caso contrário) e `demucs`, com versões fixadas registradas em DECISOES (DEC-011: torch 2.6.0 + demucs 4.1.0, sem torchaudio)
     - Saída do pip transmitida ao vivo para a tela por evento IPC; botão de cancelar instalação que encerra o processo e deixa o venv removido
     - Falha (sem internet, pip com erro) mostra mensagem legível e o log completo
     - "Reinstalar motor" nas Configurações apaga e recria o venv, com confirmação
     - Teste de integração real cria o venv numa pasta temporária e importa `demucs` (marcado como lento, executado no `pnpm verify`)
-  - Verificar: `pnpm --filter desktop test engine-install && pnpm verify`
+  - Verificar: `pnpm --filter @line-splitter/desktop test engine-install && pnpm verify`
 
 - [ ] **T-103** Download dos pesos do `htdemucs_6s` com progresso — req: RF-04, RN-12, RNF-11 · dep: T-102
   - Critérios:

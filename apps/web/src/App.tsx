@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { useRoutes } from 'react-router';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { routes } from './routes';
+import { EngineInstallProvider } from './state/EngineInstallContext';
 
 /** Árvore de rotas; o roteador (hash no app, memória nos testes) é fornecido por quem renderiza. */
 export function AppRoutes() {
@@ -17,7 +18,9 @@ interface Props {
 export function App({ queryClient, children }: Props) {
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <EngineInstallProvider>{children}</EngineInstallProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

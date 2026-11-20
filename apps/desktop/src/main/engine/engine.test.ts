@@ -18,6 +18,7 @@ import {
 } from './detect';
 import { findInPath } from './exec';
 import { HTDEMUCS_6S, enginePaths } from './paths';
+import { EngineInstaller } from './install';
 
 // Requisitos do ambiente de desenvolvimento (README): Python ≥ 3.9 e FFmpeg no PATH.
 let tmp: string;
@@ -235,7 +236,11 @@ describe('detectEngine e canal engine:status', () => {
     try {
       const repo = new SettingsRepository(db, settings());
       repo.update({ pythonPath: path.join(tmp, 'nao-tem-python') });
-      const h = engineHandlers(repo, enginePaths(userData));
+      const h = engineHandlers(
+        repo,
+        enginePaths(userData),
+        new EngineInstaller(enginePaths(userData), { step: () => undefined, log: () => undefined }),
+      );
       const res = await h['engine:status'](undefined);
       expect(res).toMatchObject({
         ok: true,
