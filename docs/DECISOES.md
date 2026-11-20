@@ -53,3 +53,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão proposta: `apps/desktop/scripts/sandbox.mjs` detecta a situação e, por padrão, falha mostrando o comando de correção (`sudo chown root:root …/chrome-sandbox && sudo chmod 4755 …`). Só com `LINE_SPLITTER_DEV_NO_SANDBOX=1` os scripts de dev/teste lançam com `--no-sandbox`. As `webPreferences` continuam com `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`. O app empacotado não usa essa opção.
 - Aprovado pelo usuário: NÃO — pendente. Enquanto o usuário não decidir (rodar o comando de correção ou aprovar o uso de `LINE_SPLITTER_DEV_NO_SANDBOX=1`), as verificações locais da IA usam `--no-sandbox` apenas para executar testes, e isso será informado no relatório.
 - Impacto: T-004, T-006 e os E2E; T-900.
+
+### DEC-009 — `better-sqlite3@13` com prebuild N-API nos dois runtimes (2026-11-20)
+- Contexto: `better-sqlite3` 12.x é addon V8 compilado e não compila contra o V8 do Electron 45. A 13.x traz prebuilds N-API (`prebuilds/<plataforma>.node`, sem compilação) que carregam tanto no Node do sistema quanto no Electron 45 — conferido em execução nos dois.
+- Decisão: usar `better-sqlite3@^13.2`, sem `electron-rebuild`. Os testes do desktop rodam no Node do sistema, junto com os demais. No empacotamento (T-900) o pacote precisa ir junto e `prebuilds/*.node` fora do asar.
+- Aprovado pelo usuário: não se aplica — decisão técnica, não muda escopo nem a stack do PRD.
+- Impacto: T-005, T-900.

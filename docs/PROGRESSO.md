@@ -39,3 +39,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: APROVADO. `openExternalSafe` não usado foi removido; critérios de teste de origem do IPC (T-602) e `extraResources` (T-900) acrescentados.
 - Observações: Electron rodado com `--no-sandbox` nesta máquina (AppArmor; sem sudo) — DEC-008 pendente de aprovação do usuário.
 - Commit: ver `git log` (T-004)
+
+### T-005 — Banco SQLite local (`better-sqlite3`) com migrações (2026-11-20)
+- Feito: `apps/desktop/src/main/db/` — `migrations.ts` (v1: `settings`, `separations` com CHECKs de instrumento/dispositivo/bitrate, STRICT) e `database.ts` (`migrate` com `PRAGMA user_version`, uma transação por migração, recusa banco mais novo; `openDatabase` com WAL). Banco aberto no `app.whenReady` em `userData/line-splitter.db`, fechado no `will-quit`, erro fatal claro se falhar.
+- Verificado: `pnpm verify` OK (53 testes); `pnpm --filter @line-splitter/desktop test db` (6 testes: do zero, idempotente com dados preservados, leitura/escrita, CHECKs, versão mais nova, rollback). App em execução com `LINE_SPLITTER_USER_DATA` temporário criou o banco com `user_version=1`.
+- Revisor: REPROVADO (Prettier; premissa errada da DEC-009 — o prebuild N-API do better-sqlite3 13 roda nos dois runtimes) → testes voltaram ao Node do sistema, `electron-rebuild` removido, DEC-009 e critério corrigidos → APROVADO.
+- Observações: T-006 dividida em T-006a (infra E2E) e T-006b (preferência pela UI, depende da T-010).
+- Commit: ver `git log` (T-005)

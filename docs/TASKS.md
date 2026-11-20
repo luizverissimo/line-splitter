@@ -55,20 +55,35 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Canal IPC `app:info` (versão, plataforma) exibido no rodapé, provando o caminho renderer → preload → main
   - Verificar: `pnpm --filter desktop build && pnpm verify` e abrir o app com `pnpm dev`
 
-- [ ] **T-005** Banco SQLite local (`better-sqlite3`) com migrações — req: RF-25 · dep: T-004
+- [x] **T-005** Banco SQLite local (`better-sqlite3`) com migrações — req: RF-25 · dep: T-004
   - Critérios:
     - Banco em `userData/line-splitter.db` (ou `LINE_SPLITTER_USER_DATA`), aberto só no processo principal
     - Migrações versionadas criam as tabelas `settings` e `separations`; rodam automaticamente ao abrir
-    - Módulo nativo recompilado para o Electron (`electron-rebuild`/`electron-builder install-app-deps`) e também funcional no Node dos testes
+    - Módulo nativo carrega no Electron e no Node dos testes (prebuild N-API do `better-sqlite3@13`, sem recompilação — DEC-009)
     - Testes de integração contra arquivo SQLite real temporário (migração do zero, migração idempotente, leitura/escrita)
-  - Verificar: `pnpm --filter desktop test -- db && pnpm verify`
+  - Verificar: `pnpm --filter desktop test db && pnpm verify`
 
-- [ ] **T-006** Playwright para Electron com um E2E real — req: RNF-13 · dep: T-005
+- [ ] **T-006** Playwright para Electron com um E2E real — req: RNF-13 · dep: T-006a, T-006b
   - Critérios:
     - Playwright `_electron` abre o app empacotado em modo teste com `LINE_SPLITTER_USER_DATA` temporário
     - E2E grava uma preferência pela UI, reinicia o app e confirma que ela veio do SQLite real
     - Script `pnpm test:e2e` na raiz; screenshots/trace salvos em falha
+    - Concluída quando T-006a e T-006b estiverem `[x]` (a tela de preferências só existe a partir da T-010)
   - Verificar: `pnpm test:e2e`
+
+- [ ] **T-006a** Infraestrutura Playwright `_electron` + E2E UI → IPC → main → SQLite — req: RNF-13 · dep: T-005
+  - Critérios:
+    - `playwright.config.ts` e helper que abre o app empacotado com `LINE_SPLITTER_USER_DATA` temporário e isolado por teste
+    - E2E: rodapé mostra nome/versão/plataforma vindos do IPC real; banco `line-splitter.db` criado e migrado na pasta do teste
+    - E2E: reiniciar o app reabre o mesmo banco sem reaplicar migrações e com os dados preservados
+    - `pnpm test:e2e` na raiz builda e roda; `forbidOnly`; screenshots/trace em falha
+  - Verificar: `pnpm test:e2e`
+
+- [ ] **T-006b** E2E de preferência gravada pela UI sobrevivendo ao reinício — req: RNF-13 · dep: T-006a, T-010
+  - Critérios:
+    - E2E altera uma preferência na tela Configurações, fecha o app, reabre e vê o valor salvo
+    - O valor é conferido também lendo o `line-splitter.db` real da pasta do teste
+  - Verificar: `pnpm test:e2e -- preferencias`
 
 - [ ] **T-007** Fixtures de áudio gerados com FFmpeg real e helpers de teste — req: RNF-10 · dep: T-001
   - Critérios:
@@ -80,7 +95,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 1 — Núcleo
 
-- [ ] **T-010** Configurações persistidas (IPC + tela) — req: RF-24, RF-25, RN-07, RN-08 · dep: T-005, T-011
+- [ ] **T-010** Configurações persistidas (IPC + tela) — req: RF-24, RF-25, RN-07, RN-08 · dep: T-005, T-006a, T-011
   - Critérios:
     - IPC `settings:get` e `settings:update` validados com Zod no main; valores salvos no SQLite
     - Padrões: pasta de saída `app.getPath('music')/Line Splitter`, bitrate 320, dispositivo Auto, caminhos de Python e FFmpeg vazios (= detectar no PATH)
@@ -106,7 +121,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Detecta CUDA via `torch.cuda.is_available()` no venv e resolve o dispositivo efetivo a partir da configuração (Auto/GPU/CPU)
     - IPC `engine:status` retorna um objeto por item `{ ok, detalhe }`; validado com Zod
     - Testes de integração reais nesta máquina (Python/FFmpeg presentes, caminho configurado inválido → item ✖)
-  - Verificar: `pnpm --filter desktop test -- engine && pnpm verify`
+  - Verificar: `pnpm --filter desktop test engine && pnpm verify`
 
 - [ ] **T-101** Tela de configuração do motor — req: RF-02, RF-05, RF-06 · dep: T-100
   - Critérios:
@@ -124,7 +139,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Falha (sem internet, pip com erro) mostra mensagem legível e o log completo
     - "Reinstalar motor" nas Configurações apaga e recria o venv, com confirmação
     - Teste de integração real cria o venv numa pasta temporária e importa `demucs` (marcado como lento, executado no `pnpm verify`)
-  - Verificar: `pnpm --filter desktop test -- engine-install && pnpm verify`
+  - Verificar: `pnpm --filter desktop test engine-install && pnpm verify`
 
 - [ ] **T-103** Download dos pesos do `htdemucs_6s` com progresso — req: RF-04, RN-12, RNF-11 · dep: T-102
   - Critérios:
@@ -132,7 +147,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Confere o checksum esperado pelo Demucs; arquivo incompleto/corrompido é apagado e o erro aparece com "Tentar de novo"
     - Com os pesos presentes, `engine:status` fica todo ✔ e o app segue para Início sem precisar de rede
     - Teste de integração real do download e da verificação de integridade
-  - Verificar: `pnpm --filter desktop test -- model && pnpm verify`
+  - Verificar: `pnpm --filter desktop test model && pnpm verify`
 
 ## Fase 3 — Envio de áudio
 
@@ -142,7 +157,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Retorna nome, duração, formato/codec, sample rate e canais; erros com códigos e mensagens em português (ex.: "Arquivo corrompido ou formato não suportado")
     - Arquivo de entrada só é lido; nada é escrito ao lado dele
     - Testes de integração com os fixtures reais: cada formato válido, corrompido, extensão errada, 31 min
-  - Verificar: `pnpm --filter desktop test -- audio && pnpm verify`
+  - Verificar: `pnpm --filter desktop test audio && pnpm verify`
 
 - [ ] **T-201** Tela Início: arrastar e soltar, escolher arquivo, metadados e player do original — req: RF-07, RF-08, RF-09, RN-01, RN-03, RN-11 · dep: T-200, T-011
   - Critérios:
@@ -173,7 +188,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Segunda chamada enquanto uma roda é recusada com erro "Já existe uma separação em andamento"
     - Ao concluir grava em `separations` (data, original, instrumento, duração do processamento, caminhos)
     - Teste de integração real com fixture de 8 s: 2 MP3 conferidos por `ffprobe` (codec mp3, bitrate, 44100 Hz, 2 canais), nomes, sufixo de conflito e registro no SQLite
-  - Verificar: `pnpm --filter desktop test -- separation && pnpm verify`
+  - Verificar: `pnpm --filter desktop test separation && pnpm verify`
 
 - [ ] **T-302** Cancelamento e tratamento de erros do motor — req: RF-13, RF-14, RN-13 · dep: T-301
   - Critérios:
@@ -182,7 +197,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Erros traduzidos para mensagens legíveis: falta de memória (RAM/VRAM), arquivo inválido, processo encerrado inesperadamente, motor ausente
     - Log técnico completo (stderr) retornado junto ao erro
     - Testes de integração reais: cancelar no meio, processo morto externamente, entrada que o Demucs rejeita
-  - Verificar: `pnpm --filter desktop test -- separation && pnpm verify`
+  - Verificar: `pnpm --filter desktop test separation && pnpm verify`
 
 - [ ] **T-303** Tela de processamento — req: RF-12, RF-13, RF-14, RNF-05 · dep: T-302
   - Critérios:
@@ -235,7 +250,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Renderer bloqueia qualquer requisição de rede (`session.webRequest`), exceto `media://` e os arquivos do app
     - Separação executada com variáveis que impedem download (`TORCH_HOME` do motor, sem pip) e falha com mensagem clara se o modelo faltar, em vez de baixar
     - Teste de integração: separação completa com a rede do processo filho bloqueada funciona com o modelo presente
-  - Verificar: `pnpm --filter desktop test -- offline && pnpm verify`
+  - Verificar: `pnpm --filter desktop test offline && pnpm verify`
 
 ## Fase 7 — Qualidade
 
@@ -264,7 +279,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Navegação, `window.open`, `webview` e permissões (câmera, microfone etc.) negados por padrão
     - `media://`, `shell.openPath`, `showItemInFolder` e exclusão de arquivos só aceitam caminhos registrados (teste com path traversal)
     - Processos filhos chamados com `spawn` e lista de argumentos (sem shell); `pnpm audit` sem vulnerabilidades altas
-  - Verificar: `pnpm --filter desktop test -- security && pnpm verify`
+  - Verificar: `pnpm --filter desktop test security && pnpm verify`
 
 - [ ] **T-603** Desempenho — req: RNF-05, RNF-06 · dep: T-600
   - Critérios:
@@ -287,7 +302,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 - [ ] **T-900** Instaladores Linux (AppImage e .deb) — req: RNF-01 · dep: T-602, T-603, T-604
   - Critérios:
     - `pnpm dist:linux` (electron-builder) gera AppImage e .deb em `release/`
-    - Módulo nativo `better-sqlite3` funciona no app empacotado
+    - Módulo nativo `better-sqlite3` funciona no app empacotado (pacote incluído e `prebuilds/*.node` desempacotado do asar, DEC-009)
     - Build do web copiado para `resources/renderer` (`extraResources`), que é onde o main o procura quando empacotado
     - AppImage executado nesta máquina: abre, detecta o motor e completa uma separação real
   - Verificar: `pnpm dist:linux` e executar o AppImage gerado

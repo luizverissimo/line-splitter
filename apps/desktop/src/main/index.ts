@@ -4,6 +4,7 @@ import { resolveDevUrl, resolveUserDataOverride } from './env';
 import { hardenApp } from './hardening';
 import { registerIpcHandlers } from './ipc';
 import { appInfoHandler } from './handlers/app';
+import { openDatabase, type Db } from './db/database';
 import { registerAppSchemes, serveRenderer } from './renderer-protocol';
 import { APP_ORIGIN, isAllowedNavigation } from './security';
 import { createMainWindow } from './window';
@@ -55,6 +56,18 @@ if (!app.requestSingleInstanceLock()) {
         fatal(err instanceof Error ? err.message : String(err));
       }
     }
+
+    let db: Db;
+    try {
+      db = openDatabase(app.getPath('userData'));
+    } catch (err) {
+      fatal(
+        `Não foi possível abrir o banco de dados local: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+    app.on('will-quit', () => {
+      if (db.open) db.close();
+    });
 
     registerIpcHandlers({ 'app:info': appInfoHandler }, (url) => isAllowedNavigation(url, origin));
 

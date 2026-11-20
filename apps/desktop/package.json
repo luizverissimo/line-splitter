@@ -2,7 +2,7 @@
   "name": "@line-splitter/desktop",
   "productName": "Line Splitter",
   "version": "0.1.0",
-  "description": "Separa um instrumento de uma m\u00fasica, localmente.",
+  "description": "Separa um instrumento de uma música, localmente.",
   "private": true,
   "type": "module",
   "main": "out/main.cjs",
@@ -10,12 +10,14 @@
     "build": "pnpm --filter @line-splitter/web build && node scripts/build.mjs",
     "start": "node scripts/start.mjs",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run --allowOnly=false"
   },
   "dependencies": {
-    "@line-splitter/shared": "workspace:*"
+    "@line-splitter/shared": "workspace:*",
+    "better-sqlite3": "^13.2.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "electron": "^45.4.1",
     "esbuild": "^0.28.2"
   }
