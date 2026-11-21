@@ -49,7 +49,7 @@ export default tseslint.config(
   },
   {
     // Fixtures do Playwright exigem o primeiro parâmetro desestruturado, mesmo sem usar outras fixtures.
-    files: ['e2e/**/*.ts'],
+    files: ['e2e/**/*.ts', 'e2e-pacote/**/*.ts'],
     rules: { 'no-empty-pattern': 'off' },
   },
 );

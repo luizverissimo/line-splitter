@@ -17,7 +17,10 @@
     "dev": "node scripts/dev.mjs",
     "test:e2e": "pnpm --filter @line-splitter/desktop build && playwright test",
     "fixtures": "node scripts/fixtures.mjs --long",
-    "bench": "pnpm --filter @line-splitter/desktop bench"
+    "bench": "pnpm --filter @line-splitter/desktop bench",
+    "dist:linux": "pnpm --filter @line-splitter/desktop dist:linux",
+    "dist:win": "pnpm --filter @line-splitter/desktop dist:win",
+    "smoke:linux": "playwright test --config playwright.pacote.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

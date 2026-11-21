@@ -89,3 +89,10 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: implementar, revisar (veredito separado por tarefa) e commitar as duas juntas ("T-400, T-401: …").
 - Aprovado pelo usuário: não se aplica — só o agrupamento do commit, sem mudar escopo nem ordem das fases.
 - Impacto: T-400, T-401.
+
+### DEC-015 — Empacotamento Linux: AppImage, .deb e sandbox (2026-11-20)
+- Contexto: `electron-builder` 26 gera AppImage e .deb em `release/`. No Ubuntu 24.04+ (AppArmor restringindo user namespaces) o Chromium precisa de `chrome-sandbox` SUID root ou de um perfil do AppArmor com `userns`. O `postinst` do .deb instala um perfil do AppArmor com `userns` (`/etc/apparmor.d/line-splitter`) e só torna `chrome-sandbox` SUID (4755) quando o kernel não oferece user namespaces. O AppImage não consegue: roda de uma montagem FUSE/extração em `/tmp`, onde nada é SUID. Além disso, o Ubuntu 24.04 não traz `libfuse2`, que o AppImage usa para se montar.
+- Decisão: o app empacotado **não** liga `--no-sandbox` sozinho. O instalador recomendado no Ubuntu 24.04+ é o .deb. Para o AppImage nesses sistemas, o README (T-902) vai documentar as opções do usuário (instalar `libfuse2t64` ou usar `APPIMAGE_EXTRACT_AND_RUN=1`; e criar um perfil do AppArmor com `userns` para o caminho do AppImage, com sudo). O teste de fumaça do pacote (`pnpm smoke:linux`) roda o AppImage gerado com `APPIMAGE_EXTRACT_AND_RUN=1` e, nesta máquina, com `--no-sandbox` só se `LINE_SPLITTER_DEV_NO_SANDBOX=1` (mesma regra do DEC-008, ainda pendente).
+- `@line-splitter/shared` e `zod` passaram a `devDependencies` do desktop: o esbuild já os embute em `out/main.cjs`, então não precisam ir para o pacote. Só `better-sqlite3` vai, com `prebuilds/` fora do asar (DEC-009); `deps/`, `src/` e `build/` do módulo ficam de fora.
+- Aprovado pelo usuário: não se aplica — decisão técnica de empacotamento, sem mudança de escopo. A parte de rodar com `--no-sandbox` depende do DEC-008, pendente.
+- Impacto: T-900, T-902.

@@ -11,17 +11,20 @@
     "start": "node scripts/start.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run --allowOnly=false",
-    "bench": "vitest run --config vitest.bench.config.ts && node -e \"process.stdout.write(require('node:fs').readFileSync('../../fixtures/benchmark.md','utf8'))\""
+    "bench": "vitest run --config vitest.bench.config.ts && node -e \"process.stdout.write(require('node:fs').readFileSync('../../fixtures/benchmark.md','utf8'))\"",
+    "dist:linux": "pnpm build && electron-builder --linux AppImage deb --publish never",
+    "dist:win": "pnpm build && electron-builder --win nsis --publish never"
   },
   "dependencies": {
-    "@line-splitter/shared": "workspace:*",
-    "better-sqlite3": "^13.2.0",
-    "zod": "^4.6.7"
+    "better-sqlite3": "^13.2.0"
   },
   "devDependencies": {
+    "@line-splitter/shared": "workspace:*",
     "@types/better-sqlite3": "^9.6.0",
     "electron": "^45.4.1",
-    "esbuild": "^0.28.2"
+    "electron-builder": "26.0.12",
+    "esbuild": "^0.28.2",
+    "zod": "^4.6.7"
   },
   "build": {
     "appId": "br.local.linesplitter",
@@ -29,11 +32,16 @@
     "executableName": "line-splitter",
     "directories": {
       "buildResources": "build",
-      "output": "release"
+      "output": "../../release"
     },
     "files": [
       "out/**",
-      "package.json"
+      "!out/**/*.map",
+      "package.json",
+      "!node_modules/better-sqlite3/binding.gyp",
+      "!node_modules/better-sqlite3/deps/**",
+      "!node_modules/better-sqlite3/src/**",
+      "!node_modules/better-sqlite3/build/**"
     ],
     "extraResources": [
       {
@@ -46,7 +54,7 @@
       }
     ],
     "asarUnpack": [
-      "**/node_modules/better-sqlite3/**"
+      "**/node_modules/better-sqlite3/prebuilds/**"
     ],
     "linux": {
       "target": [
@@ -62,7 +70,9 @@
           "Comment": "Separa um instrumento de uma música em dois MP3",
           "StartupWMClass": "Line Splitter"
         }
-      }
+      },
+      "maintainer": "Luiz Verissimo",
+      "vendor": "Luiz Verissimo"
     },
     "win": {
       "target": [
@@ -73,7 +83,24 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "shortcutName": "Line Splitter"
+      "shortcutName": "Line Splitter",
+      "artifactName": "Line-Splitter-Setup-${version}.${ext}"
+    },
+    "npmRebuild": false,
+    "deb": {
+      "depends": [
+        "ffmpeg",
+        "python3",
+        "python3-venv"
+      ],
+      "artifactName": "line-splitter_${version}_${arch}.${ext}"
+    },
+    "appImage": {
+      "artifactName": "Line-Splitter-${version}-${arch}.${ext}"
     }
+  },
+  "homepage": "https://github.com/luizverissimo/line-splitter",
+  "author": {
+    "name": "Luiz Verissimo"
   }
 }

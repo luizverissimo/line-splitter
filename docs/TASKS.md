@@ -301,7 +301,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 8 — Entrega
 
-- [ ] **T-900** Instaladores Linux (AppImage e .deb) — req: RNF-01 · dep: T-602, T-603, T-604
+- [x] **T-900** Instaladores Linux (AppImage e .deb) — req: RNF-01 · dep: T-602, T-603, T-604
   - Critérios:
     - `pnpm dist:linux` (electron-builder) gera AppImage e .deb em `release/`
     - Módulo nativo `better-sqlite3` funciona no app empacotado (pacote incluído e `prebuilds/*.node` desempacotado do asar, DEC-009)
@@ -321,6 +321,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Critérios:
     - Pré-requisitos (Node, pnpm, Python, FFmpeg, GPU opcional) para Linux e Windows
     - Comandos: dev, verify, e2e, fixtures, bench, dist:linux, dist:win
+    - Instalação no Linux: .deb recomendado no Ubuntu 24.04+; AppImage com `libfuse2t64` ou `APPIMAGE_EXTRACT_AND_RUN=1` e perfil do AppArmor (DEC-015)
     - Guia de uso: primeiro uso (instalar motor), separar, histórico, configurações; nota de que é local, sem conta
     - Cada comando do README executado e conferido
   - Verificar: seguir o README do zero num clone limpo

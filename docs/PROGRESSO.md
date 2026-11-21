@@ -206,3 +206,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (cobertura parcial) → REPROVADO (instabilidade) → APROVADO.
 - Observações: dois E2E de acessibilidade gravaram arquivos de teste na pasta Música real do usuário (`~/Music/Line Splitter`) antes do isolamento; os arquivos foram apagados. O isolamento da pasta de Música vale no Linux; o equivalente no Windows ficou como critério da T-901. E2E com `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
 - Commit: ver `git log` (T-604)
+
+### T-900 — Instaladores Linux (AppImage e .deb) (2026-11-20)
+- Feito: electron-builder 26 configurado em `apps/desktop/package.json`; `pnpm dist:linux` gera `release/Line-Splitter-0.1.0-x86_64.AppImage` e `release/line-splitter_0.1.0_amd64.deb` (depends ffmpeg, python3, python3-venv; perfil AppArmor no postinst). `better-sqlite3` vai com `prebuilds/` fora do asar; `shared`/`zod` embutidos pelo esbuild. Interface em `resources/renderer`. Teste de fumaça do pacote: `pnpm smoke:linux` (`e2e-pacote/appimage.spec.ts`). DEC-015.
+- Verificado: `pnpm dist:linux` (2 pacotes); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm smoke:linux` → AppImage abre empacotado, detecta o motor, grava no SQLite e completa uma separação real (2 MP3 + histórico); `dpkg-deb -c/-I` no .deb; `pnpm verify` OK.
+- Revisor: APROVADO (texto da DEC-015 corrigido conforme apontado).
+- Observações: nesta máquina (Ubuntu 24.04) o AppImage só abre com `--no-sandbox` (AppArmor + chrome-sandbox sem SUID) e sem libfuse2 precisa de `APPIMAGE_EXTRACT_AND_RUN=1`; DEC-008 segue pendente. O .deb não foi instalado (exige sudo).
+- Commit: ver `git log` (T-900)

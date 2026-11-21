@@ -12,6 +12,8 @@
     "packages/*/vitest.config.ts",
     "apps/*/vitest.config.ts",
     "e2e",
-    "playwright.config.ts"
+    "e2e-pacote",
+    "playwright.config.ts",
+    "playwright.pacote.config.ts"
   ]
 }

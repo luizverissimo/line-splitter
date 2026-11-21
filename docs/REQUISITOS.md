@@ -42,7 +42,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RN-11 | O arquivo original nunca é modificado nem movido | §6 | T-201, T-301 | feito |
 | RN-12 | Nenhum áudio sai do computador; rede só para instalar motor/modelo | §6 | T-102, T-103, T-501 | feito |
 | RN-13 | Separação cancelada/com erro não deixa parciais na saída nem entra como concluída no histórico | §6 | T-302, T-601 | feito |
-| RNF-01 | Linux como plataforma principal, instaladores AppImage e .deb | §3, §7 | T-500, T-900 | pendente |
+| RNF-01 | Linux como plataforma principal, instaladores AppImage e .deb | §3, §7 | T-500, T-900 | feito |
 | RNF-02 | Windows com instalador NSIS | §3, §7 | T-901 | pendente |
 | RNF-03 | Monorepo pnpm, TS strict, Electron + React/Vite, `packages/shared` com Zod e tipos IPC | §4 | T-001, T-002, T-902 | pendente |
 | RNF-04 | Segurança Electron: contextIsolation, sem nodeIntegration, sandbox, CSP restritiva, IPC validado com Zod, renderer sem acesso direto ao fs | §4, §7 | T-002, T-004, T-011, T-602 | feito |
