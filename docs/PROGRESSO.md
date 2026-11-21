@@ -156,3 +156,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (263); `pnpm --filter @line-splitter/desktop test history` 8 testes com SQLite real; `HistoryPage.test.tsx` 7 testes; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e historico` com motor real (vazio → separar → item → ouvir → abrir pasta → arquivo apagado fora do app → remover apagando MP3 → disco e banco vazios, original intacto).
 - Revisor: APROVADO (as duas). Sugestões aplicadas: uso único no `media://` liberado ao remover, mensagem cita arquivos já apagados, proteção extra contra apagar o original, caixa desabilitada durante o envio, sem região de anúncio por item.
 - Commit: ver `git log` (T-400, T-401)
+
+### T-500 — Identidade do app no desktop: ícone, nome e menu nativo em português (2026-11-20)
+- Feito: `scripts/icons.mjs` (ícone gerado sem dependências: PNG 512/256 e ICO), `apps/desktop/build/` versionado, ícone na janela, configuração do electron-builder em `apps/desktop/package.json` (nome, ícones, `.desktop`, `extraResources`), `menu.ts` (Arquivo › Escolher arquivo…/Abrir pasta de saída/Sair, Editar, Ajuda › Sobre), correção de layout no tamanho mínimo (seletor de instrumento).
+- Verificado: `pnpm verify` OK (267); `menu.test.ts`, `identity.test.ts`; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e menu` 2 passed (nome/título/tamanho mínimo, ações do menu, sem rolagem horizontal em 880x600 em todos os estados com motor real).
+- Revisor: REPROVADO (rolagem horizontal com arquivo carregado no tamanho mínimo) → corrigido → APROVADO.
+- Commit: ver `git log` (T-500)

@@ -888,3 +888,15 @@ details pre {
   gap: 0.5rem;
   margin: 0.75rem 0 0.25rem;
 }
+
+/* Na grade do passo de separação, o seletor ocupa a largura disponível (o auto-fill quebra em linhas). */
+.separate-step > .instrument-picker {
+  justify-self: stretch;
+  width: 100%;
+  min-width: 0;
+}
+
+.separation-panel > *,
+.result-panel > * {
+  min-width: 0;
+}

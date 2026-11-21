@@ -75,7 +75,10 @@ export function HomePage() {
   useEffect(() => {
     inspectRef.current = inspect;
   });
-  const { subscribe } = drop;
+  const { subscribe, subscribeChoose } = drop;
+  // Menu Arquivo › Escolher arquivo… abre o mesmo diálogo do botão.
+  const chooseRef = useRef<() => Promise<void>>(async () => undefined);
+  useEffect(() => subscribeChoose(() => void chooseRef.current()), [subscribeChoose]);
   useEffect(
     () =>
       subscribe((file) => {
@@ -108,6 +111,10 @@ export function HomePage() {
       setState({ kind: 'error', title: 'Não foi possível abrir o diálogo', error });
     }
   };
+
+  useEffect(() => {
+    chooseRef.current = choose;
+  });
 
   return (
     <section aria-labelledby="page-title">

@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { getBridge } from '../api/bridge';
+import { subscribe as subscribeEvent } from '../api/events';
 
 /** Arquivo solto na janela, já validado no cliente (ou o motivo da recusa). */
 export type DroppedFile =
@@ -26,6 +27,8 @@ interface FileDropState {
   subscribe: (handler: (file: DroppedFile) => void) => () => void;
   /** Enquanto false (ex.: inspecionando ou separando), soltar arquivos é ignorado. */
   setAccepting: (accepting: boolean) => void;
+  /** Menu Arquivo › Escolher arquivo…: a tela Início assina; vindo de outra tela, o pedido espera por ela. */
+  subscribeChoose: (handler: () => void) => () => void;
 }
 
 const Ctx = createContext<FileDropState | null>(null);
@@ -44,6 +47,8 @@ export function FileDropProvider({ children }: { children: ReactNode }) {
   const [dragging, setDragging] = useState(false);
   const pending = useRef<DroppedFile | null>(null);
   const handler = useRef<((file: DroppedFile) => void) | null>(null);
+  const chooseHandler = useRef<(() => void) | null>(null);
+  const choosePending = useRef(false);
   const accepting = useRef(true);
   const [acceptingNow, setAcceptingNow] = useState(true);
   const depth = useRef(0);
@@ -117,6 +122,27 @@ export function FileDropProvider({ children }: { children: ReactNode }) {
     };
   }, [navigate]);
 
+  useEffect(() => {
+    if (!window.api) return undefined;
+    return subscribeEvent('menu:chooseFile', () => {
+      if (!accepting.current) return;
+      if (chooseHandler.current) chooseHandler.current();
+      else choosePending.current = true;
+      if (pathname.current !== '/') void navigate('/');
+    });
+  }, [navigate]);
+
+  const subscribeChoose = useCallback((fn: () => void) => {
+    chooseHandler.current = fn;
+    if (choosePending.current) {
+      choosePending.current = false;
+      queueMicrotask(fn);
+    }
+    return () => {
+      if (chooseHandler.current === fn) chooseHandler.current = null;
+    };
+  }, []);
+
   const subscribe = useCallback((fn: (file: DroppedFile) => void) => {
     handler.current = fn;
     const waiting = pending.current;
@@ -133,7 +159,10 @@ export function FileDropProvider({ children }: { children: ReactNode }) {
     setAcceptingNow(value);
   }, []);
 
-  const value = useMemo(() => ({ dragging, subscribe, setAccepting }), [dragging, subscribe, setAccepting]);
+  const value = useMemo(
+    () => ({ dragging, subscribe, setAccepting, subscribeChoose }),
+    [dragging, subscribe, setAccepting, subscribeChoose],
+  );
   return (
     <Ctx.Provider value={value}>
       {children}

@@ -239,7 +239,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 6 — Recursos de plataforma
 
-- [ ] **T-500** Identidade do app no desktop: ícone, nome e menu nativo em português — req: RNF-01, RNF-09 · dep: T-004
+- [x] **T-500** Identidade do app no desktop: ícone, nome e menu nativo em português — req: RNF-01, RNF-09 · dep: T-004
   - Critérios:
     - Ícone do app em PNG (256/512) e ICO, usado na janela e nos instaladores
     - Nome "Line Splitter" na janela, na barra de tarefas e no `.desktop` do Linux

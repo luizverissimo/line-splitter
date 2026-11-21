@@ -12,7 +12,7 @@ export const SECURE_WEB_PREFERENCES = {
   spellcheck: false,
 } as const;
 
-export function createMainWindow(startUrl: string, preloadDir: string): BrowserWindow {
+export function createMainWindow(startUrl: string, preloadDir: string, iconPath?: string): BrowserWindow {
   const win = new BrowserWindow({
     width: 1100,
     height: 760,
@@ -20,6 +20,7 @@ export function createMainWindow(startUrl: string, preloadDir: string): BrowserW
     minHeight: 600,
     show: false,
     title: 'Line Splitter',
+    ...(iconPath ? { icon: iconPath } : {}),
     backgroundColor: '#0f1115',
     autoHideMenuBar: false,
     webPreferences: { ...SECURE_WEB_PREFERENCES, preload: path.join(preloadDir, 'preload.cjs') },

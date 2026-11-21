@@ -69,6 +69,8 @@ export const ipcEvents = {
   'engine:installLog': installLogSchema,
   'engine:modelProgress': modelProgressSchema,
   'separation:progress': separationProgressSchema,
+  /** Menu Arquivo › Escolher arquivo… */
+  'menu:chooseFile': z.object({ requestedAt: z.number() }),
 } satisfies EventMap;
 
 export const ipc = createIpc(ipcChannels, ipcEvents);

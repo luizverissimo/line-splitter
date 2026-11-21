@@ -11,6 +11,7 @@ import { audioHandlers, CurrentInput } from './handlers/audio';
 import { separationHandlers } from './handlers/separation';
 import { shellHandlers } from './handlers/shell';
 import { historyHandlers } from './handlers/history';
+import { installMenu } from './menu';
 import { HistoryRepository } from './history/repository';
 import { SeparationService } from './separation/service';
 import { enginePaths } from './engine/paths';
@@ -127,6 +128,14 @@ if (!app.requestSingleInstanceLock()) {
       (url) => isAllowedNavigation(url, origin),
     );
 
-    createMainWindow(devUrl ? devUrl.toString() : `${APP_ORIGIN}/index.html`, __dirname);
+    installMenu({
+      outputDir: () => settings.get().outputDir,
+      mainWindow: () => BrowserWindow.getAllWindows()[0],
+    });
+
+    const iconPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'icon.png')
+      : path.resolve(__dirname, '../build/icon.png');
+    createMainWindow(devUrl ? devUrl.toString() : `${APP_ORIGIN}/index.html`, __dirname, iconPath);
   });
 }
