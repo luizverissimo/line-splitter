@@ -327,7 +327,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Validação de caminhos no ramo win32 (`R_OK`) testada
   - Verificar: `pnpm verify`
 
-- [ ] **T-902** README de execução, testes, build e uso — req: RNF-03, RNF-12 · dep: T-900
+- [!] **T-902** README de execução, testes, build e uso — req: RNF-03, RNF-12 · dep: T-900
   - Critérios:
     - Pré-requisitos (Node, pnpm, Python, FFmpeg, GPU opcional) para Linux e Windows
     - Comandos: dev, verify, e2e, fixtures, bench, dist:linux, dist:win
@@ -335,6 +335,14 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Guia de uso: primeiro uso (instalar motor), separar, histórico, configurações; nota de que é local, sem conta
     - Cada comando do README executado e conferido
   - Verificar: seguir o README do zero num clone limpo
+  - Bloqueio: os comandos de desenvolvimento do README foram executados num clone limpo (install, verify, fixtures, test, test:e2e, bench, dist:linux, smoke:linux, dev; dist:win falha pedindo wine, como documentado). Faltam os que exigem sudo ou Windows, que o usuário precisa rodar e confirmar: (1) `sudo apt install ./release/line-splitter_0.1.0_amd64.deb` e abrir `line-splitter` (sem `--no-sandbox`); (2) criar o perfil do AppArmor do AppImage (bloco do README) e abrir o AppImage sem `--no-sandbox`; (3) instalar no Windows (depende da T-901).
+
+- [ ] **T-902a** Motor recusa Python fora da faixa suportada pelo PyTorch 2.6 (3.9 a 3.13) — req: RNF-03 · dep: T-902
+  - Critérios:
+    - Detecção do Python marca como problema versões acima de 3.13, com mensagem em português indicando a faixa 3.9 a 3.13
+    - Com mais de um Python no PATH, um 3.14 não impede de usar um 3.12 que venha depois
+    - Teste com interpretadores reais (scripts) cobrindo 3.8, 3.13 e 3.14
+  - Verificar: `pnpm verify`
 
 - [ ] **T-999** Auditoria final de cobertura do PRD (/auditar) — req: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RF-24, RF-25, RN-01, RN-02, RN-03, RN-04, RN-05, RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RNF-01, RNF-02, RNF-03, RNF-04, RNF-05, RNF-06, RNF-07, RNF-08, RNF-09, RNF-10, RNF-11, RNF-12, RNF-13 · dep: T-001, T-002, T-003, T-004, T-005, T-006, T-007, T-010, T-011, T-100, T-101, T-102, T-103, T-200, T-201, T-300, T-301, T-302, T-303, T-304, T-400, T-401, T-500, T-501, T-600, T-601, T-602, T-603, T-604, T-900, T-901, T-902
   - Critérios:

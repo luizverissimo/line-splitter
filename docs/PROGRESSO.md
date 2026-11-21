@@ -226,3 +226,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK; E2E completo 37 passed; integração de cancelamento/instalação com motor real 19 passed.
 - Revisor: APROVADO (observações 1 e 2 aplicadas: fallback no exit ≠ 0 com teste; DEC-016).
 - Commit: ver `git log` (T-901a)
+
+### T-902 — README de execução, testes, build e uso (2026-11-21) — BLOQUEADA (parte que exige sudo/Windows)
+- Feito: README.md do projeto (uso, instaladores Linux/Windows, primeiro uso, separar, histórico, configurações, desenvolvimento, comandos, variáveis, estrutura); o README do kit de fluxo com IA foi movido para `docs/FLUXO-IA.md`.
+- Verificado num clone limpo: `pnpm install`, `pnpm verify`, `pnpm fixtures`, `pnpm test` (295), `pnpm test:e2e envio` (4), `pnpm bench` (GPU 19,3 s, CPU 67,6 s), `pnpm dist:linux`, `pnpm smoke:linux` (1), `pnpm dev`; `pnpm dist:win` falha pedindo wine (documentado). Correções vindas da execução: `corepack` não existe no Node 26 → `npm install -g pnpm@10`. Perfil do AppArmor do README validado com `apparmor_parser --skip-kernel-load` (pelo revisor).
+- Revisor: REPROVADO (Python 3.9–3.13, referência ao benchmark, nota do bench com GPU, aviso do instalador Windows, .exe incompleto em release/) → corrigido. Comandos com sudo/Windows ficaram como bloqueio; a falta de limite superior do Python virou a T-902a.
+- Bloqueio: instalar o .deb, testar o perfil do AppArmor do AppImage e instalar no Windows (precisam de sudo/Windows).
+- Commit: ver `git log` (T-902)

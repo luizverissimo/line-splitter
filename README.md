@@ -1,58 +1,151 @@
-# Fluxo PRD → produto completo com Claude Code
+# Line Splitter
 
-Kit para a IA construir o projeto inteiro a partir do PRD — web, desktop (Electron) e mobile (Capacitor) — sem mocks, sem cortar escopo e sem perder o fio entre sessões.
+Aplicativo desktop (Electron) que separa **um instrumento** de uma música e gera **dois MP3**:
 
-## Como usar
+- `<música> - <Instrumento>.mp3` — só a linha do instrumento escolhido;
+- `<música> - sem <Instrumento>.mp3` — a música com todo o resto, sem o instrumento.
 
-1. Copie esta pasta para a pasta do novo projeto e rode `git init`.
-2. Cole o PRD completo em `docs/PRD.md`.
-3. Abra o Claude Code na pasta e rode **`/planejar`**.
-   A IA extrai cada requisito do PRD com ID, faz as perguntas que faltam (de uma vez só), gera o plano completo e valida a cobertura.
-4. Revise `docs/TASKS.md` e `docs/REQUISITOS.md`. Peça ajustes à vontade. Quando estiver bom, diga **"aprovado"**.
-5. Rode **`/autopilot`** (executa tudo até o fim) ou **`/proxima`** (uma tarefa por vez, com você acompanhando).
-6. A qualquer momento: **`/status`**. Para interromper: **`/pausar`** (ou Esc). Para retomar: `/autopilot` de novo — ele continua de onde parou.
+Instrumentos: **Voz, Bateria, Baixo, Guitarra/Violão e Piano/Teclado** (modelo `htdemucs_6s` do [Demucs](https://github.com/facebookresearch/demucs)).
 
-Para o autopilot rodar sem parar a cada comando, use o modo de permissão **Auto** (ou "aceitar edições") no Claude Code. O `.claude/settings.json` já libera `pnpm`, `npx`, `docker compose`, `git add/commit` e **bloqueia `git push`**.
+É de uso pessoal e roda **100% no seu computador**: sem conta, sem login, sem nuvem, sem cobrança. A internet só é usada uma vez, para instalar o motor (PyTorch + Demucs) e baixar o modelo (~55 MB). Depois disso funciona offline.
 
-## Por que a IA não esquece, não mocka e não para no meio
+Plataformas: **Linux** (principal) e **Windows**.
 
-| Problema | O que impede |
+---
+
+## Instalar e usar (usuário)
+
+### Pré-requisitos no computador
+
+| | Linux (Ubuntu/Debian) | Windows |
+|---|---|---|
+| Python 3.9 a 3.13, com `venv` (o PyTorch 2.6 usado pelo motor não tem pacotes para o 3.14) | `sudo apt install python3 python3-venv` | [python.org](https://www.python.org/downloads/) (marque "Add python.exe to PATH") ou `winget install Python.Python.3.12` |
+| FFmpeg (com `ffprobe`) | `sudo apt install ffmpeg` | `winget install -e --id Gyan.FFmpeg` |
+| GPU (opcional) | NVIDIA com driver instalado (`nvidia-smi` funcionando) | NVIDIA com driver instalado |
+
+Sem GPU NVIDIA o app usa a CPU (mais lento). Referência medida em 2026-11 com `pnpm bench` numa RTX 3050 6 GB / CPU de 16 threads: 4 min de música em ~19 s na GPU e ~67 s na CPU. Se o Python ou o FFmpeg não estiverem no PATH, informe o caminho em **Configurações**.
+
+### Instaladores
+
+Gerados em `release/` (veja [Gerar os instaladores](#gerar-os-instaladores)).
+
+**Linux — .deb (recomendado, inclusive no Ubuntu 24.04+):**
+
+```bash
+sudo apt install ./release/line-splitter_0.1.0_amd64.deb
+line-splitter    # ou procure "Line Splitter" no menu de aplicativos
+```
+
+O .deb já declara `ffmpeg`, `python3` e `python3-venv` como dependências e registra um perfil do AppArmor para o sandbox do Chromium.
+
+**Linux — AppImage:**
+
+```bash
+chmod +x release/Line-Splitter-0.1.0-x86_64.AppImage
+./release/Line-Splitter-0.1.0-x86_64.AppImage
+```
+
+No Ubuntu 24.04+ há dois obstáculos conhecidos do formato AppImage (DEC-015):
+
+1. **FUSE:** o AppImage precisa de `libfuse2`. Instale com `sudo apt install libfuse2t64`, ou rode sem FUSE com `APPIMAGE_EXTRACT_AND_RUN=1 ./release/Line-Splitter-0.1.0-x86_64.AppImage`.
+2. **Sandbox:** o AppArmor bloqueia os user namespaces que o sandbox do Chromium usa, e dentro do AppImage o `chrome-sandbox` não pode ser SUID. O app **não** desliga o sandbox sozinho. Libere criando um perfil do AppArmor para o caminho do AppImage (troque o caminho pelo seu):
+
+   ```bash
+   APPIMAGE="$HOME/Aplicativos/Line-Splitter-0.1.0-x86_64.AppImage"
+   sudo tee /etc/apparmor.d/line-splitter-appimage >/dev/null <<PERFIL
+   abi <abi/4.0>,
+   include <tunables/global>
+   profile line-splitter-appimage "$APPIMAGE" flags=(unconfined) {
+     userns,
+   }
+   PERFIL
+   sudo apparmor_parser -r /etc/apparmor.d/line-splitter-appimage
+   ```
+
+   Se preferir não mexer no AppArmor, use o .deb.
+
+**Windows:** gere o instalador com `pnpm dist:win` numa máquina Windows, rode `Line-Splitter-Setup-0.1.0.exe` e siga o instalador (dá para escolher a pasta); o app fica no menu Iniciar como "Line Splitter". **Atenção:** o instalador Windows ainda não foi gerado nem testado num Windows (tarefa T-901 bloqueada por falta de uma máquina Windows ou de `wine`).
+
+### Primeiro uso: instalar o motor
+
+1. Ao abrir pela primeira vez, o app vai para a tela **Motor** e mostra o que falta (Python, FFmpeg, Demucs, modelo).
+2. Clique em **Instalar motor**. O app cria um ambiente Python só dele (na pasta de dados do app) e instala o PyTorch — com CUDA se houver GPU NVIDIA, senão a versão de CPU — e o Demucs. São alguns GB; o progresso e o log aparecem na tela, e dá para cancelar.
+3. Clique em **Baixar modelo** (~55 MB, com verificação de integridade).
+4. Quando aparecer **"Tudo pronto para separar."**, vá para **Início**.
+
+### Separar um instrumento
+
+1. Em **Início**, clique em **Escolher arquivo** ou arraste o arquivo para a janela. Formatos: MP3, WAV, FLAC, M4A, AAC e OGG, até 500 MB e 30 minutos.
+2. Escolha o instrumento e clique em **Separar**. A tela mostra o progresso e o tempo decorrido; dá para trocar de tela durante a separação ou **Cancelar** (nada é gravado).
+3. No resultado, ouça as duas faixas nos players, use **Mostrar arquivo** / **Abrir pasta**, **Separar outro instrumento** (mesmo arquivo) ou **Novo arquivo**.
+
+Os MP3 vão para a **pasta de saída** (padrão: `<sua pasta de Música>/Line Splitter`). Se já existir um arquivo com o mesmo nome, o novo ganha um sufixo `(2)`, `(3)`…
+
+### Histórico
+
+A tela **Histórico** lista as separações feitas: arquivo de origem e instrumento, data, duração do áudio, tempo de processamento, dispositivo (GPU/CPU) e qualidade, com um player para cada faixa e **Abrir pasta**. **Remover** tira a separação do histórico; marque **Apagar também os arquivos MP3** para apagar as duas faixas do disco (o arquivo original nunca é apagado). Faixas apagadas fora do app aparecem como "Arquivo não encontrado".
+
+### Configurações
+
+- **Pasta de saída** dos MP3.
+- **Qualidade do MP3**: 192, 256 ou 320 kbps (padrão 320).
+- **Dispositivo de processamento**: automático (GPU se houver), GPU ou CPU.
+- **Caminho do Python** e **do FFmpeg**, se não estiverem no PATH.
+
+Tudo fica num banco SQLite local, na pasta de dados do app (Linux: `~/.config/Line Splitter`; Windows: `%APPDATA%\Line Splitter`), junto com o motor instalado.
+
+---
+
+## Desenvolvimento
+
+### Pré-requisitos
+
+- **Node.js 22.5+** e **pnpm 10** (`npm install -g pnpm@10`; nos Node.js até a 24 também dá para usar `corepack enable`).
+- Python 3.9 a 3.13 com `venv` e FFmpeg (como acima) — os testes usam o motor e o FFmpeg reais.
+- Linux: no Ubuntu 24.04+ o Electron de `node_modules` precisa do sandbox do Chromium. Rode uma vez o comando que `pnpm dev` mostra (`sudo chown root:root …/chrome-sandbox && sudo chmod 4755 …/chrome-sandbox`) ou, só em desenvolvimento, defina `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008).
+
+```bash
+pnpm install
+```
+
+### Comandos
+
+| Comando | O que faz |
 |---|---|
-| Esquece o que estava fazendo (sessão nova, contexto compactado) | O estado mora em arquivos (`TASKS.md`, `PROGRESSO.md`, `DECISOES.md`). O hook **SessionStart** injeta no início de toda sessão — e depois de toda compactação — o progresso, a tarefa em andamento e as últimas entradas do diário. |
-| Esquece partes do PRD | `/planejar` transforma cada item do PRD em requisito com ID. `tasks.mjs check` falha se algum requisito não tem tarefa. A última tarefa (T-999) é sempre a auditoria `/auditar`, que procura evidência no código para **cada** requisito e cria tarefas para o que faltar. |
-| Faz mock / dado fixo / botão que não faz nada | `CLAUDE.md` proíbe. O hook **PostToolUse** varre cada arquivo editado e devolve o erro na hora (mock, fake, TODO, "em breve", `@ts-ignore`, handler vazio…). O `pnpm verify` roda o mesmo scan. Arquivos de teste ficam de fora. |
-| Diz "pronto" sem estar | Nenhuma tarefa vira `[x]` sem `pnpm verify` passando e sem o subagente **revisor** (cético, não edita nada) responder `APROVADO` com evidência `arquivo:linha` por critério. |
-| "Isso fica para depois do MVP" | `CLAUDE.md` define MVP = tudo do PRD. Corte de escopo só com sua aprovação registrada em `DECISOES.md`. Tarefa apagada do plano é detectada (`.claude/task-ids.json`) e a IA é mandada restaurar. |
-| Para no meio e pergunta "posso continuar?" | Com o autopilot ligado, o hook **Stop** confere o plano toda vez que a IA tenta parar e a manda de volta para a próxima tarefa. |
-| Falta credencial / conta / Mac | A IA implementa a integração real lendo variáveis de ambiente, marca a tarefa `[!]` com o que você precisa fornecer e segue para a próxima. Nada é simulado. |
+| `pnpm dev` | Vite com recarga + Electron apontando para ele |
+| `pnpm verify` | typecheck + lint + Prettier + testes (Vitest) + varredura anti-mock — o portão de toda tarefa |
+| `pnpm test` | Só os testes Vitest (unidade e integração, com Demucs e FFmpeg reais num trecho curto) |
+| `pnpm test:e2e` | Builda o desktop e roda os E2E com Playwright no Electron (`pnpm test:e2e envio` filtra por arquivo) |
+| `pnpm fixtures` | Gera os áudios de teste em `fixtures/` com o FFmpeg (os testes também geram sozinhos) |
+| `pnpm bench` | Benchmark: separa 4 min de áudio na CPU e, se houver GPU NVIDIA, também na GPU; imprime os tempos e grava `fixtures/benchmark.md` |
+| `pnpm dist:linux` | Gera AppImage e .deb em `release/` |
+| `pnpm smoke:linux` | Executa o AppImage gerado e faz uma separação real (teste de fumaça do pacote) |
+| `pnpm dist:win` | Gera o instalador NSIS em `release/` (numa máquina Windows, ou no Linux com `wine`) |
 
-O autopilot desliga sozinho quando: tudo foi concluído; só restam tarefas que dependem de bloqueios seus; houve 3 tentativas seguidas de parar sem nenhum progresso (sinal de que a IA precisa de você); ou bateu o limite de 300 ciclos. Os limites ficam em `.claude/guard.config.json`.
+Na primeira execução, os testes de integração e os E2E instalam um motor de teste (CPU) em `/tmp/line-splitter-e2e-engine` — demora alguns minutos e exige internet uma vez. Com GPU NVIDIA, o `pnpm bench` instala ainda um segundo motor, com CUDA (alguns GB), em `/tmp/line-splitter-bench-engine-cuda`; sem GPU a medição da GPU é pulada.
 
-## Arquivos
+### Gerar os instaladores
 
-```
-CLAUDE.md                     regras permanentes (carregado em toda sessão)
-docs/PRD.md                   seu PRD (editar pede sua aprovação)
-docs/REQUISITOS.md            requisitos com ID ↔ tarefas
-docs/TASKS.md                 plano completo com status
-docs/PROGRESSO.md             diário por tarefa
-docs/DECISOES.md              decisões e mudanças de escopo aprovadas
-.claude/commands/             /planejar /proxima /autopilot /pausar /status /auditar
-.claude/agents/revisor.md     revisor independente
-.claude/hooks/                session-context, pre-edit-guard, post-edit-guard, stop-guard
-.claude/scripts/tasks.mjs     status | next | show T-xxx | check | autopilot on|off
-.claude/scripts/anti-mock.mjs scan de código de produção (também usado no pnpm verify)
-.claude/guard.config.json     padrões proibidos, pastas varridas, limites do autopilot
-.claude/task-ids.json         registro de IDs (gerado; versione no git)
+```bash
+pnpm dist:linux      # release/Line-Splitter-<versão>-x86_64.AppImage e release/line-splitter_<versão>_amd64.deb
+pnpm smoke:linux     # confere o AppImage gerado (no Ubuntu 24.04+: LINE_SPLITTER_DEV_NO_SANDBOX=1)
+pnpm dist:win        # release/Line-Splitter-Setup-<versão>.exe
 ```
 
-## Ajustes comuns
+`pnpm dist:win` precisa de Windows ou de `wine` no Linux (`sudo apt install wine64`).
 
-- **Outra stack**: edite a seção "Stack" do `CLAUDE.md` (ou deixe o PRD dizer — ele prevalece).
-- **Falso positivo no scan**: comente na linha `// guard-allow: motivo`, ou ajuste `forbidden` em `.claude/guard.config.json`.
-- **Código fora de `apps/` e `packages/`**: adicione a pasta em `scanDirs`.
-- **iOS**: o Capacitor só gera build iOS no macOS. No Windows essas tarefas ficarão `[!]` até você ter um Mac (ou CI com macOS).
+### Variáveis de ambiente
 
-## Limites honestos
+Todas opcionais; veja `.env.example`. As principais são `LINE_SPLITTER_USER_DATA` (pasta de dados alternativa) e `LINE_SPLITTER_MUSIC_DIR` (pasta de Música alternativa), usadas pelos testes para isolar banco, motor e saída, e `LINE_SPLITTER_DEV_NO_SANDBOX` (DEC-008).
 
-Os hooks e o revisor reduzem muito, mas não zeram, a chance de a IA errar — por isso a auditoria final existe e cria tarefas de correção em vez de aceitar falhas. Um PRD grande no autopilot consome bastante uso; `/proxima` dá mais controle se você quiser acompanhar tarefa a tarefa.
+### Estrutura
+
+```
+apps/desktop      Electron: processo principal (motor, separação, SQLite, IPC) e preload
+apps/web          Interface React + Vite (renderer)
+packages/shared   Schemas Zod e contrato IPC usados pelos dois lados
+e2e/              E2E Playwright do app        e2e-pacote/  teste de fumaça do pacote
+scripts/          dev, fixtures, ícones        docs/        PRD, requisitos, tarefas, decisões
+```
+
+O projeto foi construído com Claude Code a partir de `docs/PRD.md`; o fluxo está descrito em [`docs/FLUXO-IA.md`](docs/FLUXO-IA.md).
