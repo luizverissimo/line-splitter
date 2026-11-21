@@ -265,7 +265,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Histórico lista as separações, ouvir funciona, remover (com e sem apagar arquivos) e "arquivo não encontrado"
   - Verificar: `pnpm test:e2e`
 
-- [ ] **T-601** E2E de erros, limites e cancelamento — req: RF-02, RF-05, RF-13, RF-14, RN-02, RN-03, RN-13 · dep: T-600
+- [x] **T-601** E2E de erros, limites e cancelamento — req: RF-02, RF-05, RF-13, RF-14, RN-02, RN-03, RN-13 · dep: T-600
   - Critérios:
     - Arquivo corrompido, extensão não aceita e arquivo de 31 min mostram o erro correto
     - Cancelar no meio não deixa arquivos na pasta de saída nem item no histórico

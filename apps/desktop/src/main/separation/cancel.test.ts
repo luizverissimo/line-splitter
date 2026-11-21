@@ -26,6 +26,12 @@ describe('explainEngineFailure', () => {
       /Reinstale o motor/,
     );
     expect(explainEngineFailure('python terminou com SIGKILL')).toMatch(/encerrado inesperadamente/);
+    expect(explainEngineFailure('demucs.repo.ModelLoadingError: Invalid checksum for file')).toMatch(
+      /modelo está corrompido/,
+    );
+    expect(explainEngineFailure('WARNING: pip cache checksum mismatch, refetching wheel')).toMatch(
+      /log técnico/,
+    );
     expect(explainEngineFailure('???')).toMatch(/log técnico/);
   });
 });

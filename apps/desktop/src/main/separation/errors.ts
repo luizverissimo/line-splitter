@@ -1,3 +1,6 @@
+/** O próprio Demucs recusou os pesos do modelo (checksum diferente do nome do arquivo). */
+export const isCorruptedModel = (log: string) => /ModelLoadingError|Invalid checksum/.test(log);
+
 /** Traduz a saída do Demucs/PyTorch/FFmpeg numa mensagem para o usuário. */
 export function explainEngineFailure(log: string): string {
   if (/CUDA out of memory|OutOfMemoryError|CUBLAS_STATUS_ALLOC_FAILED/i.test(log)) {
@@ -12,6 +15,9 @@ export function explainEngineFailure(log: string): string {
     )
   ) {
     return 'O motor não conseguiu ler este arquivo de áudio. Ele pode estar corrompido.';
+  }
+  if (isCorruptedModel(log)) {
+    return 'O arquivo do modelo está corrompido. Baixe o modelo de novo na tela Motor.';
   }
   if (/No module named|ModuleNotFoundError/i.test(log)) {
     return 'O motor está incompleto. Reinstale o motor em Configurações.';

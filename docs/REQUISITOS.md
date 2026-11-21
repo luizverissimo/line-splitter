@@ -5,33 +5,33 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | ID | Requisito | Origem no PRD | Tarefas | Status |
 |---|---|---|---|---|
 | RF-01 | Ao abrir, verificar se o motor está pronto: Python ≥ 3.9, pacote `demucs`, FFmpeg e pesos do `htdemucs_6s` | §5.1 "Ao abrir, o app verifica…" | T-100 | feito |
-| RF-02 | Tela de configuração do motor com status ✔/✖ de cada item | §5.1 "tela de configuração com o status de cada item" | T-101, T-601 | pendente |
+| RF-02 | Tela de configuração do motor com status ✔/✖ de cada item | §5.1 "tela de configuração com o status de cada item" | T-101, T-601 | feito |
 | RF-03 | Botão "Instalar motor": cria venv gerenciado em `userData/engine` e instala `demucs` + `torch` via pip, com log ao vivo | §5.1 "Botão Instalar motor" | T-102 | feito |
 | RF-04 | Download dos pesos do modelo com barra de progresso | §5.1 "Download dos pesos do modelo" | T-103 | feito |
-| RF-05 | Sem Python/FFmpeg no sistema: mensagem com instruções para Linux e Windows e botão "Verificar de novo" | §5.1 "Se Python ou FFmpeg não existirem…" | T-101, T-601 | pendente |
+| RF-05 | Sem Python/FFmpeg no sistema: mensagem com instruções para Linux e Windows e botão "Verificar de novo" | §5.1 "Se Python ou FFmpeg não existirem…" | T-101, T-601 | feito |
 | RF-06 | Detectar GPU (CUDA) e usar quando disponível, senão CPU; mostrar qual está em uso | §5.1 "Detecta GPU (CUDA)…" | T-100, T-101 | feito |
-| RF-07 | Enviar áudio arrastando e soltando o arquivo na janela | §5.2 "Arrastar e soltar" | T-201, T-600 | pendente |
-| RF-08 | Enviar áudio pelo botão "Escolher arquivo" (diálogo nativo) | §5.2 "botão Escolher arquivo" | T-201, T-600 | pendente |
-| RF-09 | Após carregar, mostrar nome, duração, formato e player do original | §5.2 "Após carregar, mostra nome, duração…" | T-201, T-600 | pendente |
-| RF-10 | Pedir a escolha do instrumento: seleção única, cartões com ícone (Voz, Bateria, Baixo, Guitarra/Violão, Piano/Teclado) | §5.3 | T-300, T-600 | pendente |
+| RF-07 | Enviar áudio arrastando e soltando o arquivo na janela | §5.2 "Arrastar e soltar" | T-201, T-600 | feito |
+| RF-08 | Enviar áudio pelo botão "Escolher arquivo" (diálogo nativo) | §5.2 "botão Escolher arquivo" | T-201, T-600 | feito |
+| RF-09 | Após carregar, mostrar nome, duração, formato e player do original | §5.2 "Após carregar, mostra nome, duração…" | T-201, T-600 | feito |
+| RF-10 | Pedir a escolha do instrumento: seleção única, cartões com ícone (Voz, Bateria, Baixo, Guitarra/Violão, Piano/Teclado) | §5.3 | T-300, T-600 | feito |
 | RF-11 | Executar o Demucs `htdemucs_6s` no modo `--two-stems=<stem>` gerando instrumento e "resto" | §5.4 "Executa o Demucs no modo de duas faixas" | T-301 | feito |
-| RF-12 | Barra de progresso real (lida da saída do Demucs) e tempo decorrido | §5.4 "Barra de progresso real" | T-303, T-600 | pendente |
-| RF-13 | Botão "Cancelar": encerra o processo filho e apaga arquivos parciais | §5.4 "Botão Cancelar" | T-302, T-303, T-601 | pendente |
-| RF-14 | Erros do motor (memória, arquivo inválido, processo encerrado) em mensagem legível, com opção de ver o log técnico | §5.4 "Erros do motor…" | T-302, T-303, T-601 | pendente |
-| RF-15 | Gerar dois MP3: `<nome> - <Instrumento>.mp3` e `<nome> - sem <Instrumento>.mp3` | §1, §5.5 "Nomes dos arquivos" | T-301, T-304, T-600 | pendente |
-| RF-16 | Tela de resultado com player para cada faixa (play/pause, barra de posição, volume) | §5.5 "Player para cada uma das duas faixas" | T-011, T-304, T-600 | pendente |
-| RF-17 | Botões "Abrir pasta" e "Mostrar arquivo" no gerenciador de arquivos do sistema | §5.5 | T-304, T-600 | pendente |
-| RF-18 | Botões "Separar outro instrumento" (mesmo arquivo) e "Novo arquivo" | §5.5 | T-304, T-600 | pendente |
-| RF-19 | Histórico: lista com data, arquivo original, instrumento, duração do processamento e caminhos das saídas | §5.6 | T-301, T-400, T-600 | pendente |
-| RF-20 | Ações do histórico: ouvir as faixas e abrir pasta | §5.6 "Ações por item" | T-400, T-600 | pendente |
-| RF-21 | Remover item do histórico com opção de também apagar os MP3 | §5.6 "remover do histórico (opção de também apagar os MP3)" | T-401, T-600 | pendente |
-| RF-22 | Item do histórico indica "arquivo não encontrado" se os arquivos foram movidos/apagados | §5.6 | T-400, T-600 | pendente |
-| RF-23 | Estado vazio do histórico convidando à primeira separação | §5.6 "Estado vazio" | T-400, T-600 | pendente |
+| RF-12 | Barra de progresso real (lida da saída do Demucs) e tempo decorrido | §5.4 "Barra de progresso real" | T-303, T-600 | feito |
+| RF-13 | Botão "Cancelar": encerra o processo filho e apaga arquivos parciais | §5.4 "Botão Cancelar" | T-302, T-303, T-601 | feito |
+| RF-14 | Erros do motor (memória, arquivo inválido, processo encerrado) em mensagem legível, com opção de ver o log técnico | §5.4 "Erros do motor…" | T-302, T-303, T-601 | feito |
+| RF-15 | Gerar dois MP3: `<nome> - <Instrumento>.mp3` e `<nome> - sem <Instrumento>.mp3` | §1, §5.5 "Nomes dos arquivos" | T-301, T-304, T-600 | feito |
+| RF-16 | Tela de resultado com player para cada faixa (play/pause, barra de posição, volume) | §5.5 "Player para cada uma das duas faixas" | T-011, T-304, T-600 | feito |
+| RF-17 | Botões "Abrir pasta" e "Mostrar arquivo" no gerenciador de arquivos do sistema | §5.5 | T-304, T-600 | feito |
+| RF-18 | Botões "Separar outro instrumento" (mesmo arquivo) e "Novo arquivo" | §5.5 | T-304, T-600 | feito |
+| RF-19 | Histórico: lista com data, arquivo original, instrumento, duração do processamento e caminhos das saídas | §5.6 | T-301, T-400, T-600 | feito |
+| RF-20 | Ações do histórico: ouvir as faixas e abrir pasta | §5.6 "Ações por item" | T-400, T-600 | feito |
+| RF-21 | Remover item do histórico com opção de também apagar os MP3 | §5.6 "remover do histórico (opção de também apagar os MP3)" | T-401, T-600 | feito |
+| RF-22 | Item do histórico indica "arquivo não encontrado" se os arquivos foram movidos/apagados | §5.6 | T-400, T-600 | feito |
+| RF-23 | Estado vazio do histórico convidando à primeira separação | §5.6 "Estado vazio" | T-400, T-600 | feito |
 | RF-24 | Configurações: pasta de saída, bitrate, dispositivo (Auto/GPU/CPU), caminhos de Python e FFmpeg, reinstalar motor | §5.1 "Caminhos… podem ser sobrescritos", §5.7 | T-010, T-100, T-102 | feito |
 | RF-25 | Persistir histórico e preferências em SQLite (`better-sqlite3`) em `userData` | §4 "Persistência local", §5.7 "Persistidas no SQLite" | T-005, T-010 | feito |
 | RN-01 | Formatos aceitos: MP3, WAV, FLAC, M4A/AAC, OGG | §5.2 "Formatos aceitos" | T-200, T-201 | feito |
-| RN-02 | Limites: até 500 MB e até 30 minutos | §5.2 "Limites" | T-200, T-601 | pendente |
-| RN-03 | Validar extensão, legibilidade pelo FFmpeg e duração, com erro claro se inválido | §5.2 "Validação" | T-200, T-201, T-601 | pendente |
+| RN-02 | Limites: até 500 MB e até 30 minutos | §5.2 "Limites" | T-200, T-601 | feito |
+| RN-03 | Validar extensão, legibilidade pelo FFmpeg e duração, com erro claro se inválido | §5.2 "Validação" | T-200, T-201, T-601 | feito |
 | RN-04 | Mapeamento instrumento → stem: Voz=vocals, Bateria=drums, Baixo=bass, Guitarra/Violão=guitar, Piano/Teclado=piano | §5.3 tabela | T-300 | feito |
 | RN-05 | Botão "Separar" só habilitado com um instrumento escolhido | §5.3 | T-300 | feito |
 | RN-06 | Uma separação por vez | §5.4 | T-301 | feito |
@@ -41,7 +41,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RN-10 | Toda separação gera exatamente dois arquivos | §6 | T-301 | feito |
 | RN-11 | O arquivo original nunca é modificado nem movido | §6 | T-201, T-301 | feito |
 | RN-12 | Nenhum áudio sai do computador; rede só para instalar motor/modelo | §6 | T-102, T-103, T-501 | feito |
-| RN-13 | Separação cancelada/com erro não deixa parciais na saída nem entra como concluída no histórico | §6 | T-302, T-601 | pendente |
+| RN-13 | Separação cancelada/com erro não deixa parciais na saída nem entra como concluída no histórico | §6 | T-302, T-601 | feito |
 | RNF-01 | Linux como plataforma principal, instaladores AppImage e .deb | §3, §7 | T-500, T-900 | pendente |
 | RNF-02 | Windows com instalador NSIS | §3, §7 | T-901 | pendente |
 | RNF-03 | Monorepo pnpm, TS strict, Electron + React/Vite, `packages/shared` com Zod e tipos IPC | §4 | T-001, T-002, T-902 | pendente |
@@ -54,4 +54,4 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RNF-10 | Testes de integração com Demucs e FFmpeg reais em áudio curto livre (sem mock do motor) | §4, §7 | T-007, T-301 | feito |
 | RNF-11 | Funciona offline após a configuração inicial | §2 | T-103, T-501 | feito |
 | RNF-12 | Usuário único: sem login, sem nuvem, sem cobrança | §2 | T-004, T-902 | pendente |
-| RNF-13 | Testes E2E com Playwright para Electron | §4 | T-006, T-600 | pendente |
+| RNF-13 | Testes E2E com Playwright para Electron | §4 | T-006, T-600 | feito |

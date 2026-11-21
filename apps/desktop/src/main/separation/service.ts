@@ -17,7 +17,7 @@ import { killTree, spawnTree } from '../engine/process-tree';
 import type { HistoryRepository } from '../history/repository';
 import type { MediaRegistry } from '../media/registry';
 import { outputPaths, parseDemucsProgress } from './naming';
-import { explainEngineFailure } from './errors';
+import { explainEngineFailure, isCorruptedModel } from './errors';
 
 export interface SeparationDeps {
   paths: EnginePaths;
@@ -193,6 +193,10 @@ export class SeparationService {
       if (this.cancelled) throw new AppError('CANCELLED', 'Separação cancelada. Nenhum arquivo foi gerado.');
       if (err instanceof AppError) throw err;
       const technical = `${this.log}\n${err instanceof Error ? err.message : String(err)}`.trim();
+      if (isCorruptedModel(technical)) {
+        // Pesos corrompidos: tira o arquivo para a tela Motor oferecer o download de novo.
+        fs.rmSync(path.join(this.deps.paths.modelsDir, HTDEMUCS_6S.file), { force: true });
+      }
       throw new AppError('ENGINE_FAILED', explainEngineFailure(technical), technical);
     } finally {
       if (tmp) fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });

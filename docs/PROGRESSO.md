@@ -176,3 +176,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: APROVADO. Sugestões aplicadas: bitrate conferido no E2E; posição e volume do player.
 - Observações: E2E exigem `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
 - Commit: ver `git log` (T-600)
+
+### T-601 — E2E de erros, limites e cancelamento (2026-11-20)
+- Feito: `e2e/erros.spec.ts` (corrompido, .wma, 31 min, 501 MB; erro real do motor com pesos inválidos → mensagem legível, log técnico, nada gravado, e a tela Motor oferece baixar de novo; cancelar no meio sem arquivos nem histórico; FFmpeg inválido leva à tela Motor). Produção: pesos recusados pelo Demucs são apagados e a mensagem orienta baixar de novo (`separation/errors.ts`, `service.ts`).
+- Verificado: `pnpm verify` OK (271); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 29 passed.
+- Revisor: REPROVADO (mensagem mandava baixar o modelo mas a tela Motor não oferecia; regex larga) → corrigido → APROVADO.
+- Commit: ver `git log` (T-601)
