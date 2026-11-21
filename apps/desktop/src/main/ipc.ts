@@ -10,16 +10,22 @@ export type HandlerMap = { [C in IpcChannel]: RegisteredHandler };
  */
 export function registerIpcHandlers(handlers: HandlerMap, isTrustedSender: (url: string) => boolean): void {
   for (const channel of Object.keys(ipc.channels) as IpcChannel[]) {
-    const handler = handlers[channel];
-    ipcMain.handle(channel, async (event: IpcMainInvokeEvent, payload: unknown): Promise<IpcResult> => {
-      const senderUrl = event.senderFrame?.url ?? '';
-      if (!isTrustedSender(senderUrl)) {
-        return {
-          ok: false,
-          error: new AppError('FORBIDDEN', 'Origem não autorizada para o canal.', senderUrl).toJSON(),
-        };
-      }
-      return handler(payload);
-    });
+    const guarded = guardSender(handlers[channel], isTrustedSender);
+    ipcMain.handle(channel, (event: IpcMainInvokeEvent, payload: unknown) =>
+      guarded(event.senderFrame?.url ?? '', payload),
+    );
   }
+}
+
+/** Só executa o handler se a mensagem veio de um frame da origem do app; senão responde FORBIDDEN. */
+export function guardSender(handler: RegisteredHandler, isTrustedSender: (url: string) => boolean) {
+  return async (senderUrl: string, payload: unknown): Promise<IpcResult> => {
+    if (!isTrustedSender(senderUrl)) {
+      return {
+        ok: false,
+        error: new AppError('FORBIDDEN', 'Origem não autorizada para o canal.', senderUrl).toJSON(),
+      };
+    }
+    return handler(payload);
+  };
 }

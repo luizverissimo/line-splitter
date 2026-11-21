@@ -182,3 +182,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (271); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 29 passed.
 - Revisor: REPROVADO (mensagem mandava baixar o modelo mas a tela Motor não oferecia; regex larga) → corrigido → APROVADO.
 - Commit: ver `git log` (T-601)
+
+### T-602 — Revisão de segurança do Electron (2026-11-20)
+- Feito: `security-review.test.ts` (preferências seguras; todos os canais do contrato recusam payload inválido sem executar o handler; `guardSender` recusa origem não confiável com FORBIDDEN; varredura: `child_process` só em `engine/exec.ts` e `engine/process-tree.ts`, toda chamada de `spawn` com `shell: false`, sem `exec*`), `ipc.ts` com `guardSender` extraído, `e2e/seguranca.spec.ts` (preferências e CSP, sem Node no renderer, `window.open`/navegação externa/`<webview>`/câmera/microfone/notificações negados). Vitest atualizado para 4.1 (o `pnpm audit` acusava 2 críticas e 3 moderadas, todas em dependências de teste); matchers do jest-dom registrados explicitamente.
+- Verificado: `pnpm --filter @line-splitter/desktop test security` 7 passed; `pnpm verify` OK (275); `pnpm audit` sem vulnerabilidades; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 30 passed. Caminhos registrados/path traversal: `media.test.ts`, `shell.test.ts`, `history.test.ts`.
+- Revisor: APROVADO. Reforços aplicados: varredura cobre qualquer import de `child_process`; `taskkill` com `shell: false` explícito.
+- Observações: E2E com `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente): o sandbox de processo do Chromium não foi exercitado nesta máquina.
+- Commit: ver `git log` (T-602)

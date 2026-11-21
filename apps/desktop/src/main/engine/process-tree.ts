@@ -17,7 +17,7 @@ export function spawnTree(command: string, args: string[], env: NodeJS.ProcessEn
 export function killTree(child: ChildProcess): void {
   if (child.exitCode !== null || child.signalCode !== null || child.pid === undefined) return;
   if (process.platform === 'win32') {
-    spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true });
+    spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, shell: false });
     return;
   }
   try {

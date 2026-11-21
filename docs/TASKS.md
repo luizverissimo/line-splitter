@@ -273,7 +273,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Python/FFmpeg ausentes (caminho inválido) levam à tela Motor com instruções e "Verificar de novo"
   - Verificar: `pnpm test:e2e`
 
-- [ ] **T-602** Revisão de segurança do Electron — req: RNF-04 · dep: T-600
+- [x] **T-602** Revisão de segurança do Electron — req: RNF-04 · dep: T-600
   - Critérios:
     - Teste automatizado confere `contextIsolation`, `sandbox`, `nodeIntegration: false` e CSP em todas as janelas
     - Todo canal IPC tem schema Zod de entrada; teste percorre o contrato e envia payload inválido a cada canal
