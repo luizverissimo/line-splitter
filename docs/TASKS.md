@@ -344,7 +344,38 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste com interpretadores reais (scripts) cobrindo 3.8, 3.13 e 3.14
   - Verificar: `pnpm verify`
 
-- [ ] **T-999** Auditoria final de cobertura do PRD (/auditar) — req: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RF-24, RF-25, RN-01, RN-02, RN-03, RN-04, RN-05, RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RNF-01, RNF-02, RNF-03, RNF-04, RNF-05, RNF-06, RNF-07, RNF-08, RNF-09, RNF-10, RNF-11, RNF-12, RNF-13 · dep: T-001, T-002, T-003, T-004, T-005, T-006, T-007, T-010, T-011, T-100, T-101, T-102, T-103, T-200, T-201, T-300, T-301, T-302, T-303, T-304, T-400, T-401, T-500, T-501, T-600, T-601, T-602, T-603, T-604, T-900, T-901, T-902
+- [ ] **T-903** Medição de vazamento e escolha dos modelos por instrumento — req: RF-26 · dep: T-902a
+  - Critérios:
+    - Script `pnpm quality` mede, para cada instrumento, o vazamento do resto na faixa do instrumento (e vice-versa) com áudio sintético de stems conhecidos (SDR/razão de energia), com o motor real
+    - Compara o atual (`htdemucs_6s`) com os candidatos (RoFormer para voz; `htdemucs_ft` para bateria/baixo; `htdemucs_6s` com `--shifts`/`--overlap` para guitarra/piano) e grava a tabela em `fixtures/quality.md`
+    - Mesma comparação na música real indicada pelo usuário (resíduo medido e trechos para ouvir)
+    - Modelos, URLs, tamanhos e SHA-256 escolhidos registrados na DEC-017
+  - Verificar: `pnpm quality`
+
+- [ ] **T-904** Motor: instala o separador RoFormer e baixa todos os modelos escolhidos — req: RF-26, RF-01, RF-04 · dep: T-903
+  - Critérios:
+    - Instalação do motor inclui o pacote do separador RoFormer (versão fixa) além do Demucs, com o mesmo progresso/log/cancelamento
+    - Tela Motor mostra cada modelo (nome, tamanho, baixado ou não) e "Baixar modelos" baixa todos com progresso, retomada, cancelamento e verificação SHA-256
+    - Detecção ao abrir considera todos os modelos; motores antigos (só `htdemucs_6s`) são reconhecidos como incompletos com instrução clara
+    - Testes de integração com downloads reais (ou servidor HTTP local de teste servindo o arquivo real) e E2E da tela Motor
+  - Verificar: `pnpm verify` e `pnpm test:e2e motor modelo`
+
+- [ ] **T-905** Separação usa o melhor modelo por instrumento — req: RF-26, RF-11, RF-12 · dep: T-904
+  - Critérios:
+    - Voz usa o RoFormer; Bateria/Baixo usam `htdemucs_ft`; Guitarra/Piano usam `htdemucs_6s` com os parâmetros da T-903; os dois MP3 continuam sendo gerados (instrumento e resto)
+    - Progresso real lido da saída de cada separador, cancelamento que mata a árvore de processos e erros legíveis valem para os dois motores
+    - Histórico registra o modelo usado
+    - Medição da T-903 repetida pelo app mostra vazamento menor que o do `htdemucs_6s` em todos os instrumentos
+    - Testes de integração com os motores reais e E2E do fluxo completo para Voz e Bateria
+  - Verificar: `pnpm verify`, `pnpm quality` e `pnpm test:e2e resultado processamento`
+
+- [ ] **T-906** Benchmark, README e pacotes atualizados para os novos modelos — req: RF-26, RNF-04 · dep: T-905
+  - Critérios:
+    - `pnpm bench` mede o tempo por instrumento com os novos modelos (GPU e CPU) e o README mostra os números e o espaço em disco necessário
+    - `pnpm dist:linux` + `pnpm smoke:linux` com uma separação de Voz pelo RoFormer no AppImage
+  - Verificar: `pnpm bench`, `pnpm dist:linux` e `pnpm smoke:linux`
+
+- [ ] **T-999** Auditoria final de cobertura do PRD (/auditar) — req: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RF-24, RF-25, RN-01, RN-02, RN-03, RN-04, RN-05, RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RNF-01, RNF-02, RNF-03, RNF-04, RNF-05, RNF-06, RNF-07, RNF-08, RNF-09, RNF-10, RNF-11, RNF-12, RNF-13, RF-26 · dep: T-001, T-002, T-003, T-004, T-005, T-006, T-007, T-010, T-011, T-100, T-101, T-102, T-103, T-200, T-201, T-300, T-301, T-302, T-303, T-304, T-400, T-401, T-500, T-501, T-600, T-601, T-602, T-603, T-604, T-900, T-901, T-902, T-903, T-904, T-905, T-906
   - Critérios:
     - Cada requisito de `REQUISITOS.md` tem evidência (código + teste + verificação) conferida pelo revisor
     - Lacunas viram novas tarefas antes da entrega

@@ -102,3 +102,11 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - Decisão: a ordem é por nome e depois por pasta — o primeiro nome da lista vence em qualquer pasta do PATH. Isso também vale no Linux/macOS: um `python3` em qualquer pasta do PATH vence um `python` numa pasta anterior (antes, a primeira pasta vencia). É o comportamento desejado: `python3` é sempre o Python 3 do sistema, enquanto `python` pode ser outro interpretador. Se um candidato não executa ou é antigo demais, o próximo é testado.
 - Aprovado pelo usuário: não se aplica — decisão técnica, sem mudança de escopo.
 - Impacto: T-901a.
+
+### DEC-017 — Qualidade da separação: melhor modelo por instrumento (2026-11-21)
+- Contexto: o usuário relatou que, na faixa do instrumento, ainda dá para ouvir o resto da música baixinho e pediu isolamento como o do lalal.ai. O PRD fixa o Demucs `htdemucs_6s`, o único que separa guitarra e piano, porém o mais fraco nos demais instrumentos. Nenhum separador zera o vazamento; modelos mais novos reduzem bastante.
+- Opções apresentadas: (1) melhor modelo por instrumento; (2) só Demucs em alta qualidade (`htdemucs_ft` + `--shifts`); (3) escolha Rápida/Máxima nas Configurações.
+- Decisão: opção (1). Voz com um modelo da família RoFormer (BS-/MelBand-RoFormer); Bateria e Baixo com o Demucs `htdemucs_ft`; Guitarra/Violão e Piano/Teclado com o `htdemucs_6s` em alta qualidade (`--shifts` e mais sobreposição). Os modelos exatos e os parâmetros são escolhidos por medição de vazamento (T-903), com áudio sintético e uma música real indicada pelo usuário. Custos aceitos: separação de 2 a 4 vezes mais lenta e cerca de 1 GB a mais de modelos para baixar.
+- Muda o PRD em §4/§5 (motor fixo `htdemucs_6s`) — prevalece esta decisão; o restante do PRD (dois MP3, offline após a configuração, cancelamento, progresso real, histórico) continua valendo.
+- Aprovado pelo usuário: SIM — escolheu "Melhor modelo por instrumento (Recomendado)" em 2026-11-21 e vai indicar uma música real para a medição.
+- Impacto: RF-01, RF-04, RF-11, RF-12, RNF-04 (desempenho); novas tarefas T-903 a T-906; README e benchmark.
