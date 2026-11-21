@@ -64,7 +64,7 @@ No Ubuntu 24.04+ há dois obstáculos conhecidos do formato AppImage (DEC-015):
 
    Se preferir não mexer no AppArmor, use o .deb.
 
-**Windows:** gere o instalador com `pnpm dist:win` numa máquina Windows, rode `Line-Splitter-Setup-0.1.0.exe` e siga o instalador (dá para escolher a pasta); o app fica no menu Iniciar como "Line Splitter". **Atenção:** o instalador Windows ainda não foi gerado nem testado num Windows (tarefa T-901 bloqueada por falta de uma máquina Windows ou de `wine`).
+**Windows:** gere o instalador com `pnpm dist:win` (numa máquina Windows, ou no Linux com `wine`), rode `Line-Splitter-Setup-0.1.0.exe` e siga o instalador (dá para escolher a pasta); o app fica no menu Iniciar como "Line Splitter". **Atenção:** o instalador Windows é gerado (também no Linux, com `wine`), mas ainda não foi testado num Windows real (tarefa T-901).
 
 ### Primeiro uso: instalar o motor
 
@@ -132,7 +132,7 @@ pnpm smoke:linux     # confere o AppImage gerado (no Ubuntu 24.04+: LINE_SPLITTE
 pnpm dist:win        # release/Line-Splitter-Setup-<versão>.exe
 ```
 
-`pnpm dist:win` precisa de Windows ou de `wine` no Linux (`sudo apt install wine64`).
+`pnpm dist:win` precisa de Windows ou de `wine` no Linux (`sudo apt install wine`).
 
 ### Variáveis de ambiente
 
