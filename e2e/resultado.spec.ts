@@ -67,10 +67,15 @@ test.describe('Fluxo completo de separação', () => {
         .toBeGreaterThanOrEqual(1);
       expect(await audio.evaluate((a: HTMLAudioElement) => a.duration)).toBeCloseTo(8, 0);
       await expect(player).toContainText('0:08');
+      // Barra de posição e volume também agem no áudio de verdade.
+      await player.getByRole('slider', { name: 'Posição em musica-curta - Voz.mp3' }).fill('4');
+      await expect.poll(() => audio.evaluate((a: HTMLAudioElement) => a.currentTime)).toBeCloseTo(4, 0);
+      await player.getByRole('slider', { name: 'Volume de musica-curta - Voz.mp3' }).fill('0.5');
+      await expect.poll(() => audio.evaluate((a: HTMLAudioElement) => a.volume)).toBeCloseTo(0.5, 2);
       await player.getByRole('button', { name: 'Tocar musica-curta - Voz.mp3' }).click();
       await expect
         .poll(() => audio.evaluate((a: HTMLAudioElement) => a.currentTime), { timeout: 10_000 })
-        .toBeGreaterThan(0.3);
+        .toBeGreaterThan(4.3);
       await result.getByRole('button', { name: 'Pausar musica-curta - Voz.mp3' }).click();
 
       await result.getByRole('button', { name: 'Mostrar arquivo' }).first().click();

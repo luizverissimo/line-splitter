@@ -169,3 +169,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: APROVADO. Sugestão aplicada: `devtools:`/`chrome-extension:` também bloqueados.
 - Observações: o teste de rede bloqueada depende do `bwrap` (bubblewrap) instalado; sem ele (outros sistemas) esse bloco não roda.
 - Commit: ver `git log` (T-501)
+
+### T-600 — E2E de todos os fluxos felizes do PRD (2026-11-20)
+- Feito: `e2e/fluxos.spec.ts` (os 5 instrumentos pela interface com o motor real: 2 MP3 cada conferidos por ffprobe — mp3, 320 kbps, 44,1 kHz, estéreo, ~8 s — nomes corretos, progresso chegando a 100% e tempo decorrido, histórico com 5 itens e remover sem apagar); `resultado.spec.ts` passou a exercitar posição e volume do player. Demais fluxos em `envio`, `processamento`, `resultado` e `historico`.
+- Verificado: `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 25 passed; `pnpm verify` OK.
+- Revisor: APROVADO. Sugestões aplicadas: bitrate conferido no E2E; posição e volume do player.
+- Observações: E2E exigem `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
+- Commit: ver `git log` (T-600)

@@ -27,8 +27,8 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RF-21 | Remover item do histórico com opção de também apagar os MP3 | §5.6 "remover do histórico (opção de também apagar os MP3)" | T-401, T-600 | pendente |
 | RF-22 | Item do histórico indica "arquivo não encontrado" se os arquivos foram movidos/apagados | §5.6 | T-400, T-600 | pendente |
 | RF-23 | Estado vazio do histórico convidando à primeira separação | §5.6 "Estado vazio" | T-400, T-600 | pendente |
-| RF-24 | Configurações: pasta de saída, bitrate, dispositivo (Auto/GPU/CPU), caminhos de Python e FFmpeg, reinstalar motor | §5.1 "Caminhos… podem ser sobrescritos", §5.7 | T-010, T-100, T-102 | pendente |
-| RF-25 | Persistir histórico e preferências em SQLite (`better-sqlite3`) em `userData` | §4 "Persistência local", §5.7 "Persistidas no SQLite" | T-005, T-010 | pendente |
+| RF-24 | Configurações: pasta de saída, bitrate, dispositivo (Auto/GPU/CPU), caminhos de Python e FFmpeg, reinstalar motor | §5.1 "Caminhos… podem ser sobrescritos", §5.7 | T-010, T-100, T-102 | feito |
+| RF-25 | Persistir histórico e preferências em SQLite (`better-sqlite3`) em `userData` | §4 "Persistência local", §5.7 "Persistidas no SQLite" | T-005, T-010 | feito |
 | RN-01 | Formatos aceitos: MP3, WAV, FLAC, M4A/AAC, OGG | §5.2 "Formatos aceitos" | T-200, T-201 | feito |
 | RN-02 | Limites: até 500 MB e até 30 minutos | §5.2 "Limites" | T-200, T-601 | pendente |
 | RN-03 | Validar extensão, legibilidade pelo FFmpeg e duração, com erro claro se inválido | §5.2 "Validação" | T-200, T-201, T-601 | pendente |

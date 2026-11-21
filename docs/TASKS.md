@@ -256,7 +256,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
 
 ## Fase 7 — Qualidade
 
-- [ ] **T-600** E2E de todos os fluxos felizes do PRD — req: RF-07, RF-08, RF-09, RF-10, RF-12, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RNF-13 · dep: T-401, T-501
+- [x] **T-600** E2E de todos os fluxos felizes do PRD — req: RF-07, RF-08, RF-09, RF-10, RF-12, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RNF-13 · dep: T-401, T-501
   - Critérios:
     - Envio por diálogo e por arrastar e soltar
     - Cada um dos 5 instrumentos gera 2 MP3 válidos (conferidos com `ffprobe`) com nomes corretos
