@@ -111,7 +111,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
     const userData = path.join(tmp(), 'arquivo-comum');
     fs.writeFileSync(userData, 'não é pasta');
     const installer = new EngineInstaller(enginePaths(userData), recorder().events);
-    const opts = { reinstall: true, systemPython: await systemPython(), cuda: false };
+    const opts = { reinstall: true, target: { systemPython: await systemPython(), cuda: false } };
     const err = await installer.install(opts).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(AppError);
     expect(err).toMatchObject({ code: 'ENGINE_FAILED', details: expect.stringMatching(/ENOTDIR|EEXIST/) });
@@ -135,8 +135,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
       const err = await installer
         .install({
           reinstall: true,
-          systemPython: await systemPython(),
-          cuda: false,
+          target: { systemPython: await systemPython(), cuda: false },
           extraEnv: { HTTPS_PROXY: proxy, https_proxy: proxy, PIP_RETRIES: '0', PIP_TIMEOUT: '2' },
         })
         .catch((e: unknown) => e);
@@ -159,8 +158,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
       const installer = new EngineInstaller(paths, rec.events);
       const result = await installer.install({
         reinstall: true,
-        systemPython: await systemPython(),
-        cuda: false,
+        target: { systemPython: await systemPython(), cuda: false },
       });
       expect(result).toMatchObject({ demucs: '4.1.0', cuda: false });
       expect(result.torch).toMatch(/^2\.6\.0/);
@@ -187,7 +185,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
       },
     });
     await expect(
-      installer.install({ reinstall: true, systemPython: await systemPython(), cuda: false }),
+      installer.install({ reinstall: true, target: { systemPython: await systemPython(), cuda: false } }),
     ).rejects.toMatchObject({ code: 'CANCELLED' });
     expect(fs.existsSync(paths.venvDir)).toBe(false);
     expect(rec.steps.map((s) => s.step)).toEqual([1, 2]);
@@ -206,7 +204,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
         },
       });
       await expect(
-        installer.install({ reinstall: true, systemPython: await systemPython(), cuda: false }),
+        installer.install({ reinstall: true, target: { systemPython: await systemPython(), cuda: false } }),
       ).rejects.toMatchObject({ code: 'CANCELLED' });
       expect(fs.existsSync(paths.venvDir)).toBe(false);
     },
@@ -219,8 +217,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
     const err = await installer
       .install({
         reinstall: true,
-        systemPython: await systemPython(),
-        cuda: false,
+        target: { systemPython: await systemPython(), cuda: false },
         // Proxy inalcançável: toda conexão do pip real falha, como sem internet.
         extraEnv: {
           HTTPS_PROXY: 'http://127.0.0.1:9',
@@ -240,13 +237,34 @@ describe('EngineInstaller (pip e venv reais)', () => {
     expect((err as { details?: string }).details).toMatch(/proxy|127\.0\.0\.1/i);
   }, 120_000);
 
+  it('cancelar enquanto o Python ainda é localizado também cancela (antes de criar o ambiente)', async () => {
+    const paths = enginePaths(tmp());
+    const rec = recorder();
+    const installer = new EngineInstaller(paths, rec.events);
+    let release: () => void = () => undefined;
+    const python = await systemPython();
+    const run = installer.install({
+      reinstall: true,
+      target: () =>
+        new Promise((resolve) => {
+          release = () => resolve({ systemPython: python, cuda: false });
+        }),
+    });
+    expect(installer.isRunning).toBe(true);
+    expect(installer.cancel()).toBe(true);
+    release();
+    await expect(run).rejects.toMatchObject({ code: 'CANCELLED' });
+    expect(rec.steps).toEqual([]);
+    expect(fs.existsSync(paths.venvDir)).toBe(false);
+  });
+
   it('recusa duas instalações ao mesmo tempo', async () => {
     const paths = enginePaths(tmp());
     const installer = new EngineInstaller(paths, recorder().events);
     const python = await systemPython();
-    const first = installer.install({ reinstall: true, systemPython: python, cuda: false });
+    const first = installer.install({ reinstall: true, target: { systemPython: python, cuda: false } });
     await expect(
-      installer.install({ reinstall: true, systemPython: python, cuda: false }),
+      installer.install({ reinstall: true, target: { systemPython: python, cuda: false } }),
     ).rejects.toMatchObject({
       code: 'CONFLICT',
     });

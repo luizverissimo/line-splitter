@@ -48,7 +48,9 @@ export function SeparationResultPanel({ result, onSeparateAnother, onNewFile }: 
         <div className="result-track" key={t.path}>
           <div className="result-track-head">
             <strong>{t.title}</strong>
-            <span className="result-file">{baseName(t.path)}</span>
+            <span className="result-file" data-path>
+              {baseName(t.path)}
+            </span>
             <Button
               icon={<Search size={16} aria-hidden="true" />}
               disabled={pending}

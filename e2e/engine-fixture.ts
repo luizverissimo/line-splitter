@@ -28,8 +28,7 @@ export async function ensureTestEngine(): Promise<string> {
     if (!python.path) throw new Error(`E2E do motor exigem Python no PATH: ${python.detail}`);
     await new EngineInstaller(paths, { step: () => undefined, log: () => undefined }).install({
       reinstall: true,
-      systemPython: python.path,
-      cuda: false,
+      target: { systemPython: python.path, cuda: false },
     });
   }
   if (!status.model.ok) await new ModelDownloader(paths, () => undefined).download();

@@ -24,12 +24,20 @@ export interface InstallEvents {
   log: (log: InstallLog) => void;
 }
 
-export interface InstallOptions {
-  reinstall: boolean;
+export interface InstallTarget {
   /** Python do sistema que cria o ambiente. */
   systemPython: string;
   /** Instalar o PyTorch com CUDA. */
   cuda: boolean;
+}
+
+export interface InstallOptions {
+  reinstall: boolean;
+  /**
+   * Python e variante do PyTorch, já conhecidos ou descobertos depois que a instalação começa
+   * (assim o Cancelar vale desde o primeiro instante).
+   */
+  target: InstallTarget | (() => Promise<InstallTarget>);
   /** Variáveis extras para o pip (ex.: proxy corporativo). */
   extraEnv?: NodeJS.ProcessEnv;
 }
@@ -98,6 +106,7 @@ export class EngineInstaller {
     this.logBroken = null;
     const { venvPython, venvDir } = this.paths;
     const total = 5;
+    let target: InstallTarget = { systemPython: '', cuda: false };
     const env: NodeJS.ProcessEnv = {
       ...process.env,
       PIP_DISABLE_PIP_VERSION_CHECK: '1',
@@ -115,12 +124,14 @@ export class EngineInstaller {
         const detail = err instanceof Error ? err.message : String(err);
         throw new AppError('ENGINE_FAILED', explainInstallFailure(detail), detail);
       }
+      target = typeof options.target === 'function' ? await options.target() : options.target;
+      if (this.cancelled) throw new Error('cancelado antes de começar');
       this.step(1, total, 'Criando o ambiente Python do motor');
       if (options.reinstall) fs.rmSync(venvDir, { recursive: true, force: true });
       if (!fs.existsSync(venvPython)) {
         fs.rmSync(venvDir, { recursive: true, force: true });
         fs.mkdirSync(this.paths.engineDir, { recursive: true });
-        await this.exec(options.systemPython, ['-m', 'venv', venvDir], env);
+        await this.exec(target.systemPython, ['-m', 'venv', venvDir], env);
       } else {
         this.log('Ambiente existente encontrado; os pacotes serão conferidos.', 'info');
       }
@@ -128,11 +139,11 @@ export class EngineInstaller {
       this.step(2, total, 'Atualizando o pip');
       await this.exec(venvPython, ['-m', 'pip', 'install', '--upgrade', 'pip'], env);
 
-      const flavor = options.cuda ? 'cuda' : 'cpu';
+      const flavor = target.cuda ? 'cuda' : 'cpu';
       this.step(
         3,
         total,
-        options.cuda ? 'Instalando o PyTorch com suporte à GPU (CUDA)' : 'Instalando o PyTorch (CPU)',
+        target.cuda ? 'Instalando o PyTorch com suporte à GPU (CUDA)' : 'Instalando o PyTorch (CPU)',
       );
       await this.exec(
         venvPython,

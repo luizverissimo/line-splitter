@@ -290,7 +290,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Medição de responsividade: durante a separação, a troca de rota na UI responde em < 200 ms (medido no E2E)
   - Verificar: `pnpm bench`
 
-- [ ] **T-604** Acessibilidade e idioma — req: RNF-07, RNF-08, RNF-09 · dep: T-600
+- [x] **T-604** Acessibilidade e idioma — req: RNF-07, RNF-08, RNF-09 · dep: T-600
   - Critérios:
     - Todas as telas operáveis só por teclado, com foco visível e rótulos acessíveis nos botões de ícone
     - Auditoria `@axe-core/playwright` sem violações sérias/críticas em todas as telas
@@ -313,6 +313,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Critérios:
     - `pnpm dist:win` gera instalador NSIS (no Linux via wine ou numa máquina Windows)
     - Caminhos de Python/FFmpeg/venv funcionam no Windows (`Scripts\python.exe`, `.exe`)
+    - E2E no Windows isolam a pasta de Música/saída (o isolamento atual via XDG só vale no Linux)
     - Instalado num Windows: abre, instala o motor e completa uma separação real
   - Verificar: `pnpm dist:win` e executar o instalador num Windows
 

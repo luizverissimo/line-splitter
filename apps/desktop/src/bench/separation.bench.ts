@@ -36,8 +36,7 @@ async function ensureCudaEngine(): Promise<EnginePaths> {
     if (!python.path) throw new Error(python.detail);
     await new EngineInstaller(paths, { step: () => undefined, log: () => undefined }).install({
       reinstall: true,
-      systemPython: python.path,
-      cuda: true,
+      target: { systemPython: python.path, cuda: true },
     });
   }
   if (!status.model.ok) await new ModelDownloader(paths, () => undefined).download();

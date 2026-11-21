@@ -15,7 +15,9 @@ function Output({ title, output }: { title: string; output: HistoryItem['instrum
   return (
     <div className="history-output">
       <span className="history-output-title">{title}</span>
-      <span className="result-file">{output.path}</span>
+      <span className="result-file" data-path>
+        {output.path}
+      </span>
       {output.exists && output.url ? (
         <AudioPlayer src={output.url} title={baseName(output.path)} />
       ) : (
@@ -38,14 +40,16 @@ function HistoryEntry({ item, onRemove }: { item: HistoryItem; onRemove: (item: 
       <div className="history-head">
         <div>
           <h2>
-            {item.sourceName} · {label}
+            <span data-path>{item.sourceName}</span> · {label}
           </h2>
           <p className="history-meta">
             {dateFormat.format(new Date(item.createdAt))} · áudio de {formatDuration(item.audioDurationS)} ·
             processado em {formatDuration(item.processingMs / 1000)} ({item.device === 'cuda' ? 'GPU' : 'CPU'}
             , {item.bitrateKbps} kbps)
           </p>
-          <p className="history-meta">Original: {item.sourcePath}</p>
+          <p className="history-meta">
+            Original: <span data-path>{item.sourcePath}</span>
+          </p>
         </div>
         <div className="actions">
           <Button

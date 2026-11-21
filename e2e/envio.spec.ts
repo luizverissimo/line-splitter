@@ -77,7 +77,10 @@ test.describe('Envio do arquivo de áudio', () => {
   test('soltar fora da caixa, numa outra tela, leva ao Início com o arquivo', async ({ userData }) => {
     const { app, page } = await launchApp(userData);
     try {
+      // Sem motor instalado o app abre na tela Motor; espera essa decisão antes de navegar.
+      await expect(page.getByRole('heading', { level: 1, name: 'Motor de separação' })).toBeVisible();
       await page.getByRole('link', { name: 'Configurações' }).click();
+      await expect(page.getByRole('heading', { level: 1, name: 'Configurações' })).toBeVisible();
       await dropFile(page, fixtures.ogg, 'nav');
       await expect(page.getByRole('heading', { level: 1, name: 'Início' })).toBeVisible();
       await expect(

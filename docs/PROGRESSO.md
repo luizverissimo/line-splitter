@@ -199,3 +199,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm bench` (2 passed); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e processamento` 3 execuções seguidas, 2 passed cada; `pnpm verify` OK.
 - Revisor: APROVADO (o revisor reproduziu: GPU 19,2 s, CPU 66,9 s). Sugestão aplicada: o benchmark confere que o motor CUDA ficou pronto após instalar.
 - Commit: ver `git log` (T-603)
+
+### T-604 — Acessibilidade e idioma (2026-11-21)
+- Feito: `e2e/a11y.spec.ts` (auditoria axe WCAG 2.1 A/AA — inclui contraste — em todas as telas e estados: Início vazio/erro/arquivo, processamento, resultado, Motor pronto/com problema, instalação em andamento/cancelada/com falha, download em andamento/cancelado, Histórico vazio/com item, diálogo de remoção, Configurações com erro, página inexistente, separação com erro; varredura de textos de interface em inglês, ignorando só nomes/caminhos de arquivo marcados com `data-path` e saída técnica; fluxo principal, Configurações, Histórico, Motor e player só com teclado, com foco visível). `e2e/app.ts` isola a pasta de Música dos E2E (`e2e/isolamento.spec.ts`). Bug corrigido: Cancelar logo após "Instalar motor" era ignorado (o instalador agora resolve Python/variante depois de começar).
+- Verificado: `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e a11y` 6 passed (estável em repetição); suíte completa 37 passed duas vezes seguidas; `pnpm verify` OK (276).
+- Revisor: REPROVADO (cobertura parcial) → REPROVADO (instabilidade) → APROVADO.
+- Observações: dois E2E de acessibilidade gravaram arquivos de teste na pasta Música real do usuário (`~/Music/Line Splitter`) antes do isolamento; os arquivos foram apagados. O isolamento da pasta de Música vale no Linux; o equivalente no Windows ficou como critério da T-901. E2E com `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente).
+- Commit: ver `git log` (T-604)

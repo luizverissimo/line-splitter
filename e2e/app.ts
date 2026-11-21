@@ -24,10 +24,23 @@ export function makeUserData(): string {
 
 /** Abre o app empacotado (out/ + web/dist) com uma pasta de dados própria. */
 export async function launchApp(userData: string, extraEnv: NodeJS.ProcessEnv = {}): Promise<LaunchedApp> {
+  // A pasta de Música (padrão da pasta de saída) também fica dentro da pasta do teste:
+  // nenhum E2E pode gravar na pasta real do usuário.
+  const xdg = path.join(userData, 'xdg');
+  const music = path.join(userData, 'Musica');
+  fs.mkdirSync(xdg, { recursive: true });
+  fs.mkdirSync(music, { recursive: true });
+  fs.writeFileSync(path.join(xdg, 'user-dirs.dirs'), `XDG_MUSIC_DIR="${music}"\n`);
   const app = await _electron.launch({
     executablePath: electronBinary,
     args: [...devElectronArgs(electronBinary), desktopDir],
-    env: { ...process.env, LINE_SPLITTER_USER_DATA: userData, LINE_SPLITTER_DEV_URL: '', ...extraEnv },
+    env: {
+      ...process.env,
+      XDG_CONFIG_HOME: xdg,
+      LINE_SPLITTER_USER_DATA: userData,
+      LINE_SPLITTER_DEV_URL: '',
+      ...extraEnv,
+    },
   });
   const page = await app.firstWindow();
   await page.waitForLoadState('domcontentloaded');

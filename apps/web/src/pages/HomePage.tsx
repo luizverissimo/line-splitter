@@ -159,7 +159,7 @@ export function HomePage() {
       )}
       {state.kind === 'ready' && (
         <div className="audio-card" aria-label="Arquivo escolhido">
-          <h2>{state.audio.fileName}</h2>
+          <h2 data-path>{state.audio.fileName}</h2>
           <dl className="audio-meta">
             <div>
               <dt>Duração</dt>
