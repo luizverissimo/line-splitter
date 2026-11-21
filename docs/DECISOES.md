@@ -96,3 +96,9 @@ Decisões técnicas e mudanças de escopo. Mudança de escopo só entra aqui com
 - `@line-splitter/shared` e `zod` passaram a `devDependencies` do desktop: o esbuild já os embute em `out/main.cjs`, então não precisam ir para o pacote. Só `better-sqlite3` vai, com `prebuilds/` fora do asar (DEC-009); `deps/`, `src/` e `build/` do módulo ficam de fora.
 - Aprovado pelo usuário: não se aplica — decisão técnica de empacotamento, sem mudança de escopo. A parte de rodar com `--no-sandbox` depende do DEC-008, pendente.
 - Impacto: T-900, T-902.
+
+### DEC-016 — Busca de executáveis no PATH: por nome, depois por pasta (2026-11-21)
+- Contexto: para o Windows (T-901a) a detecção do Python passou a testar todos os candidatos do PATH em ordem até um funcionar (`python`, depois o lançador `py`), ignorando o atalho da Microsoft Store (`…\Microsoft\WindowsApps`).
+- Decisão: a ordem é por nome e depois por pasta — o primeiro nome da lista vence em qualquer pasta do PATH. Isso também vale no Linux/macOS: um `python3` em qualquer pasta do PATH vence um `python` numa pasta anterior (antes, a primeira pasta vencia). É o comportamento desejado: `python3` é sempre o Python 3 do sistema, enquanto `python` pode ser outro interpretador. Se um candidato não executa ou é antigo demais, o próximo é testado.
+- Aprovado pelo usuário: não se aplica — decisão técnica, sem mudança de escopo.
+- Impacto: T-901a.

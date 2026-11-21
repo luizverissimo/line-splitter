@@ -220,3 +220,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Bloqueio: `pnpm dist:win` falha com "wine is required" (wine exige sudo para instalar) e a instalação real exige uma máquina Windows.
 - Revisor: APROVADO para as mudanças commitadas; lacunas de teste dos ramos win32 viraram a T-901a.
 - Commit: ver `git log` (T-901)
+
+### T-901a — Ramos Windows testáveis no Linux (2026-11-21)
+- Feito: `findAllInPath` (PATHEXT, `Path`, `;`, sem bit de execução no Windows, ignora `WindowsApps`); `detectPython` com plataforma injetável testando cada candidato até um funcionar; `killTree`/`spawnTree` com dependências injetáveis e taskkill com fallback (erro ao iniciar ou código ≠ 0); `checkExecutable` com plataforma. `windows.test.ts` com arquivos e scripts reais. DEC-016.
+- Verificado: `pnpm verify` OK; E2E completo 37 passed; integração de cancelamento/instalação com motor real 19 passed.
+- Revisor: APROVADO (observações 1 e 2 aplicadas: fallback no exit ≠ 0 com teste; DEC-016).
+- Commit: ver `git log` (T-901a)

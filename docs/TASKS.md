@@ -318,7 +318,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Verificar: `pnpm dist:win` e executar o instalador num Windows
   - Bloqueio: `pnpm dist:win` no Linux exige wine (electron-builder usa wine para o rcedit e para o NSIS; instalar wine exige sudo — `sudo apt install wine64`), ou rodar `pnpm dist:win` numa máquina Windows. O critério "instalado num Windows: abre, instala o motor e completa uma separação real" exige uma máquina Windows. Já feito: config NSIS e script `dist:win`; isolamento da pasta de Música dos E2E em qualquer sistema (`LINE_SPLITTER_MUSIC_DIR`).
 
-- [ ] **T-901a** Ramos Windows testáveis no Linux (PATH/PATHEXT, Python, ffprobe, taskkill, permissões) — req: RNF-02 · dep: T-901
+- [x] **T-901a** Ramos Windows testáveis no Linux (PATH/PATHEXT, Python, ffprobe, taskkill, permissões) — req: RNF-02 · dep: T-901
   - Critérios:
     - `findInPath` no ramo win32 testado (PATHEXT, `Path`, padrão sem PATHEXT, bit de execução ignorado)
     - `detectPython` com plataforma injetável: no Windows tenta `python` e `py`, ignora o atalho da Microsoft Store (`WindowsApps`) e cai no próximo candidato quando um falha

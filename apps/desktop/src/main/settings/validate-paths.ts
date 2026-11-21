@@ -23,14 +23,19 @@ export function checkOutputDir(dir: string): string | null {
 }
 
 /** Arquivo existente e executável. */
-export function checkExecutable(file: string, label: string): string | null {
+export function checkExecutable(
+  file: string,
+  label: string,
+  platform: NodeJS.Platform = process.platform,
+): string | null {
   try {
     if (!fs.statSync(file).isFile()) return `${label}: o caminho não é um arquivo.`;
   } catch {
     return `${label}: arquivo não encontrado.`;
   }
   try {
-    fs.accessSync(file, process.platform === 'win32' ? fs.constants.R_OK : fs.constants.X_OK);
+    // No Windows não há bit de execução: basta o arquivo existir e ser legível.
+    fs.accessSync(file, platform === 'win32' ? fs.constants.R_OK : fs.constants.X_OK);
     return null;
   } catch {
     return `${label}: o arquivo não tem permissão de execução.`;

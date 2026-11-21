@@ -2,7 +2,7 @@ import { MIN_PYTHON, type EngineDevice, type EngineStatus, type Settings } from 
 import fs from 'node:fs';
 import { z } from 'zod';
 import path from 'node:path';
-import { findInPath, run } from './exec';
+import { findAllInPath, findInPath, run } from './exec';
 import { HTDEMUCS_6S, type EnginePaths } from './paths';
 
 type Item = { ok: boolean; detail: string };
@@ -21,15 +21,13 @@ const atLeast = (v: number[], min: readonly number[]) => {
   return true;
 };
 
-export async function detectPython(configured: string): Promise<Item & { path: string | null }> {
-  const python =
-    configured || findInPath(process.platform === 'win32' ? ['python', 'py'] : ['python3', 'python']);
-  if (!python) {
-    return { ok: false, path: null, detail: 'Python não encontrado no sistema.' };
-  }
-  if (configured && !fs.existsSync(configured)) {
-    return { ok: false, path: configured, detail: `Python não encontrado em ${configured}.` };
-  }
+export interface DetectOptions {
+  env?: NodeJS.ProcessEnv;
+  platform?: NodeJS.Platform;
+}
+
+/** Roda o Python e confere a versão mínima. */
+async function probePython(python: string): Promise<Item & { path: string | null }> {
   const r = await run(python, ['-c', "import sys; print('%d.%d.%d' % sys.version_info[:3])"], {
     timeoutMs: 15_000,
   });
@@ -50,6 +48,39 @@ export async function detectPython(configured: string): Promise<Item & { path: s
     };
   }
   return { ok: true, path: python, detail: `Python ${text}` };
+}
+
+/**
+ * Python do sistema: o configurado ou, sem configuração, cada candidato do PATH em ordem
+ * (Windows: `python` e depois o lançador `py`; Linux/macOS: `python3` e depois `python`)
+ * até um funcionar. Sem nenhum funcionando, explica a falha do primeiro.
+ */
+export async function detectPython(
+  configured: string,
+  options: DetectOptions = {},
+): Promise<Item & { path: string | null }> {
+  const platform = options.platform ?? process.platform;
+  if (configured) {
+    if (!fs.existsSync(configured)) {
+      return { ok: false, path: configured, detail: `Python não encontrado em ${configured}.` };
+    }
+    return probePython(configured);
+  }
+  const candidates = findAllInPath(
+    platform === 'win32' ? ['python', 'py'] : ['python3', 'python'],
+    options.env ?? process.env,
+    platform,
+  );
+  if (candidates.length === 0) {
+    return { ok: false, path: null, detail: 'Python não encontrado no sistema.' };
+  }
+  let first: (Item & { path: string | null }) | null = null;
+  for (const candidate of candidates) {
+    const result = await probePython(candidate);
+    if (result.ok) return result;
+    first ??= result;
+  }
+  return first ?? { ok: false, path: null, detail: 'Python não encontrado no sistema.' };
 }
 
 export async function detectFfmpeg(

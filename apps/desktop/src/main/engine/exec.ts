@@ -41,29 +41,56 @@ export function run(
   });
 }
 
-/** Procura um executável nas pastas do PATH (com PATHEXT no Windows). */
-export function findInPath(
+/**
+ * Atalhos de "App Execution Alias" do Windows (python.exe em ...\Microsoft\WindowsApps) abrem a
+ * Microsoft Store em vez de executar o Python; nunca são candidatos.
+ */
+function isWindowsAppsAlias(dir: string): boolean {
+  return /[\\/]Microsoft[\\/]WindowsApps[\\/]?$/i.test(dir);
+}
+
+/** Todos os executáveis com esses nomes nas pastas do PATH, na ordem de busca (com PATHEXT no Windows). */
+export function findAllInPath(
   names: string[],
   env: NodeJS.ProcessEnv = process.env,
   platform: NodeJS.Platform = process.platform,
-): string | null {
-  const dirs = (env.PATH ?? env.Path ?? '').split(path.delimiter).filter(Boolean);
+): string[] {
+  const dirs = (env.PATH ?? env.Path ?? '')
+    .split(platform === 'win32' ? ';' : path.delimiter)
+    .filter(Boolean)
+    .filter((dir) => platform !== 'win32' || !isWindowsAppsAlias(dir));
   const exts =
-    platform === 'win32' ? (env.PATHEXT ?? '.EXE;.CMD;.BAT').split(';').map((e) => e.toLowerCase()) : [''];
-  for (const dir of dirs) {
-    for (const name of names) {
+    platform === 'win32'
+      ? (env.PATHEXT ?? '.EXE;.CMD;.BAT')
+          .split(';')
+          .filter(Boolean)
+          .map((e) => e.toLowerCase())
+      : [''];
+  const found: string[] = [];
+  // Por nome primeiro: "python" em qualquer pasta vence "py" (mesma ordem de preferência da lista).
+  for (const name of names) {
+    for (const dir of dirs) {
       for (const ext of exts) {
         const candidate = path.join(dir, name + ext);
         try {
-          const stat = fs.statSync(candidate);
-          if (!stat.isFile()) continue;
+          if (!fs.statSync(candidate).isFile()) continue;
+          // No Windows não existe bit de execução: a extensão do PATHEXT é o que conta.
           if (platform !== 'win32') fs.accessSync(candidate, fs.constants.X_OK);
-          return candidate;
+          if (!found.includes(candidate)) found.push(candidate);
         } catch {
           continue;
         }
       }
     }
   }
-  return null;
+  return found;
+}
+
+/** Primeiro executável encontrado no PATH (ver findAllInPath). */
+export function findInPath(
+  names: string[],
+  env: NodeJS.ProcessEnv = process.env,
+  platform: NodeJS.Platform = process.platform,
+): string | null {
+  return findAllInPath(names, env, platform)[0] ?? null;
 }
