@@ -44,11 +44,6 @@ test('AppImage gerado: abre, usa o SQLite nativo, detecta o motor e completa uma
 }) => {
   expect(fs.existsSync(appImage), `rode "pnpm dist:linux" antes (${appImage})`).toBe(true);
   linkTestEngine(userData, await ensureTestEngine());
-  const xdg = path.join(userData, 'xdg');
-  const music = path.join(userData, 'Musica');
-  fs.mkdirSync(xdg, { recursive: true });
-  fs.mkdirSync(music, { recursive: true });
-  fs.writeFileSync(path.join(xdg, 'user-dirs.dirs'), `XDG_MUSIC_DIR="${music}"\n`);
 
   const app = await _electron.launch({
     executablePath: appImage,
@@ -57,8 +52,8 @@ test('AppImage gerado: abre, usa o SQLite nativo, detecta o motor e completa uma
       ...process.env,
       // Sem libfuse2 (padrão no Ubuntu 24.04) o AppImage se extrai e roda sozinho.
       APPIMAGE_EXTRACT_AND_RUN: '1',
-      XDG_CONFIG_HOME: xdg,
       LINE_SPLITTER_USER_DATA: userData,
+      LINE_SPLITTER_MUSIC_DIR: path.join(userData, 'Musica'),
       LINE_SPLITTER_DEV_URL: '',
     },
     timeout: 120_000,

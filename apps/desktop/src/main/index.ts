@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog } from 'electron';
 import path from 'node:path';
-import { resolveDevUrl, resolveUserDataOverride } from './env';
+import { resolveDevUrl, resolveMusicDirOverride, resolveUserDataOverride } from './env';
 import { hardenApp } from './hardening';
 import { registerIpcHandlers } from './ipc';
 import { appInfoHandler } from './handlers/app';
@@ -41,6 +41,8 @@ let devUrl: URL | null;
 try {
   const userData = resolveUserDataOverride(process.env);
   if (userData) app.setPath('userData', userData);
+  const music = resolveMusicDirOverride(process.env);
+  if (music) app.setPath('music', music);
   devUrl = resolveDevUrl(process.env);
 } catch (err) {
   fatal(err instanceof Error ? err.message : String(err));

@@ -2,11 +2,28 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { resolveDevUrl, resolveUserDataOverride } from './env';
+import { resolveDevUrl, resolveMusicDirOverride, resolveUserDataOverride } from './env';
 
 const tmpDirs: string[] = [];
 afterEach(() => {
   for (const dir of tmpDirs.splice(0)) fs.rmSync(dir, { recursive: true, force: true });
+});
+
+describe('resolveMusicDirOverride', () => {
+  it('sem variável devolve null; com caminho absoluto cria e devolve', () => {
+    expect(resolveMusicDirOverride({})).toBeNull();
+    const base = fs.mkdtempSync(path.join(os.tmpdir(), 'ls-music-'));
+    tmpDirs.push(base);
+    const target = path.join(base, 'Musica');
+    expect(resolveMusicDirOverride({ LINE_SPLITTER_MUSIC_DIR: target })).toBe(target);
+    expect(fs.statSync(target).isDirectory()).toBe(true);
+  });
+
+  it('recusa caminho relativo com mensagem clara', () => {
+    expect(() => resolveMusicDirOverride({ LINE_SPLITTER_MUSIC_DIR: 'Musica' })).toThrow(
+      /LINE_SPLITTER_MUSIC_DIR precisa ser um caminho absoluto/,
+    );
+  });
 });
 
 describe('resolveUserDataOverride', () => {

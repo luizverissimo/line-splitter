@@ -309,13 +309,23 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - AppImage executado nesta máquina: abre, detecta o motor e completa uma separação real
   - Verificar: `pnpm dist:linux` e executar o AppImage gerado
 
-- [ ] **T-901** Instalador Windows (NSIS) — req: RNF-02 · dep: T-900
+- [!] **T-901** Instalador Windows (NSIS) — req: RNF-02 · dep: T-900
   - Critérios:
     - `pnpm dist:win` gera instalador NSIS (no Linux via wine ou numa máquina Windows)
     - Caminhos de Python/FFmpeg/venv funcionam no Windows (`Scripts\python.exe`, `.exe`)
     - E2E no Windows isolam a pasta de Música/saída (o isolamento atual via XDG só vale no Linux)
     - Instalado num Windows: abre, instala o motor e completa uma separação real
   - Verificar: `pnpm dist:win` e executar o instalador num Windows
+  - Bloqueio: `pnpm dist:win` no Linux exige wine (electron-builder usa wine para o rcedit e para o NSIS; instalar wine exige sudo — `sudo apt install wine64`), ou rodar `pnpm dist:win` numa máquina Windows. O critério "instalado num Windows: abre, instala o motor e completa uma separação real" exige uma máquina Windows. Já feito: config NSIS e script `dist:win`; isolamento da pasta de Música dos E2E em qualquer sistema (`LINE_SPLITTER_MUSIC_DIR`).
+
+- [ ] **T-901a** Ramos Windows testáveis no Linux (PATH/PATHEXT, Python, ffprobe, taskkill, permissões) — req: RNF-02 · dep: T-901
+  - Critérios:
+    - `findInPath` no ramo win32 testado (PATHEXT, `Path`, padrão sem PATHEXT, bit de execução ignorado)
+    - `detectPython` com plataforma injetável: no Windows tenta `python` e `py`, ignora o atalho da Microsoft Store (`WindowsApps`) e cai no próximo candidato quando um falha
+    - `detectFfmpeg` acha `ffprobe.exe` vizinho de `ffmpeg.exe` (teste)
+    - `killTree`/`spawnTree` com plataforma e spawn injetáveis: argumentos `taskkill /pid N /T /F` testados e erro do spawn do taskkill tratado sem derrubar o main
+    - Validação de caminhos no ramo win32 (`R_OK`) testada
+  - Verificar: `pnpm verify`
 
 - [ ] **T-902** README de execução, testes, build e uso — req: RNF-03, RNF-12 · dep: T-900
   - Critérios:

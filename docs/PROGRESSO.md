@@ -213,3 +213,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: APROVADO (texto da DEC-015 corrigido conforme apontado).
 - Observações: nesta máquina (Ubuntu 24.04) o AppImage só abre com `--no-sandbox` (AppArmor + chrome-sandbox sem SUID) e sem libfuse2 precisa de `APPIMAGE_EXTRACT_AND_RUN=1`; DEC-008 segue pendente. O .deb não foi instalado (exige sudo).
 - Commit: ver `git log` (T-900)
+
+### T-901 — Instalador Windows (NSIS) (2026-11-21) — BLOQUEADA
+- Feito: script `pnpm dist:win` e config NSIS (artifactName, ícone .ico, diretório escolhível); `LINE_SPLITTER_MUSIC_DIR` isola a pasta de Música dos E2E em qualquer sistema (antes só via XDG no Linux). No caminho, corrigida corrida real do redirecionamento inicial (`StartupRedirect`) que vencia um clique do usuário durante a abertura (causa da falha intermitente do E2E de envio FLAC), com teste que reproduz a corrida.
+- Verificado: `pnpm verify` OK; E2E completo 37 passed duas vezes; `pnpm smoke:linux` OK; mutação confirma o teste do StartupRedirect.
+- Bloqueio: `pnpm dist:win` falha com "wine is required" (wine exige sudo para instalar) e a instalação real exige uma máquina Windows.
+- Revisor: APROVADO para as mudanças commitadas; lacunas de teste dos ramos win32 viraram a T-901a.
+- Commit: ver `git log` (T-901)
