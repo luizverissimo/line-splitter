@@ -239,3 +239,8 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (298); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e motor instalacao` 4 passed.
 - Revisor: APROVADO. Observação não bloqueante: no Windows o lançador `py` usa o Python padrão (não tenta `py -3.12` se o padrão for 3.14).
 - Commit: ver `git log` (T-902a)
+
+### T-901 — Instalador Windows (NSIS) — retomada após o usuário instalar o wine (2026-11-21) — continua BLOQUEADA
+- Feito/verificado: `pnpm dist:win` agora gera `release/Line-Splitter-Setup-0.1.0.exe` (PE32 NSIS, 122 MB; `win-unpacked` com `resources/renderer`, `app.asar.unpacked/.../prebuilds/win32-x64.node`, `icon.ico`). Sob o wine (prefixo isolado no scratchpad): `Setup.exe /S` instala em `AppData\Local\Programs\line-splitter` e cria o atalho "Line Splitter" no menu Iniciar; o app abre, o rodapé mostra "Line Splitter 0.1.0 · Windows · Electron 45.4.1" e o processo principal responde `engine:status` com as mensagens em português para Windows (Python/FFmpeg não encontrados).
+- Limite do wine: o processo morre (código 3, crash nativo, sem eventos JS) ao exibir a janela; numa cópia de diagnóstico sem `win.show()` o processo fica estável, e um app Electron mínimo também não roda direito no wine 9 → limitação do wine, não do app. Não houve mudança de código.
+- Bloqueio restante: instalar e usar num Windows real (abrir, instalar o motor, baixar o modelo, separar).

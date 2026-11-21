@@ -316,7 +316,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - E2E no Windows isolam a pasta de Música/saída (o isolamento atual via XDG só vale no Linux)
     - Instalado num Windows: abre, instala o motor e completa uma separação real
   - Verificar: `pnpm dist:win` e executar o instalador num Windows
-  - Bloqueio: `pnpm dist:win` no Linux exige wine (electron-builder usa wine para o rcedit e para o NSIS; instalar wine exige sudo — `sudo apt install wine64`), ou rodar `pnpm dist:win` numa máquina Windows. O critério "instalado num Windows: abre, instala o motor e completa uma separação real" exige uma máquina Windows. Já feito: config NSIS e script `dist:win`; isolamento da pasta de Música dos E2E em qualquer sistema (`LINE_SPLITTER_MUSIC_DIR`).
+  - Bloqueio: falta só o critério "instalado num Windows: abre, instala o motor e completa uma separação real", que exige uma máquina Windows real. Com o wine instalado pelo usuário, `pnpm dist:win` gera `release/Line-Splitter-Setup-0.1.0.exe` (NSIS, 122 MB); sob o wine o instalador instala em silêncio (`/S`) com atalho no menu Iniciar, e o app abre com SQLite, IPC e detecção do motor funcionando em win32, mas o wine 9 derruba o processo ao exibir a janela do Electron 45 (sem o `show()` o processo fica estável), então o wine não serve para validar o uso. O usuário precisa instalar o .exe num Windows e conferir: abrir, Instalar motor, Baixar modelo e separar uma música.
 
 - [x] **T-901a** Ramos Windows testáveis no Linux (PATH/PATHEXT, Python, ffprobe, taskkill, permissões) — req: RNF-02 · dep: T-901
   - Critérios:
