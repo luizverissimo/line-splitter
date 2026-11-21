@@ -1,6 +1,6 @@
-import { net, protocol } from 'electron';
+import { protocol } from 'electron';
+import { Readable } from 'node:stream';
 import fs from 'node:fs';
-import { pathToFileURL } from 'node:url';
 import { APP_HOST, APP_SCHEME, PROD_CSP } from './security';
 import { mimeFor, resolveStaticPath } from './static-files';
 import { MEDIA_SCHEME, type MediaRegistry } from './media/registry';
@@ -22,15 +22,16 @@ export function serveRenderer(rendererDir: string): void {
       `Build da interface não encontrado em ${rendererDir}. Rode "pnpm --filter @line-splitter/web build".`,
     );
   }
-  protocol.handle(APP_SCHEME, async (request) => {
+  protocol.handle(APP_SCHEME, (request) => {
     const url = new URL(request.url);
     if (url.host !== APP_HOST) return new Response('Origem não permitida', { status: 403 });
     const file = resolveStaticPath(rendererDir, url.pathname);
     if (!file) return new Response('Caminho não permitido', { status: 403 });
     if (!fs.existsSync(file) || !fs.statSync(file).isFile())
       return new Response('Não encontrado', { status: 404 });
-    const upstream = await net.fetch(pathToFileURL(file).toString());
-    return new Response(upstream.body, {
+    // Lido direto do disco (não via net.fetch de file://, que passaria pelo bloqueio de rede da sessão).
+    const body = Readable.toWeb(fs.createReadStream(file)) as ReadableStream<Uint8Array>;
+    return new Response(body, {
       status: 200,
       headers: {
         'Content-Type': mimeFor(file),

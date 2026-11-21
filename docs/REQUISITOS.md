@@ -40,7 +40,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RN-09 | Nome repetido na saída ganha sufixo ` (2)`, ` (3)`… | §5.5 | T-301 | feito |
 | RN-10 | Toda separação gera exatamente dois arquivos | §6 | T-301 | feito |
 | RN-11 | O arquivo original nunca é modificado nem movido | §6 | T-201, T-301 | feito |
-| RN-12 | Nenhum áudio sai do computador; rede só para instalar motor/modelo | §6 | T-102, T-103, T-501 | pendente |
+| RN-12 | Nenhum áudio sai do computador; rede só para instalar motor/modelo | §6 | T-102, T-103, T-501 | feito |
 | RN-13 | Separação cancelada/com erro não deixa parciais na saída nem entra como concluída no histórico | §6 | T-302, T-601 | pendente |
 | RNF-01 | Linux como plataforma principal, instaladores AppImage e .deb | §3, §7 | T-500, T-900 | pendente |
 | RNF-02 | Windows com instalador NSIS | §3, §7 | T-901 | pendente |
@@ -52,6 +52,6 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RNF-08 | Tema escuro | §7 | T-003, T-604 | pendente |
 | RNF-09 | Interface em português | §7 | T-003, T-500, T-604 | pendente |
 | RNF-10 | Testes de integração com Demucs e FFmpeg reais em áudio curto livre (sem mock do motor) | §4, §7 | T-007, T-301 | feito |
-| RNF-11 | Funciona offline após a configuração inicial | §2 | T-103, T-501 | pendente |
+| RNF-11 | Funciona offline após a configuração inicial | §2 | T-103, T-501 | feito |
 | RNF-12 | Usuário único: sem login, sem nuvem, sem cobrança | §2 | T-004, T-902 | pendente |
 | RNF-13 | Testes E2E com Playwright para Electron | §4 | T-006, T-600 | pendente |

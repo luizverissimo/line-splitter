@@ -49,3 +49,24 @@ export function isAllowedNavigation(target: string, allowedOrigin: string): bool
     return false;
   }
 }
+
+/**
+ * Requisições que o renderer pode fazer: só os arquivos do app (app://), os áudios liberados (media://)
+ * e, em desenvolvimento, o servidor do Vite em localhost. Nada mais sai para a rede (RN-12).
+ */
+export function isAllowedRendererRequest(target: string, devOrigin: string | null): boolean {
+  let url: URL;
+  try {
+    url = new URL(target);
+  } catch {
+    return false;
+  }
+  if (url.protocol === `${APP_SCHEME}:`) return url.host === APP_HOST;
+  if (url.protocol === 'media:') return true;
+  if (devOrigin) {
+    const dev = new URL(devOrigin);
+    const sameHost = url.hostname === dev.hostname && url.port === dev.port;
+    if (sameHost && ['http:', 'https:', 'ws:', 'wss:'].includes(url.protocol)) return true;
+  }
+  return false;
+}

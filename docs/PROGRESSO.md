@@ -162,3 +162,10 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (267); `menu.test.ts`, `identity.test.ts`; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e menu` 2 passed (nome/título/tamanho mínimo, ações do menu, sem rolagem horizontal em 880x600 em todos os estados com motor real).
 - Revisor: REPROVADO (rolagem horizontal com arquivo carregado no tamanho mínimo) → corrigido → APROVADO.
 - Commit: ver `git log` (T-500)
+
+### T-501 — Garantia de privacidade/offline (2026-11-20)
+- Feito: bloqueio de rede no renderer (`session.webRequest`, só app://, media:// e o Vite em dev), arquivos do build lidos direto do disco, variáveis offline do hub na separação, erro claro sem o modelo.
+- Verificado: `pnpm verify` OK; `offline.test.ts` 4 testes (separação real com o processo do motor isolado da rede por `bwrap --unshare-net`); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 24 passed (inclui `offline`); modo dev conferido por screenshot.
+- Revisor: APROVADO. Sugestão aplicada: `devtools:`/`chrome-extension:` também bloqueados.
+- Observações: o teste de rede bloqueada depende do `bwrap` (bubblewrap) instalado; sem ele (outros sistemas) esse bloco não roda.
+- Commit: ver `git log` (T-501)

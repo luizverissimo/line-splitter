@@ -247,7 +247,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Janela com tamanho mínimo que não quebra o layout
   - Verificar: `pnpm verify && pnpm test:e2e menu`
 
-- [ ] **T-501** Garantia de privacidade/offline — req: RN-12, RNF-11 · dep: T-301
+- [x] **T-501** Garantia de privacidade/offline — req: RN-12, RNF-11 · dep: T-301
   - Critérios:
     - Renderer bloqueia qualquer requisição de rede (`session.webRequest`), exceto `media://` e os arquivos do app
     - Separação executada com variáveis que impedem download (`TORCH_HOME` do motor, sem pip) e falha com mensagem clara se o modelo faltar, em vez de baixar

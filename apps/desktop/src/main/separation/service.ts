@@ -69,6 +69,14 @@ export class SeparationService {
       this.progress('preparing', 0);
       const settings = this.deps.settings();
       const engine = await detectEngine(settings, this.deps.paths);
+      if (engine.demucs.ok && engine.ffmpeg.ok && !engine.model.ok) {
+        // Nunca baixamos nada durante a separação: sem o modelo local, explica e para.
+        throw new AppError(
+          'ENGINE_MISSING',
+          'O modelo de separação não foi baixado. Baixe-o na tela Motor (é preciso internet só nessa etapa).',
+          engine.model.detail,
+        );
+      }
       if (!engine.ready || !engine.ffmpeg.path || !engine.ffmpeg.ffprobePath) {
         const problems = [engine.python, engine.ffmpeg, engine.demucs, engine.model]
           .filter((item) => !item.ok)
@@ -227,6 +235,10 @@ export class SeparationService {
         PYTHONNOUSERSITE: '1',
         PYTHONUNBUFFERED: '1',
         TORCH_HOME: this.deps.paths.torchHome,
+        // Garantias extras de que nada é baixado: o Demucs roda com --repo local e o hub fica offline.
+        HF_HUB_OFFLINE: '1',
+        HF_DATASETS_OFFLINE: '1',
+        TRANSFORMERS_OFFLINE: '1',
       });
       this.child = child;
       const collect = (d: Buffer) => {
