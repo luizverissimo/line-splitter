@@ -46,8 +46,8 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RNF-02 | Windows com instalador NSIS | §3, §7 | T-901 | pendente |
 | RNF-03 | Monorepo pnpm, TS strict, Electron + React/Vite, `packages/shared` com Zod e tipos IPC | §4 | T-001, T-002, T-902 | pendente |
 | RNF-04 | Segurança Electron: contextIsolation, sem nodeIntegration, sandbox, CSP restritiva, IPC validado com Zod, renderer sem acesso direto ao fs | §4, §7 | T-002, T-004, T-011, T-602 | feito |
-| RNF-05 | UI não trava durante o processamento | §5.4 | T-303, T-603 | pendente |
-| RNF-06 | Desempenho de referência: música de 4 min em ~2 min com GPU e ~10 min em CPU | §7 | T-603 | pendente |
+| RNF-05 | UI não trava durante o processamento | §5.4 | T-303, T-603 | feito |
+| RNF-06 | Desempenho de referência: música de 4 min em ~2 min com GPU e ~10 min em CPU | §7 | T-603 | feito |
 | RNF-07 | Estados de carregando, vazio e erro em todas as telas | §7 | T-003, T-011, T-604 | pendente |
 | RNF-08 | Tema escuro | §7 | T-003, T-604 | pendente |
 | RNF-09 | Interface em português | §7 | T-003, T-500, T-604 | pendente |

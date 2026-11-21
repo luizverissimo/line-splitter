@@ -189,3 +189,13 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: APROVADO. Reforços aplicados: varredura cobre qualquer import de `child_process`; `taskkill` com `shell: false` explícito.
 - Observações: E2E com `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008 pendente): o sandbox de processo do Chromium não foi exercitado nesta máquina.
 - Commit: ver `git log` (T-602)
+
+### T-603 — Desempenho (2026-11-21)
+- Feito: `pnpm bench` (`apps/desktop/src/bench/separation.bench.ts`, configuração própria fora do `pnpm verify`): separa 4:00 de áudio (clipe sintético repetido, DEC-005) com o motor real em GPU — motor CUDA instalado pelo próprio instalador do app — e em CPU, e imprime os tempos. Responsividade medida dentro da página no E2E `processamento`: troca de tela durante a separação < 200 ms.
+- Resultado do benchmark nesta máquina (RTX 3050 6 GB, 16 threads):
+  - GPU (CUDA): 18,8 s para 4:00 de áudio (referência do PRD: ~2 min) → dentro da referência
+  - CPU: 65,9 s para 4:00 de áudio (referência do PRD: ~10 min) → dentro da referência
+  - Nenhum ajuste (`--segment`, `-j`) foi necessário.
+- Verificado: `pnpm bench` (2 passed); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e processamento` 3 execuções seguidas, 2 passed cada; `pnpm verify` OK.
+- Revisor: APROVADO (o revisor reproduziu: GPU 19,2 s, CPU 66,9 s). Sugestão aplicada: o benchmark confere que o motor CUDA ficou pronto após instalar.
+- Commit: ver `git log` (T-603)

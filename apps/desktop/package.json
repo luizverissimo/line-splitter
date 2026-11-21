@@ -10,7 +10,8 @@
     "build": "pnpm --filter @line-splitter/web build && node scripts/build.mjs",
     "start": "node scripts/start.mjs",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --allowOnly=false"
+    "test": "vitest run --allowOnly=false",
+    "bench": "vitest run --config vitest.bench.config.ts && node -e \"process.stdout.write(require('node:fs').readFileSync('../../fixtures/benchmark.md','utf8'))\""
   },
   "dependencies": {
     "@line-splitter/shared": "workspace:*",

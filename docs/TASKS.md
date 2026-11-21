@@ -283,7 +283,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Processos filhos chamados com `spawn` e lista de argumentos (sem shell); `pnpm audit` sem vulnerabilidades altas
   - Verificar: `pnpm --filter @line-splitter/desktop test security && pnpm verify`
 
-- [ ] **T-603** Desempenho — req: RNF-05, RNF-06 · dep: T-600
+- [x] **T-603** Desempenho — req: RNF-05, RNF-06 · dep: T-600
   - Critérios:
     - Script de benchmark separa um áudio de 4 min (livre de direitos) em GPU e em CPU e grava os tempos em `docs/PROGRESSO.md`
     - Tempos comparados com a referência do PRD (~2 min GPU, ~10 min CPU); se acima, registrar causa e ajustes feitos (ex.: `--segment`, `-j`)

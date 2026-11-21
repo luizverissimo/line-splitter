@@ -45,10 +45,29 @@ test.describe('Tela de processamento (motor real)', () => {
 
       // A interface continua respondendo: trocar de tela e voltar mantém a separação e o progresso.
       const before = await value();
-      const t0 = Date.now();
-      await page.getByRole('link', { name: 'Histórico' }).click();
+      // Medido dentro da página: do clique até o título da nova tela aparecer, com a separação rodando.
+      const routeMs = await page.evaluate(
+        () =>
+          new Promise<number>((resolve) => {
+            const start = performance.now();
+            const done = () => {
+              if (document.querySelector('h1')?.textContent === 'Histórico') {
+                observer.disconnect();
+                resolve(performance.now() - start);
+              }
+            };
+            const observer = new MutationObserver(done);
+            observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+            (
+              Array.from(document.querySelectorAll('a')).find(
+                (a) => a.textContent === 'Histórico',
+              ) as HTMLElement
+            ).click();
+            done();
+          }),
+      );
+      expect(routeMs).toBeLessThan(200);
       await expect(page.getByRole('heading', { level: 1, name: 'Histórico' })).toBeVisible();
-      expect(Date.now() - t0).toBeLessThan(1000);
       await page.getByRole('link', { name: 'Início' }).click();
       await expect(page.getByRole('heading', { name: 'Separando: Bateria' })).toBeVisible();
       expect(await value()).toBeGreaterThanOrEqual(before);
