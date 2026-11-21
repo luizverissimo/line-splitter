@@ -92,7 +92,7 @@ describe('Python', () => {
     fs.writeFileSync(old, '#!/bin/sh\necho 3.8.10\n', { mode: 0o755 });
     const r = await detectPython(old);
     expect(r.ok).toBe(false);
-    expect(r.detail).toBe('Python 3.8.10 encontrado; é necessário 3.9 ou mais novo.');
+    expect(r.detail).toBe('Python 3.8.10 encontrado; o motor (PyTorch 2.6) precisa do Python 3.9 a 3.13.');
   });
 });
 

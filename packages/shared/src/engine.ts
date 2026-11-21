@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { deviceSchema } from './settings';
 
 export const MIN_PYTHON = [3, 9] as const;
+/** Maior Python com pacotes do PyTorch 2.6 usado pelo motor. */
+export const MAX_PYTHON = [3, 13] as const;
 
 export const engineItemSchema = z.object({
   ok: z.boolean(),

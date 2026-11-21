@@ -337,7 +337,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
   - Verificar: seguir o README do zero num clone limpo
   - Bloqueio: os comandos de desenvolvimento do README foram executados num clone limpo (install, verify, fixtures, test, test:e2e, bench, dist:linux, smoke:linux, dev; dist:win falha pedindo wine, como documentado). Faltam os que exigem sudo ou Windows, que o usuário precisa rodar e confirmar: (1) `sudo apt install ./release/line-splitter_0.1.0_amd64.deb` e abrir `line-splitter` (sem `--no-sandbox`); (2) criar o perfil do AppArmor do AppImage (bloco do README) e abrir o AppImage sem `--no-sandbox`; (3) instalar no Windows (depende da T-901).
 
-- [ ] **T-902a** Motor recusa Python fora da faixa suportada pelo PyTorch 2.6 (3.9 a 3.13) — req: RNF-03 · dep: T-902
+- [x] **T-902a** Motor recusa Python fora da faixa suportada pelo PyTorch 2.6 (3.9 a 3.13) — req: RNF-03 · dep: T-902
   - Critérios:
     - Detecção do Python marca como problema versões acima de 3.13, com mensagem em português indicando a faixa 3.9 a 3.13
     - Com mais de um Python no PATH, um 3.14 não impede de usar um 3.12 que venha depois

@@ -89,7 +89,7 @@ describe('detectPython no Windows', () => {
     expect(r).toEqual({
       ok: false,
       path: path.join(only, 'python.exe'),
-      detail: 'Python 3.8.10 encontrado; é necessário 3.9 ou mais novo.',
+      detail: 'Python 3.8.10 encontrado; o motor (PyTorch 2.6) precisa do Python 3.9 a 3.13.',
     });
   });
 
@@ -98,6 +98,43 @@ describe('detectPython no Windows', () => {
     script(store, 'python.exe', 'echo 3.12.0');
     const r = await detectPython('', { platform: 'win32', env: { PATH: store } });
     expect(r).toEqual({ ok: false, path: null, detail: 'Python não encontrado no sistema.' });
+  });
+});
+
+describe('faixa de versões do Python (PyTorch 2.6: 3.9 a 3.13)', () => {
+  it('3.13 serve; 3.14 é recusado com a faixa na mensagem', async () => {
+    const ok = dir('py313');
+    const novo = dir('py314');
+    script(ok, 'python3', 'echo 3.13.1');
+    script(novo, 'python3', 'echo 3.14.0');
+    expect(await detectPython('', { platform: 'linux', env: { PATH: ok } })).toEqual({
+      ok: true,
+      path: path.join(ok, 'python3'),
+      detail: 'Python 3.13.1',
+    });
+    expect(await detectPython('', { platform: 'linux', env: { PATH: novo } })).toEqual({
+      ok: false,
+      path: path.join(novo, 'python3'),
+      detail: 'Python 3.14.0 encontrado; o motor (PyTorch 2.6) precisa do Python 3.9 a 3.13.',
+    });
+  });
+
+  it('um 3.14 antes no PATH não impede de usar um 3.12 depois', async () => {
+    const novo = dir('py314b');
+    const bom = dir('py312');
+    script(novo, 'python3', 'echo 3.14.2');
+    script(bom, 'python3', 'echo 3.12.8');
+    expect(await detectPython('', { platform: 'linux', env: { PATH: `${novo}:${bom}` } })).toEqual({
+      ok: true,
+      path: path.join(bom, 'python3'),
+      detail: 'Python 3.12.8',
+    });
+  });
+
+  it('Python configurado fora da faixa também é recusado', async () => {
+    const d = dir('py-config');
+    const py = script(d, 'python-novo', 'echo 3.14.0');
+    expect((await detectPython(py)).ok).toBe(false);
   });
 });
 

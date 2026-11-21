@@ -233,3 +233,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO (Python 3.9–3.13, referência ao benchmark, nota do bench com GPU, aviso do instalador Windows, .exe incompleto em release/) → corrigido. Comandos com sudo/Windows ficaram como bloqueio; a falta de limite superior do Python virou a T-902a.
 - Bloqueio: instalar o .deb, testar o perfil do AppArmor do AppImage e instalar no Windows (precisam de sudo/Windows).
 - Commit: ver `git log` (T-902)
+
+### T-902a — Motor recusa Python fora da faixa do PyTorch 2.6 (2026-11-21)
+- Feito: `MAX_PYTHON = [3, 13]` em `packages/shared`; `detectPython` recusa < 3.9 e > 3.13 com mensagem citando a faixa e segue para o próximo candidato do PATH. Testes com interpretadores reais (scripts) para 3.8, 3.13, 3.14, 3.14 antes de 3.12 no PATH e Python configurado 3.14.
+- Verificado: `pnpm verify` OK (298); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e motor instalacao` 4 passed.
+- Revisor: APROVADO. Observação não bloqueante: no Windows o lançador `py` usa o Python padrão (não tenta `py -3.12` se o padrão for 3.14).
+- Commit: ver `git log` (T-902a)

@@ -1,4 +1,10 @@
-import { MIN_PYTHON, type EngineDevice, type EngineStatus, type Settings } from '@line-splitter/shared';
+import {
+  MAX_PYTHON,
+  MIN_PYTHON,
+  type EngineDevice,
+  type EngineStatus,
+  type Settings,
+} from '@line-splitter/shared';
 import fs from 'node:fs';
 import { z } from 'zod';
 import path from 'node:path';
@@ -40,11 +46,13 @@ async function probePython(python: string): Promise<Item & { path: string | null
     };
   }
   const text = version.join('.');
-  if (!atLeast(version, MIN_PYTHON)) {
+  const [major = 0, minor = 0] = version;
+  const tooNew = major > MAX_PYTHON[0] || (major === MAX_PYTHON[0] && minor > MAX_PYTHON[1]);
+  if (!atLeast(version, MIN_PYTHON) || tooNew) {
     return {
       ok: false,
       path: python,
-      detail: `Python ${text} encontrado; é necessário ${MIN_PYTHON.join('.')} ou mais novo.`,
+      detail: `Python ${text} encontrado; o motor (PyTorch 2.6) precisa do Python ${MIN_PYTHON.join('.')} a ${MAX_PYTHON.join('.')}.`,
     };
   }
   return { ok: true, path: python, detail: `Python ${text}` };
