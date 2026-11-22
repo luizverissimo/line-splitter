@@ -60,6 +60,11 @@ export const ipcChannels = {
     input: z.object({ path: z.string().min(1) }),
     output: z.object({ shown: z.literal(true) }),
   },
+  /** Salva uma cópia de uma faixa gerada onde o usuário escolher ("Salvar como"); null = cancelou o diálogo. */
+  'file:saveCopy': {
+    input: z.object({ path: z.string().min(1) }),
+    output: z.object({ savedTo: z.string().min(1) }).nullable(),
+  },
   'engine:cancelDownload': { input: z.undefined(), output: z.object({ cancelled: z.boolean() }) },
 } satisfies ChannelMap;
 

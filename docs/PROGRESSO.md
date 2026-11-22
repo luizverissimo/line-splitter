@@ -270,3 +270,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm bench` (4:00 de áudio, RTX 3050 / CPU 16 threads): GPU voz 331 s, demais 117–119 s; CPU voz 2.971 s, demais 892–907 s. `pnpm dist:linux` + `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm smoke:linux` OK (voz pelo RoFormer no AppImage; DEC-008 pendente); `pnpm dist:win` regerado; `pnpm verify` OK (309).
 - Revisor: REPROVADO (verify falhava por arquivos da T-907 na árvore) → T-906 isolada → APROVADO.
 - Commit: ver `git log` (T-906)
+
+### T-907 — Baixar MP3 de cada faixa pelo "Salvar como" (2026-11-22)
+- Feito: canal `file:saveCopy` (main): aceita só saídas registradas no histórico, abre o "Salvar como" nativo com o nome da faixa na pasta Downloads (filtro MP3, confirmação de substituir pelo próprio diálogo), valida destino (.mp3, pasta existente e gravável) e copia de forma atômica (temporário + rename); erros legíveis para origem sumida, sem permissão, disco cheio e arquivo em uso. Botão "Baixar MP3" (com "Salvando…", "Salvo em …" e erro) em cada faixa do resultado e do Histórico (só para faixas existentes).
+- Verificado: `pnpm verify` OK (324; integração com cópia real, recusas e disco cheio via /dev/full); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e resultado historico seguranca` passou (cancelar, salvar as duas faixas com sha256 igual à saída, salvar do histórico; DEC-008 pendente).
+- Revisor: APROVADO (recomendações aplicadas: teste das opções do diálogo e mensagem de arquivo em uso; o nome do temporário com pid ficou, pois o diálogo é modal e o botão fica desabilitado enquanto salva).
+- Commit: ver `git log` (T-907)

@@ -1,9 +1,12 @@
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fixtures } from '../scripts/fixtures.mjs';
 import { expect, launchApp, test } from './app';
 import { openAppDb } from './db';
 import { ensureTestEngine, linkTestEngine } from './engine-fixture';
+
+const sha = (f: string) => createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 
 test.describe('Fluxo completo de separação', () => {
   test('escolher arquivo → Voz → Separar → dois MP3 reais, players e próximos passos', async ({
@@ -88,6 +91,54 @@ test.describe('Fluxo completo de separação', () => {
           }),
         )
         .toEqual({ shown: [path.join(outputDir, 'musica-curta - Voz.mp3')], opened: [outputDir] });
+
+      // Baixar MP3: o "Salvar como" nativo responde com destinos numa pasta de downloads do teste
+      // (o primeiro pedido é cancelado); o app grava uma cópia idêntica de cada faixa.
+      const downloads = path.join(userData, 'Baixados');
+      fs.mkdirSync(downloads);
+      await app.evaluate(({ dialog }, dir) => {
+        const g = globalThis as { __saveAsked?: string[] };
+        g.__saveAsked = [];
+        const answers: (string | null)[] = [null, `${dir}/só a voz.mp3`, `${dir}/sem a voz.mp3`];
+        dialog.showSaveDialog = (async (...args: unknown[]) => {
+          const opts = args[args.length - 1] as Electron.SaveDialogOptions;
+          g.__saveAsked?.push(opts.defaultPath ?? '');
+          (g as { __saveOpts?: unknown }).__saveOpts = { properties: opts.properties, filters: opts.filters };
+          const answer = answers.shift() ?? null;
+          return answer ? { canceled: false, filePath: answer } : { canceled: true, filePath: '' };
+        }) as typeof dialog.showSaveDialog;
+      }, downloads);
+      const saveVoice = result.getByRole('button', { name: 'Baixar MP3: Só Voz' });
+      await saveVoice.click();
+      await expect(saveVoice).toBeEnabled();
+      await expect(result.getByRole('status')).toHaveCount(0);
+      expect(fs.readdirSync(downloads)).toEqual([]);
+      await saveVoice.click();
+      await expect(result.getByRole('status').filter({ hasText: 'só a voz.mp3' })).toHaveText(
+        `Salvo em ${path.join(downloads, 'só a voz.mp3')}`,
+      );
+      await result.getByRole('button', { name: 'Baixar MP3: Sem Voz' }).click();
+      await expect(result.getByRole('status').filter({ hasText: 'sem a voz.mp3' })).toHaveText(
+        `Salvo em ${path.join(downloads, 'sem a voz.mp3')}`,
+      );
+      expect(fs.readdirSync(downloads).sort()).toEqual(['sem a voz.mp3', 'só a voz.mp3']);
+      expect(sha(path.join(downloads, 'só a voz.mp3'))).toBe(
+        sha(path.join(outputDir, 'musica-curta - Voz.mp3')),
+      );
+      expect(sha(path.join(downloads, 'sem a voz.mp3'))).toBe(
+        sha(path.join(outputDir, 'musica-curta - sem Voz.mp3')),
+      );
+      expect(
+        (await app.evaluate(() => (globalThis as { __saveAsked?: string[] }).__saveAsked))?.map((p) =>
+          path.basename(p),
+        ),
+      ).toEqual(['musica-curta - Voz.mp3', 'musica-curta - Voz.mp3', 'musica-curta - sem Voz.mp3']);
+
+      // O diálogo do sistema confirma antes de substituir um arquivo existente e filtra MP3.
+      expect(await app.evaluate(() => (globalThis as { __saveOpts?: unknown }).__saveOpts)).toEqual({
+        properties: expect.arrayContaining(['showOverwriteConfirmation', 'createDirectory']),
+        filters: [{ name: 'Áudio MP3', extensions: ['mp3'] }],
+      });
 
       await result.getByRole('button', { name: 'Separar outro instrumento' }).click();
       await expect(

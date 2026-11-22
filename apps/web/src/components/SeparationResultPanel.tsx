@@ -3,6 +3,7 @@ import { FilePlus2, FolderOpen, Repeat, Search } from 'lucide-react';
 import { useState } from 'react';
 import { call } from '../api/client';
 import { errorMessage } from '../api/errors';
+import { DownloadMp3Button } from './DownloadMp3Button';
 import { AudioPlayer, Button, ErrorAlert } from './ui';
 
 const baseName = (p: string) => p.split(/[\\/]/).pop() ?? p;
@@ -13,7 +14,7 @@ interface Props {
   onNewFile: () => void;
 }
 
-/** Os dois MP3 gerados, com players, abrir pasta/mostrar arquivo e próximos passos. */
+/** Os dois MP3 gerados, com players, baixar MP3, abrir pasta/mostrar arquivo e próximos passos. */
 export function SeparationResultPanel({ result, onSeparateAnother, onNewFile }: Props) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -60,6 +61,7 @@ export function SeparationResultPanel({ result, onSeparateAnother, onNewFile }: 
             </Button>
           </div>
           <AudioPlayer src={t.url} title={baseName(t.path)} />
+          <DownloadMp3Button path={t.path} trackTitle={t.title} />
         </div>
       ))}
       {actionError && <ErrorAlert title="Não foi possível concluir a ação" message={actionError} />}

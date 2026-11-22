@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { call } from '../api/client';
 import { errorDetails, errorMessage } from '../api/errors';
+import { DownloadMp3Button } from '../components/DownloadMp3Button';
 import { QueryError } from '../components/QueryError';
 import { AudioPlayer, Button, ConfirmDialog, EmptyState, ErrorAlert, LoadingState } from '../components/ui';
 
@@ -19,7 +20,10 @@ function Output({ title, output }: { title: string; output: HistoryItem['instrum
         {output.path}
       </span>
       {output.exists && output.url ? (
-        <AudioPlayer src={output.url} title={baseName(output.path)} />
+        <>
+          <AudioPlayer src={output.url} title={baseName(output.path)} />
+          <DownloadMp3Button path={output.path} trackTitle={title} />
+        </>
       ) : (
         <span className="history-missing">Arquivo não encontrado</span>
       )}

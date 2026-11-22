@@ -73,12 +73,31 @@ test.describe('Histórico (motor real)', () => {
         .poll(() => app.evaluate(() => (globalThis as { __opened?: string[] }).__opened))
         .toEqual([outputDir]);
 
+      // Baixar MP3 direto do histórico: o "Salvar como" nativo responde com um destino do teste.
+      const downloads = path.join(userData, 'Baixados');
+      fs.mkdirSync(downloads);
+      await app.evaluate(
+        ({ dialog }, dest) => {
+          dialog.showSaveDialog = (async () => ({
+            canceled: false,
+            filePath: dest,
+          })) as typeof dialog.showSaveDialog;
+        },
+        path.join(downloads, 'sem voz.mp3'),
+      );
+      await entry.getByRole('button', { name: 'Baixar MP3: Sem Voz' }).click();
+      await expect(entry.getByRole('status')).toHaveText(`Salvo em ${path.join(downloads, 'sem voz.mp3')}`);
+      expect(sha(path.join(downloads, 'sem voz.mp3'))).toBe(
+        sha(path.join(outputDir, 'Minha Música - sem Voz.mp3')),
+      );
+
       // Um arquivo apagado fora do app aparece como não encontrado ao reabrir a tela.
       fs.rmSync(path.join(outputDir, 'Minha Música - sem Voz.mp3'));
       await page.getByRole('link', { name: 'Início' }).click();
       await page.getByRole('link', { name: 'Histórico' }).click();
       await expect(entry.getByText('Arquivo não encontrado')).toBeVisible();
       await expect(entry.getByRole('group', { name: 'Player: Minha Música - sem Voz.mp3' })).toHaveCount(0);
+      await expect(entry.getByRole('button', { name: 'Baixar MP3: Sem Voz' })).toHaveCount(0);
 
       // Remover apagando os MP3: some da lista e do disco; o original fica.
       await entry.getByRole('button', { name: 'Remover' }).click();

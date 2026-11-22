@@ -900,3 +900,18 @@ details pre {
 .result-panel > * {
   min-width: 0;
 }
+
+/* Baixar MP3: botão com a confirmação "Salvo em …" ao lado */
+.download-mp3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+.download-mp3 .save-ok {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.download-mp3 .query-error {
+  flex-basis: 100%;
+}

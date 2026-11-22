@@ -45,6 +45,38 @@ describe('Tela Histórico', () => {
     expect(entries[1]?.querySelectorAll('audio')).toHaveLength(2);
   });
 
+  it('cada faixa existente tem "Baixar MP3"; faixa sumida não tem', async () => {
+    const user = userEvent.setup();
+    const save = vi.fn(() => ({ ok: true, data: { savedTo: '/d/Minha Música - sem Voz.mp3' } }));
+    setup({
+      'history:list': () => ({
+        ok: true,
+        data: [
+          item(2, {
+            stem: 'drums',
+            sourceName: 'Outra',
+            instrument: { path: '/s/Outra - Bateria.mp3', exists: true, url: 'media://audio/x' },
+            rest: { path: '/s/Outra - sem Bateria.mp3', exists: false, url: null },
+          }),
+          item(1),
+        ],
+      }),
+      'file:saveCopy': save,
+    });
+    const [other, mine] = within(await screen.findByRole('list', { name: 'Separações' })).getAllByRole(
+      'listitem',
+    ) as [HTMLElement, HTMLElement];
+    expect(within(other).getAllByRole('button', { name: /^Baixar MP3/ })).toHaveLength(1);
+    expect(within(other).getByRole('button', { name: 'Baixar MP3: Só Bateria' })).toBeInTheDocument();
+    await user.click(within(mine).getByRole('button', { name: 'Baixar MP3: Sem Voz' }));
+    expect(save).toHaveBeenCalledWith({ path: '/s/Minha Música - sem Voz.mp3' });
+    expect(await within(mine).findByRole('status')).toHaveTextContent(
+      'Salvo em /d/Minha Música - sem Voz.mp3',
+    );
+    await user.click(within(mine).getByRole('button', { name: 'Baixar MP3: Só Voz' }));
+    expect(save).toHaveBeenLastCalledWith({ path: '/s/Minha Música - Voz.mp3' });
+  });
+
   it('arquivo não encontrado desabilita ouvir; abrir pasta usa uma saída existente', async () => {
     const user = userEvent.setup();
     const open = vi.fn(() => ({ ok: true, data: { opened: true } }));

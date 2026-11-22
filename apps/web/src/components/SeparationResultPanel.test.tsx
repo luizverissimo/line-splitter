@@ -69,6 +69,24 @@ describe('Tela de resultado', () => {
     ).toBeInTheDocument();
   });
 
+  it('cada faixa tem "Baixar MP3", que salva a faixa certa', async () => {
+    const user = userEvent.setup();
+    const save = vi.fn((p: unknown) => ({
+      ok: true,
+      data: { savedTo: `/d/${(p as { path: string }).path.split('/').pop() ?? ''}` },
+    }));
+    setup({ 'file:saveCopy': save });
+    await user.click(screen.getByRole('button', { name: 'Baixar MP3: Só Guitarra/Violão' }));
+    expect(save).toHaveBeenLastCalledWith({ path: result.instrumentPath });
+    await user.click(screen.getByRole('button', { name: 'Baixar MP3: Sem Guitarra/Violão' }));
+    expect(save).toHaveBeenLastCalledWith({ path: result.restPath });
+    const saved = await screen.findAllByRole('status');
+    expect(saved.map((s) => s.textContent)).toEqual([
+      'Salvo em /d/Minha Música - Guitarra-Violão.mp3',
+      'Salvo em /d/Minha Música - sem Guitarra-Violão.mp3',
+    ]);
+  });
+
   it('Separar outro instrumento e Novo arquivo', async () => {
     const user = userEvent.setup();
     const { onSeparateAnother, onNewFile } = setup();

@@ -375,7 +375,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - `pnpm dist:linux` + `pnpm smoke:linux` com uma separação de Voz pelo RoFormer no AppImage
   - Verificar: `pnpm bench`, `pnpm dist:linux` e `pnpm smoke:linux`
 
-- [ ] **T-907** Baixar MP3 de cada faixa (com e sem o instrumento/voz) pelo "Salvar como" — req: RF-27 · dep: T-906
+- [x] **T-907** Baixar MP3 de cada faixa (com e sem o instrumento/voz) pelo "Salvar como" — req: RF-27 · dep: T-906
   - Critérios:
     - No resultado da separação e em cada item do Histórico, cada faixa ("só o instrumento" e "sem o instrumento") tem o botão "Baixar MP3"
     - O botão abre o diálogo nativo "Salvar como" com o nome sugerido (ex.: `musica - Voz.mp3`) e grava uma cópia do MP3 no lugar escolhido; cancelar o diálogo não faz nada
