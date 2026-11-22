@@ -369,13 +369,22 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração com os motores reais e E2E do fluxo completo para Voz e Bateria
   - Verificar: `pnpm verify`, `pnpm quality` e `pnpm test:e2e resultado processamento`
 
-- [ ] **T-906** Benchmark, README e pacotes atualizados para os novos modelos — req: RF-26, RNF-04 · dep: T-905
+- [x] **T-906** Benchmark, README e pacotes atualizados para os novos modelos — req: RF-26, RNF-04 · dep: T-905
   - Critérios:
     - `pnpm bench` mede o tempo por instrumento com os novos modelos (GPU e CPU) e o README mostra os números e o espaço em disco necessário
     - `pnpm dist:linux` + `pnpm smoke:linux` com uma separação de Voz pelo RoFormer no AppImage
   - Verificar: `pnpm bench`, `pnpm dist:linux` e `pnpm smoke:linux`
 
-- [ ] **T-999** Auditoria final de cobertura do PRD (/auditar) — req: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RF-24, RF-25, RN-01, RN-02, RN-03, RN-04, RN-05, RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RNF-01, RNF-02, RNF-03, RNF-04, RNF-05, RNF-06, RNF-07, RNF-08, RNF-09, RNF-10, RNF-11, RNF-12, RNF-13, RF-26 · dep: T-001, T-002, T-003, T-004, T-005, T-006, T-007, T-010, T-011, T-100, T-101, T-102, T-103, T-200, T-201, T-300, T-301, T-302, T-303, T-304, T-400, T-401, T-500, T-501, T-600, T-601, T-602, T-603, T-604, T-900, T-901, T-902, T-903, T-904, T-905, T-906
+- [ ] **T-907** Baixar MP3 de cada faixa (com e sem o instrumento/voz) pelo "Salvar como" — req: RF-27 · dep: T-906
+  - Critérios:
+    - No resultado da separação e em cada item do Histórico, cada faixa ("só o instrumento" e "sem o instrumento") tem o botão "Baixar MP3"
+    - O botão abre o diálogo nativo "Salvar como" com o nome sugerido (ex.: `musica - Voz.mp3`) e grava uma cópia do MP3 no lugar escolhido; cancelar o diálogo não faz nada
+    - O processo principal só aceita salvar faixas registradas (saída atual ou do histórico), valida o destino (extensão .mp3, pasta gravável) e nunca sobrescreve sem a confirmação do diálogo do sistema
+    - Mensagens de sucesso ("Salvo em …") e de erro (arquivo de origem sumiu, sem permissão, disco cheio), com estados de carregando
+    - Testes de integração do canal IPC (cópia real, recusas) e de componente; E2E salvando as duas faixas pelo diálogo
+  - Verificar: `pnpm verify` e `pnpm test:e2e resultado historico`
+
+- [ ] **T-999** Auditoria final de cobertura do PRD (/auditar) — req: RF-01, RF-02, RF-03, RF-04, RF-05, RF-06, RF-07, RF-08, RF-09, RF-10, RF-11, RF-12, RF-13, RF-14, RF-15, RF-16, RF-17, RF-18, RF-19, RF-20, RF-21, RF-22, RF-23, RF-24, RF-25, RN-01, RN-02, RN-03, RN-04, RN-05, RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RNF-01, RNF-02, RNF-03, RNF-04, RNF-05, RNF-06, RNF-07, RNF-08, RNF-09, RNF-10, RNF-11, RNF-12, RNF-13, RF-26, RF-27 · dep: T-001, T-002, T-003, T-004, T-005, T-006, T-007, T-010, T-011, T-100, T-101, T-102, T-103, T-200, T-201, T-300, T-301, T-302, T-303, T-304, T-400, T-401, T-500, T-501, T-600, T-601, T-602, T-603, T-604, T-900, T-901, T-902, T-903, T-904, T-905, T-906, T-907
   - Critérios:
     - Cada requisito de `REQUISITOS.md` tem evidência (código + teste + verificação) conferida pelo revisor
     - Lacunas viram novas tarefas antes da entrega

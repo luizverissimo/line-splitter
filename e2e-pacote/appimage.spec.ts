@@ -39,7 +39,7 @@ function sandboxArgs(): string[] {
   return ['--no-sandbox'];
 }
 
-test('AppImage gerado: abre, usa o SQLite nativo, detecta o motor e completa uma separação real', async ({
+test('AppImage gerado: abre, usa o SQLite nativo, detecta o motor e completa uma separação real (voz pelo RoFormer)', async ({
   userData,
 }) => {
   expect(fs.existsSync(appImage), `rode "pnpm dist:linux" antes (${appImage})`).toBe(true);
@@ -120,8 +120,9 @@ test('AppImage gerado: abre, usa o SQLite nativo, detecta o motor e completa uma
   }
   const db = openAppDb(userData);
   try {
-    expect(db.prepare('SELECT instrument, device FROM separations').all()).toEqual([
-      { instrument: 'vocals', device: 'cpu' },
+    // A voz é separada pelo RoFormer da DEC-017 também no app empacotado.
+    expect(db.prepare('SELECT instrument, device, model FROM separations').all()).toEqual([
+      { instrument: 'vocals', device: 'cpu', model: 'MelBand-RoFormer Kim FT2 Bleedless' },
     ]);
   } finally {
     db.close();

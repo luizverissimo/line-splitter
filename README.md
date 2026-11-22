@@ -23,7 +23,7 @@ Plataformas: **Linux** (principal) e **Windows**.
 | FFmpeg (com `ffprobe`) | `sudo apt install ffmpeg` | `winget install -e --id Gyan.FFmpeg` |
 | GPU (opcional) | NVIDIA com driver instalado (`nvidia-smi` funcionando) | NVIDIA com driver instalado |
 
-Sem GPU NVIDIA o app usa a CPU (mais lento). Referência medida em 2026-11 com `pnpm bench` numa RTX 3050 6 GB / CPU de 16 threads: 4 min de música em ~19 s na GPU e ~67 s na CPU. Se o Python ou o FFmpeg não estiverem no PATH, informe o caminho em **Configurações**.
+Sem GPU NVIDIA o app usa a CPU (mais lento). Referência medida em 2026-11-22 com `pnpm bench` numa RTX 3050 6 GB / CPU de 16 threads, para 4 min de música: voz (MelBand-RoFormer Kim FT2 Bleedless) em ~5,5 min na GPU e ~50 min na CPU; bateria, baixo, guitarra/violão e piano/teclado (BS-Roformer-SW) em ~2 min na GPU e ~15 min na CPU. Esses modelos isolam muito melhor que o anterior, ao custo de mais tempo (DEC-017). Espaço em disco: motor ~1,7 GB (CPU) ou ~5,7 GB (com CUDA), mais ~1,5 GB dos modelos. Se o Python ou o FFmpeg não estiverem no PATH, informe o caminho em **Configurações**.
 
 ### Instaladores
 

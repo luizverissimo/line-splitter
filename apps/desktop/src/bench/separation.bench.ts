@@ -1,6 +1,6 @@
-// Benchmark de desempenho (RNF-06): separa um áudio de 4 min em GPU e em CPU com o motor real
-// e imprime os tempos para registrar em docs/PROGRESSO.md. Rodar com `pnpm bench`.
-import type { Settings } from '@line-splitter/shared';
+// Benchmark de desempenho (RNF-06, DEC-017): separa um áudio de 4 min, instrumento por instrumento, em GPU
+// e em CPU com o motor real e os modelos de cada instrumento, e imprime os tempos. Rodar com `pnpm bench`.
+import { instrumentOf, STEMS, type Settings, type Stem } from '@line-splitter/shared';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -12,7 +12,7 @@ import { openDatabase, type Db } from '../main/db/database';
 import { detectEngine, detectPython } from '../main/engine/detect';
 import { EngineInstaller, hasNvidiaGpu } from '../main/engine/install';
 import { ModelDownloader } from '../main/engine/model';
-import { enginePaths, type EnginePaths } from '../main/engine/paths';
+import { enginePaths, modelForStem, type EnginePaths } from '../main/engine/paths';
 import { HistoryRepository } from '../main/history/repository';
 import { MediaRegistry } from '../main/media/registry';
 import { SeparationService } from '../main/separation/service';
@@ -82,7 +82,7 @@ describe('benchmark: música de 4 min', () => {
     );
   });
 
-  async function measure(label: 'cuda' | 'cpu', paths: EnginePaths) {
+  async function measure(label: 'cuda' | 'cpu', paths: EnginePaths, stem: Stem) {
     const settings: Settings = {
       outputDir: path.join(work, `saida-${label}`),
       bitrateKbps: 320,
@@ -99,11 +99,17 @@ describe('benchmark: música de 4 min', () => {
       onProgress: () => undefined,
       tmpRoot: work,
     });
-    const result = await service.run('vocals');
+    const result = await service.run(stem);
     expect(result.device).toBe(label);
+    expect(result.model).toBe(modelForStem(stem).name);
     const seconds = result.processingMs / 1000;
-    const line = `- ${label === 'cuda' ? 'GPU (CUDA)' : 'CPU'}: ${seconds.toFixed(1)} s para 4:00 de áudio (referência do PRD: ~${REFERENCE_S[label] / 60} min) → ${seconds <= REFERENCE_S[label] ? 'dentro' : 'ACIMA'} da referência`;
-    results.push(line);
+    const verdict =
+      seconds <= REFERENCE_S[label]
+        ? 'dentro da referência do PRD'
+        : 'ACIMA da referência do PRD (custo aceito na DEC-017)';
+    results.push(
+      `- ${label === 'cuda' ? 'GPU (CUDA)' : 'CPU'} · ${instrumentOf(stem).label} (${result.model}): ${seconds.toFixed(1)} s para 4:00 de áudio (referência: ~${REFERENCE_S[label] / 60} min) → ${verdict}`,
+    );
     return seconds;
   }
 
@@ -114,18 +120,18 @@ describe('benchmark: música de 4 min', () => {
         results.push('- GPU (CUDA): sem GPU NVIDIA nesta máquina; medição não realizada');
         return;
       }
-      const seconds = await measure('cuda', await ensureCudaEngine());
-      expect(seconds).toBeGreaterThan(0);
+      const paths = await ensureCudaEngine();
+      for (const stem of STEMS) expect(await measure('cuda', paths, stem)).toBeGreaterThan(0);
     },
-    60 * 60_000,
+    3 * 60 * 60_000,
   );
 
   it(
     'CPU',
     async () => {
-      const seconds = await measure('cpu', enginePaths(path.dirname(await ensureTestEngine())));
-      expect(seconds).toBeGreaterThan(0);
+      const paths = enginePaths(path.dirname(await ensureTestEngine()));
+      for (const stem of STEMS) expect(await measure('cpu', paths, stem)).toBeGreaterThan(0);
     },
-    60 * 60_000,
+    4 * 60 * 60_000,
   );
 });

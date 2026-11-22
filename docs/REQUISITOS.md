@@ -30,6 +30,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RF-24 | Configurações: pasta de saída, bitrate, dispositivo (Auto/GPU/CPU), caminhos de Python e FFmpeg, reinstalar motor | §5.1 "Caminhos… podem ser sobrescritos", §5.7 | T-010, T-100, T-102 | feito |
 | RF-25 | Persistir histórico e preferências em SQLite (`better-sqlite3`) em `userData` | §4 "Persistência local", §5.7 "Persistidas no SQLite" | T-005, T-010 | feito |
 | RF-26 | Separação com o melhor modelo por instrumento, escolhido por medição (DEC-017): MelBand-RoFormer Kim FT2 Bleedless para voz e BS-Roformer-SW para bateria, baixo, guitarra e piano, com vazamento menor que o `htdemucs_6s` | DEC-017 (pedido do usuário em 2026-11-21) | T-903, T-904, T-905, T-906 | pendente |
+| RF-27 | Baixar em MP3 cada faixa gerada (só o instrumento/voz e sem o instrumento/voz) pelo diálogo "Salvar como", no resultado e no histórico | Pedido do usuário em 2026-11-22 (DEC-018) | T-907 | pendente |
 | RN-01 | Formatos aceitos: MP3, WAV, FLAC, M4A/AAC, OGG | §5.2 "Formatos aceitos" | T-200, T-201 | feito |
 | RN-02 | Limites: até 500 MB e até 30 minutos | §5.2 "Limites" | T-200, T-601 | feito |
 | RN-03 | Validar extensão, legibilidade pelo FFmpeg e duração, com erro claro se inválido | §5.2 "Validação" | T-200, T-201, T-601 | feito |

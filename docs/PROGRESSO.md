@@ -264,3 +264,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: reconstrução mix = faixa + resto com erro ~3e-8 (executor à mão, motor de teste); `pnpm verify` OK (309); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 37 passed (22 min; DEC-008 pendente); `pnpm quality --candidates app,htdemucs_6s` (12 trechos, GPU): vazamento app × anterior — Voz −29,1 × −21,4; Bateria −24,2 × −20,4; Baixo −24,7 × −21,6; Guitarra −20,3 × −3,7; Piano −16,4 × −1,6 dB.
 - Revisor: REPROVADO (textos com Demucs, critérios/RF desatualizados, teste de progresso fraco, quality sem rigidez, testes faltando, sobras) → APROVADO.
 - Commit: ver `git log` (T-905)
+
+### T-906 — Benchmark, README e pacotes atualizados para os novos modelos (2026-11-22)
+- Feito: `pnpm bench` mede cada instrumento com o modelo do app (GPU e CPU, conferindo o modelo gravado); README com os tempos por instrumento e o espaço em disco (motor 1,7 GB CPU / 5,7 GB CUDA + ~1,5 GB de modelos); teste do AppImage confere a voz pelo MelBand-RoFormer Kim; DEC-017 registra que os tempos medidos na música inteira ficaram acima das estimativas aprovadas.
+- Verificado: `pnpm bench` (4:00 de áudio, RTX 3050 / CPU 16 threads): GPU voz 331 s, demais 117–119 s; CPU voz 2.971 s, demais 892–907 s. `pnpm dist:linux` + `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm smoke:linux` OK (voz pelo RoFormer no AppImage; DEC-008 pendente); `pnpm dist:win` regerado; `pnpm verify` OK (309).
+- Revisor: REPROVADO (verify falhava por arquivos da T-907 na árvore) → T-906 isolada → APROVADO.
+- Commit: ver `git log` (T-906)
