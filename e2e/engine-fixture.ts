@@ -89,16 +89,33 @@ export function linkTestEngine(userData: string, engineDir: string): void {
 }
 
 /**
- * Liga à pasta de dados do teste só os pesos grandes dos RoFormer (~1,5 GB) já baixados no motor de teste,
- * para que o download pela interface baixe de verdade o resto (configurações e htdemucs_6s) sem repetir 1,5 GB.
+ * Prepara a pasta de modelos de um teste para o download pela interface sem repetir 1,5 GB: os pesos do
+ * BS-Roformer-SW são ligados do motor de teste, e os do modelo de voz começam de um `.parcial` com tudo menos
+ * os últimos `missingBytes` — o app baixa o resto de verdade, do espelho oficial, com HTTP Range. As
+ * configurações (.yaml) também são baixadas pelo app.
  */
-export async function seedLargeModels(userData: string): Promise<string[]> {
+export async function seedPartialModels(userData: string, missingBytes = 40 * 1024 * 1024): Promise<string> {
   const source = path.join(await ensureTestEngine(), 'models');
   const target = path.join(userData, 'engine', 'models');
   fs.mkdirSync(target, { recursive: true });
-  const seeded = fs.readdirSync(source).filter((f) => f.endsWith('.ckpt'));
-  for (const f of seeded) fs.symlinkSync(path.join(source, f), path.join(target, f));
-  return seeded;
+  fs.symlinkSync(path.join(source, 'BS-Roformer-SW.ckpt'), path.join(target, 'BS-Roformer-SW.ckpt'));
+  const vocals = 'mel_band_roformer_kim_ft2_bleedless_unwa.ckpt';
+  const partial = path.join(target, `${vocals}.parcial`);
+  const size = fs.statSync(path.join(source, vocals)).size;
+  const input = fs.openSync(path.join(source, vocals), 'r');
+  const output = fs.openSync(partial, 'w');
+  try {
+    const buf = Buffer.alloc(8 * 1024 * 1024);
+    for (let pos = 0; pos < size - missingBytes;) {
+      const n = fs.readSync(input, buf, 0, Math.min(buf.length, size - missingBytes - pos), pos);
+      fs.writeSync(output, buf, 0, n);
+      pos += n;
+    }
+  } finally {
+    fs.closeSync(input);
+    fs.closeSync(output);
+  }
+  return partial;
 }
 
 /**

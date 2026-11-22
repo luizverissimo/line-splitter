@@ -217,8 +217,8 @@ function ReinstallEngine() {
     <div className="field reinstall">
       <h2>Motor de separação</h2>
       <p className="field-hint">
-        Apaga o ambiente Python do Line Splitter e instala o PyTorch e o Demucs de novo. Os pesos do modelo
-        são mantidos.
+        Apaga o ambiente Python do Line Splitter e instala o PyTorch e o separador (audio-separator) de novo.
+        Os modelos de separação já baixados são mantidos.
       </p>
       <div>
         <Button variant="danger" onClick={() => setConfirming(true)} disabled={install.running}>

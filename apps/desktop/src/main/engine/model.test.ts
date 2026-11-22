@@ -11,7 +11,7 @@ import { ModelDownloader } from './model';
 import {
   enginePaths,
   INSTRUMENTS_MODEL,
-  SEPARATION_MODELS,
+  modelForStem,
   VOCALS_MODEL,
   type ModelFile,
   type SeparationModel,
@@ -122,6 +122,8 @@ const model = (id: string, files: ModelFile[], extra: Partial<SeparationModel> =
   id,
   name: `Modelo ${id}`,
   stems: ['vocals'],
+  checkpoint: files[0]?.file ?? 'pesos.ckpt',
+  config: files[1]?.file ?? 'config.yaml',
   files,
   ...extra,
 });
@@ -159,6 +161,17 @@ describe('ModelDownloader (HTTP real)', () => {
       ['b', true, ['Bateria', 'Baixo']],
     ]);
     expect(downloader.isRunning).toBe(false);
+  });
+
+  it('ao terminar, apaga as sobras do motor anterior (htdemucs_6s) e mantém o resto', async () => {
+    const dir = tmp();
+    const paths = enginePaths(dir);
+    fs.mkdirSync(paths.modelsDir, { recursive: true });
+    for (const f of ['5c90dfd2-34c22ccb.th', 'htdemucs_6s.yaml', 'outro-arquivo.txt']) {
+      fs.writeFileSync(path.join(paths.modelsDir, f), 'x');
+    }
+    await setup([model('a', [smallFile()])], dir).downloader.download();
+    expect(files(paths.modelsDir)).toEqual(['config.yaml', 'outro-arquivo.txt']);
   });
 
   it('o que já está baixado não é baixado de novo', async () => {
@@ -271,6 +284,27 @@ describe('ModelDownloader (HTTP real)', () => {
   });
 });
 
+describe('modelo por instrumento (DEC-017)', () => {
+  it('voz usa o Kim FT2 Bleedless; bateria, baixo, guitarra e piano usam o BS-Roformer-SW', () => {
+    expect(modelForStem('vocals').name).toBe('MelBand-RoFormer Kim FT2 Bleedless');
+    for (const stem of ['drums', 'bass', 'guitar', 'piano'] as const) {
+      expect({ stem, model: modelForStem(stem).name }).toEqual({ stem, model: 'BS-Roformer-SW' });
+    }
+    expect(modelForStem('vocals')).toMatchObject({
+      checkpoint: 'mel_band_roformer_kim_ft2_bleedless_unwa.ckpt',
+      config: 'config_mel_band_roformer_kim_ft_unwa.yaml',
+    });
+    expect(modelForStem('piano')).toMatchObject({
+      checkpoint: 'BS-Roformer-SW.ckpt',
+      config: 'BS-Roformer-SW.yaml',
+    });
+    // Pesos e configuração de cada modelo estão entre os arquivos que o download traz.
+    for (const m of [VOCALS_MODEL, INSTRUMENTS_MODEL]) {
+      expect(m.files.map((f) => f.file)).toEqual([m.checkpoint, m.config]);
+    }
+  });
+});
+
 describe('detecção dos modelos', () => {
   it('não baixado, incompleto, arquivo gerado alterado e pronto', () => {
     const paths = enginePaths(tmp());
@@ -288,22 +322,18 @@ describe('detecção dos modelos', () => {
     expect(detectModels(paths, [m])[0]).toMatchObject({ ok: true, detail: 'Baixado (3,0 MB)' });
   });
 
-  it('motor antigo, só com o htdemucs_6s: os modelos novos aparecem como faltando, com o tamanho', () => {
+  it('motor antigo, só com os arquivos do htdemucs_6s: os modelos novos aparecem como faltando, com o tamanho', () => {
     const paths = enginePaths(tmp());
-    const legacy = SEPARATION_MODELS.find((m) => m.id === 'htdemucs_6s');
-    expect(legacy).toBeDefined();
     fs.mkdirSync(paths.modelsDir, { recursive: true });
-    for (const f of legacy?.files ?? []) {
-      const fd = fs.openSync(path.join(paths.modelsDir, f.file), 'w');
-      fs.ftruncateSync(fd, f.sizeBytes);
-      fs.closeSync(fd);
-    }
-    for (const g of legacy?.generated ?? []) fs.writeFileSync(path.join(paths.modelsDir, g.file), g.content);
+    // Arquivos que o motor anterior deixava na pasta (pesos do htdemucs_6s e o yaml gerado).
+    const fd = fs.openSync(path.join(paths.modelsDir, '5c90dfd2-34c22ccb.th'), 'w');
+    fs.ftruncateSync(fd, 54_996_327);
+    fs.closeSync(fd);
+    fs.writeFileSync(path.join(paths.modelsDir, 'htdemucs_6s.yaml'), "models: ['5c90dfd2']\n");
     const models = detectModels(paths);
     expect(models.map((m) => [m.id, m.ok, m.detail])).toEqual([
       ['melband-kim-ft2-bleedless', false, 'Não baixado (870,8 MB).'],
       ['bs-roformer-sw', false, 'Não baixado (667,0 MB).'],
-      ['htdemucs_6s', true, 'Baixado (52,4 MB)'],
     ]);
     expect(summarizeModels(models)).toEqual({
       ok: false,

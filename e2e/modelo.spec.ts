@@ -1,31 +1,32 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { expect, launchApp, test } from './app';
-import { ensureTestEngine, linkTestEngine, seedLargeModels } from './engine-fixture';
+import { ensureTestEngine, linkTestEngine, seedPartialModels } from './engine-fixture';
 
-const DEMUCS_FILE = '5c90dfd2-34c22ccb.th';
-const DOWNLOADED = [
-  DEMUCS_FILE,
-  'BS-Roformer-SW.yaml',
-  'config_mel_band_roformer_kim_ft_unwa.yaml',
-  'htdemucs_6s.yaml',
-];
+const VOCALS = 'mel_band_roformer_kim_ft2_bleedless_unwa.ckpt';
+const VOCALS_SIZE = 913_101_368;
 
 test.describe('Download dos modelos pelo app', () => {
-  test('baixa das fontes oficiais com progresso e cada modelo fica ✔', async ({ userData }) => {
+  test('continua o download do espelho oficial com progresso e cada modelo fica ✔', async ({ userData }) => {
     test.setTimeout(10 * 60_000);
-    const seeded = await seedLargeModels(userData);
+    await seedPartialModels(userData);
     const { app, page } = await launchApp(userData);
     try {
       const items = page.getByRole('list', { name: 'Itens do motor' }).getByRole('listitem');
+      await expect(items).toHaveCount(5);
       await expect(items.nth(3)).toContainText(
         'Modelo MelBand-RoFormer Kim FT2 Bleedless · Voz: com problema',
       );
-      await expect(items.nth(3)).toContainText('Download incompleto (870,8 MB); baixe de novo.');
-      await expect(items.nth(5)).toContainText('Não baixado (52,4 MB).');
+      await expect(items.nth(3)).toContainText('Não baixado (870,8 MB).');
+      await expect(items.nth(4)).toContainText('Download incompleto (667,0 MB); baixe de novo.');
       await page.getByRole('button', { name: 'Baixar modelos' }).click();
-      await expect(page.getByText(/^Baixando .+: .* de 52,5 MB$/)).toBeVisible({ timeout: 60_000 });
-      await expect(page.getByText('Modelos baixados e conferidos (52,5 MB).')).toBeVisible({
+      // O total é o tamanho completo do que falta; a barra já começa no que estava no parcial.
+      await expect(
+        page.getByText(/^Baixando MelBand-RoFormer Kim FT2 Bleedless: 8\d\d,\d MB de 870,8 MB$/),
+      ).toBeVisible({
+        timeout: 60_000,
+      });
+      await expect(page.getByText(/^Modelos baixados e conferidos \(4\d,\d MB\)\.$/)).toBeVisible({
         timeout: 5 * 60_000,
       });
       await expect(items.nth(3)).toContainText('Modelo MelBand-RoFormer Kim FT2 Bleedless · Voz: pronto');
@@ -33,11 +34,14 @@ test.describe('Download dos modelos pelo app', () => {
       await expect(items.nth(4)).toContainText(
         'Modelo BS-Roformer-SW · Bateria, Baixo, Guitarra/Violão, Piano/Teclado: pronto',
       );
-      await expect(items.nth(5)).toContainText(
-        'Modelo htdemucs_6s · Voz, Bateria, Baixo, Guitarra/Violão, Piano/Teclado: pronto',
-      );
       const models = path.join(userData, 'engine', 'models');
-      expect(fs.readdirSync(models).sort()).toEqual([...DOWNLOADED, ...seeded].sort());
+      expect(fs.readdirSync(models).sort()).toEqual([
+        'BS-Roformer-SW.ckpt',
+        'BS-Roformer-SW.yaml',
+        'config_mel_band_roformer_kim_ft_unwa.yaml',
+        VOCALS,
+      ]);
+      expect(fs.statSync(path.join(models, VOCALS)).size).toBe(VOCALS_SIZE);
     } finally {
       await app.close();
     }
@@ -47,29 +51,29 @@ test.describe('Download dos modelos pelo app', () => {
     userData,
   }) => {
     test.setTimeout(10 * 60_000);
-    await seedLargeModels(userData);
+    const partial = await seedPartialModels(userData, 200 * 1024 * 1024);
+    const seeded = fs.statSync(partial).size;
     const models = path.join(userData, 'engine', 'models');
-    const partial = path.join(models, `${DEMUCS_FILE}.parcial`);
     const { app, page } = await launchApp(userData);
     try {
       await page.getByRole('button', { name: 'Baixar modelos' }).click();
-      await expect(page.getByText(/^Baixando htdemucs_6s: /)).toBeVisible({ timeout: 60_000 });
-      await expect.poll(() => (fs.existsSync(partial) ? fs.statSync(partial).size : 0)).toBeGreaterThan(0);
+      await expect(page.getByText(/^Baixando MelBand-RoFormer Kim FT2 Bleedless: /)).toBeVisible({
+        timeout: 60_000,
+      });
+      await expect.poll(() => fs.statSync(partial).size, { timeout: 60_000 }).toBeGreaterThan(seeded);
       await page.getByRole('button', { name: 'Cancelar download' }).click();
       await expect(
         page.getByText('Download dos modelos cancelado. O que já foi baixado é aproveitado na próxima vez.'),
       ).toBeVisible();
       const kept = fs.statSync(partial).size;
-      expect(kept).toBeGreaterThan(0);
-      expect(fs.existsSync(path.join(models, DEMUCS_FILE))).toBe(false);
+      expect(kept).toBeGreaterThan(seeded);
+      expect(kept).toBeLessThan(VOCALS_SIZE);
+      expect(fs.existsSync(path.join(models, VOCALS))).toBe(false);
       await page.getByRole('button', { name: 'Baixar modelos' }).click();
-      // Só o que faltava é transferido: o total mostrado é menor que os 52,4 MB do arquivo.
-      await expect(
-        page.getByText(/^Modelos baixados e conferidos \((?!52,4 MB)[\d,]+ (KB|MB)\)\.$/),
-      ).toBeVisible({
+      await expect(page.getByText(/^Modelos baixados e conferidos \(.+\)\.$/)).toBeVisible({
         timeout: 5 * 60_000,
       });
-      expect(fs.statSync(path.join(models, DEMUCS_FILE)).size).toBe(54_996_327);
+      expect(fs.statSync(path.join(models, VOCALS)).size).toBe(VOCALS_SIZE);
       expect(fs.existsSync(partial)).toBe(false);
     } finally {
       await app.close();

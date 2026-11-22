@@ -111,7 +111,7 @@ test.describe('Fluxo completo de separação', () => {
     const db = openAppDb(userData);
     try {
       const rows = db
-        .prepare('SELECT instrument, instrument_output, rest_output, device FROM separations')
+        .prepare('SELECT instrument, instrument_output, rest_output, device, model FROM separations')
         .all();
       expect(rows).toEqual([
         {
@@ -119,12 +119,14 @@ test.describe('Fluxo completo de separação', () => {
           instrument_output: path.join(outputDir, 'musica-curta - Voz.mp3'),
           rest_output: path.join(outputDir, 'musica-curta - sem Voz.mp3'),
           device: 'cpu',
+          model: 'MelBand-RoFormer Kim FT2 Bleedless',
         },
         {
           instrument: 'bass',
           instrument_output: path.join(outputDir, 'musica-curta - Baixo.mp3'),
           rest_output: path.join(outputDir, 'musica-curta - sem Baixo.mp3'),
           device: 'cpu',
+          model: 'BS-Roformer-SW',
         },
       ]);
     } finally {

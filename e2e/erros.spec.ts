@@ -47,19 +47,18 @@ test.describe('Erros, limites e cancelamento', () => {
 
   test('erro do motor exibe mensagem legível e o log técnico, sem gravar nada', async ({ userData }) => {
     test.setTimeout(15 * 60_000);
-    // Motor de verdade, mas com um arquivo de modelo do tamanho certo e conteúdo errado:
-    // o próprio Demucs recusa pelo checksum.
+    // Motor de verdade, mas com os pesos do modelo de voz do tamanho certo e conteúdo errado:
+    // o PyTorch não consegue ler o arquivo.
     const realEngine = await ensureTestEngine();
     const engineDir = path.join(userData, 'engine');
     fs.mkdirSync(path.join(engineDir, 'models'), { recursive: true });
-    // Os modelos novos (DEC-017) vêm íntegros do motor de teste; só o do Demucs é criado errado aqui.
-    await linkModelsExcept(userData, ['5c90dfd2-34c22ccb.th', 'htdemucs_6s.yaml']);
+    // Os modelos vêm íntegros do motor de teste, menos os pesos do modelo de voz, criados errados aqui.
+    await linkModelsExcept(userData, ['mel_band_roformer_kim_ft2_bleedless_unwa.ckpt']);
     fs.symlinkSync(path.join(realEngine, 'venv'), path.join(engineDir, 'venv'), 'dir');
-    const weights = path.join(engineDir, 'models', '5c90dfd2-34c22ccb.th');
+    const weights = path.join(engineDir, 'models', 'mel_band_roformer_kim_ft2_bleedless_unwa.ckpt');
     const fd = fs.openSync(weights, 'w');
-    fs.ftruncateSync(fd, 54_996_327);
+    fs.ftruncateSync(fd, 913_101_368);
     fs.closeSync(fd);
-    fs.writeFileSync(path.join(engineDir, 'models', 'htdemucs_6s.yaml'), "models: ['5c90dfd2']\n");
     const outputDir = path.join(userData, 'Saída');
 
     const { app, page } = await launchApp(userData);
@@ -77,10 +76,12 @@ test.describe('Erros, limites e cancelamento', () => {
       const alert = page.getByRole('alert').filter({ hasText: 'A separação falhou' });
       await expect(alert).toBeVisible({ timeout: 5 * 60_000 });
       await expect(alert).toContainText(
-        'O arquivo do modelo está corrompido. Baixe o modelo de novo na tela Motor.',
+        'O arquivo do modelo está corrompido. Baixe os modelos de novo na tela Motor.',
       );
       await alert.getByText('Ver log técnico').click();
-      await expect(alert).toContainText(/checksum|ModelLoadingError|Invalid checksum/i);
+      await expect(alert).toContainText(
+        /Failed to (load|create) .*(Roformer|roformer)|PytorchStreamReader|legacy \.tar format/,
+      );
       expect(fs.existsSync(outputDir) ? fs.readdirSync(outputDir) : []).toEqual([]);
 
       // Seguindo a instrução: na tela Motor o modelo aparece como não baixado e o download está disponível.
@@ -89,7 +90,7 @@ test.describe('Erros, limites e cancelamento', () => {
       const model = page
         .getByRole('list', { name: 'Itens do motor' })
         .getByRole('listitem')
-        .filter({ hasText: 'Modelo htdemucs_6s' });
+        .filter({ hasText: 'Modelo MelBand-RoFormer Kim FT2 Bleedless' });
       await expect(model).toContainText('com problema');
       await expect(page.getByRole('button', { name: 'Baixar modelos' })).toBeEnabled();
     } finally {

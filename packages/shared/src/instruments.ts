@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** Stems do modelo htdemucs_6s que o usuário pode isolar (PRD §5.3). */
+/** Instrumentos que o usuário pode isolar (PRD §5.3; modelos da DEC-017). */
 export const STEMS = ['vocals', 'drums', 'bass', 'guitar', 'piano'] as const;
 export const stemSchema = z.enum(STEMS, { error: 'Escolha um instrumento válido.' });
 export type Stem = z.infer<typeof stemSchema>;

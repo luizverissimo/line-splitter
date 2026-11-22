@@ -122,9 +122,10 @@ test.describe('Acessibilidade e idioma', () => {
       await expect(page.getByRole('group', { name: 'Qual instrumento você quer separar?' })).toBeVisible();
       await check(page, 'Arquivo carregado e escolha do instrumento');
 
-      await page.locator('label.selectable-card', { hasText: 'Canto e falas' }).click();
+      // Bateria (BS-Roformer-SW): a música de ~64 s leva poucos minutos na CPU.
+      await page.locator('label.selectable-card', { hasText: 'Bateria e percussão' }).click();
       await page.getByRole('button', { name: 'Separar' }).click();
-      await expect(page.getByRole('heading', { name: 'Separando: Voz' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Separando: Bateria' })).toBeVisible();
       await check(page, 'Processamento');
       await expect(page.getByRole('heading', { name: 'Pronto! Dois arquivos gerados' })).toBeVisible({
         timeout: 10 * 60_000,
@@ -292,13 +293,15 @@ test.describe('Acessibilidade e idioma', () => {
     const realEngine = await ensureTestEngine();
     const engineDir = path.join(userData, 'engine');
     fs.mkdirSync(path.join(engineDir, 'models'), { recursive: true });
-    // Os modelos novos (DEC-017) vêm íntegros do motor de teste; só o do Demucs é criado errado aqui.
-    await linkModelsExcept(userData, ['5c90dfd2-34c22ccb.th', 'htdemucs_6s.yaml']);
+    // Os modelos vêm íntegros do motor de teste, menos os pesos do modelo de voz, criados errados aqui.
+    await linkModelsExcept(userData, ['mel_band_roformer_kim_ft2_bleedless_unwa.ckpt']);
     fs.symlinkSync(path.join(realEngine, 'venv'), path.join(engineDir, 'venv'), 'dir');
-    const fd = fs.openSync(path.join(engineDir, 'models', '5c90dfd2-34c22ccb.th'), 'w');
-    fs.ftruncateSync(fd, 54_996_327);
+    const fd = fs.openSync(
+      path.join(engineDir, 'models', 'mel_band_roformer_kim_ft2_bleedless_unwa.ckpt'),
+      'w',
+    );
+    fs.ftruncateSync(fd, 913_101_368);
     fs.closeSync(fd);
-    fs.writeFileSync(path.join(engineDir, 'models', 'htdemucs_6s.yaml'), "models: ['5c90dfd2']\n");
     const { app, page } = await launchApp(userData);
     try {
       await app.evaluate(({ dialog }, f) => {
@@ -311,7 +314,9 @@ test.describe('Acessibilidade e idioma', () => {
       await page.getByRole('button', { name: 'Escolher arquivo' }).click();
       await page.locator('label.selectable-card', { hasText: 'Canto e falas' }).click();
       await page.getByRole('button', { name: 'Separar' }).click();
-      await expect(page.getByText('A separação falhou')).toBeVisible({ timeout: 5 * 60_000 });
+      await expect(page.getByRole('alert').filter({ hasText: 'A separação falhou' })).toBeVisible({
+        timeout: 5 * 60_000,
+      });
       await check(page, 'Separação com erro');
     } finally {
       await app.close();
@@ -416,6 +421,8 @@ test.describe('Acessibilidade e idioma', () => {
       // Motor: "Verificar de novo" pelo teclado.
       await tabTo(/^Motor$/, true);
       await page.keyboard.press('Enter');
+      // Ao abrir, a tela Motor pode estar refazendo a verificação (botão em carregamento).
+      await expect(page.getByRole('button', { name: 'Verificar de novo' })).toBeEnabled({ timeout: 60_000 });
       await tabTo(/^Verificar de novo$/);
       await page.keyboard.press('Enter');
       await expect(page.getByText('Tudo pronto para separar.')).toBeVisible({ timeout: 60_000 });

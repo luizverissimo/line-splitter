@@ -30,6 +30,7 @@ export function historyHandlers(history: HistoryRepository, media: MediaRegistry
     processingMs: r.processingMs,
     device: r.device,
     bitrateKbps: r.bitrateKbps,
+    model: r.model,
     instrument: output(r.instrumentOutput),
     rest: output(r.restOutput),
   });

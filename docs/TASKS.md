@@ -360,10 +360,10 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Testes de integração com downloads reais (ou servidor HTTP local de teste servindo o arquivo real) e E2E da tela Motor
   - Verificar: `pnpm verify` e `pnpm test:e2e motor modelo`
 
-- [ ] **T-905** Separação usa o melhor modelo por instrumento — req: RF-26, RF-11, RF-12 · dep: T-904
+- [x] **T-905** Separação usa o melhor modelo por instrumento — req: RF-26, RF-11, RF-12 · dep: T-904
   - Critérios:
-    - Voz usa o RoFormer; Bateria/Baixo usam `htdemucs_ft`; Guitarra/Piano usam `htdemucs_6s` com os parâmetros da T-903; os dois MP3 continuam sendo gerados (instrumento e resto)
-    - Progresso real lido da saída de cada separador, cancelamento que mata a árvore de processos e erros legíveis valem para os dois motores
+    - Voz usa o MelBand-RoFormer Kim FT2 Bleedless; Bateria, Baixo, Guitarra/Violão e Piano/Teclado usam o BS-Roformer-SW (modelos escolhidos na T-903, DEC-017); os dois MP3 continuam sendo gerados (instrumento e resto)
+    - Progresso real lido da saída do separador, cancelamento que mata a árvore de processos e erros legíveis
     - Histórico registra o modelo usado
     - Medição da T-903 repetida pelo app mostra vazamento menor que o do `htdemucs_6s` em todos os instrumentos
     - Testes de integração com os motores reais e E2E do fluxo completo para Voz e Bateria

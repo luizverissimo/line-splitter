@@ -263,8 +263,8 @@ describe('árvore de processos no Windows', () => {
       },
       killGroup: () => undefined,
     });
-    spawnTree('python.exe', ['-m', 'demucs'], { A: '1' }, deps('win32'));
-    spawnTree('python', ['-m', 'demucs'], { A: '1' }, deps('linux'));
+    spawnTree('python.exe', ['-c', 'print(1)'], { A: '1' }, deps('win32'));
+    spawnTree('python', ['-c', 'print(1)'], { A: '1' }, deps('linux'));
     expect(seen).toEqual([
       { shell: false, windowsHide: true, detached: false, env: { A: '1' } },
       { shell: false, windowsHide: true, detached: true, env: { A: '1' } },

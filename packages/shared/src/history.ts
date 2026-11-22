@@ -18,6 +18,8 @@ export const historyItemSchema = z.object({
   processingMs: z.number().int().min(0),
   device: z.enum(['cuda', 'cpu']),
   bitrateKbps: z.union([z.literal(192), z.literal(256), z.literal(320)]),
+  /** Modelo de separação usado (DEC-017). */
+  model: z.string().min(1),
   instrument: historyOutputSchema,
   rest: historyOutputSchema,
 });

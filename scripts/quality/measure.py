@@ -25,6 +25,7 @@ import glob
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -45,6 +46,9 @@ CANDIDATES = {
     'bs_roformer_sw': ('BS-Roformer-SW.ckpt', ALL5, None),
     'melband_kim_ft2_bleedless': ('mel_band_roformer_kim_ft2_bleedless_unwa.ckpt', ['vocals'], None),
     'bs_roformer_1297': ('model_bs_roformer_ep_317_sdr_12.9755.ckpt', ['vocals'], None),
+    # O próprio app: o executor da separação (apps/desktop/src/main/separation/runner.ts) com o modelo que o
+    # app escolhe para cada instrumento (--app-runner e --app-models, preparados pelo quality.mjs).
+    'app': ('(modelo do app por instrumento)', ALL5, None),
 }
 MUSDB_STREAMS = {'mix': 0, 'drums': 1, 'bass': 2, 'other': 3, 'vocals': 4}
 SLAKH_CLASS = {'Guitar': 'guitar', 'Piano': 'piano', 'Drums': 'drums', 'Bass': 'bass'}
@@ -90,6 +94,29 @@ class Separator:
             out[stem], _ = sf.read(match[0], dtype='float32')
         for f in files:
             os.remove(f)
+        return out
+
+
+class AppRunner:
+    """Separa como o app: chama o executor do app num processo Python próprio, como o processo principal faz."""
+
+    def __init__(self, runner, models_by_stem, models_dir, work):
+        self.runner, self.models, self.models_dir, self.work = runner, models_by_stem, models_dir, work
+
+    def run(self, wav_path, stems):
+        out = {}
+        for stem in stems:
+            checkpoint, config = self.models[stem]
+            job = tempfile.mkdtemp(prefix='app-', dir=self.work)
+            r = subprocess.run(
+                [sys.executable, self.runner, checkpoint, config, self.models_dir, job, wav_path, stem],
+                capture_output=True,
+                text=True,
+            )
+            if r.returncode != 0 or 'LINE_SPLITTER_SEPARACAO_OK' not in r.stdout:
+                raise RuntimeError(f'executor do app falhou ({stem}): {r.stderr[-2000:]}')
+            out[stem], _ = sf.read(os.path.join(job, 'instrumento.wav'), dtype='float32')
+            shutil.rmtree(job, ignore_errors=True)
         return out
 
 
@@ -144,7 +171,7 @@ def evaluate(sep, st, target, work):
     others = sum(x for k, x in st.items() if k != target)
     mix = others + st[target]
     p = os.path.join(work, 'mix.wav')
-    sf.write(p, mix, SR)
+    sf.write(p, mix, SR, subtype='FLOAT')
     t0 = time.time()
     e = sep.run(p, [target])[target][:n]
     elapsed = time.time() - t0
@@ -160,7 +187,7 @@ def evaluate(sep, st, target, work):
     h, q = len(e) // 2, SR // 2
     muted = target_a.copy()
     muted[h:] = 0
-    sf.write(p, others + muted, SR)
+    sf.write(p, others + muted, SR, subtype='FLOAT')
     ep = sep.run(p, [target])[target][: len(e)]
     pause = db(np.sum(ep[h + q :] ** 2), np.sum(others[h + q :] ** 2))
     err = db(np.sum((ep[: h - q] - muted[: h - q]) ** 2), np.sum(muted[: h - q] ** 2))
@@ -179,7 +206,12 @@ def summarize(values):
 def measure(a):
     model_file, stems, demucs_params = CANDIDATES[a.candidate]
     work = tempfile.mkdtemp(prefix='ls-quality-')
-    sep = Separator(model_file, a.models, work, demucs_params)
+    if a.candidate == 'app':
+        if not a.app_runner or not a.app_models:
+            sys.exit('O candidato "app" exige --app-runner e --app-models (rode pelo "pnpm quality").')
+        sep = AppRunner(a.app_runner, json.loads(a.app_models), a.models, work)
+    else:
+        sep = Separator(model_file, a.models, work, demucs_params)
     rows, speed = {}, []
     # MUSDB: voz, bateria, baixo (gravações reais).
     for name, st in musdb_excerpts(a.musdb, a.tracks, work):
@@ -207,7 +239,7 @@ def measure(a):
     }
     if a.song:
         os.makedirs(a.song_out, exist_ok=True)
-        mix = decode(a.song, os.path.join(work, 'musica.wav'))
+        mix = decode(a.song, os.path.join(work, 'musica.wav'))  # decode grava WAV de ponto flutuante
         est = sep.run(os.path.join(work, 'musica.wav'), stems)
         for s, e in est.items():
             n = min(len(e), len(mix))
@@ -262,6 +294,8 @@ def main():
     ap.add_argument('--song-out')
     ap.add_argument('--song-metrics')
     ap.add_argument('--song-candidates', help='candidatos (separados por vírgula) considerados no --song-metrics')
+    ap.add_argument('--app-runner', help='arquivo .py com o executor da separação do app')
+    ap.add_argument('--app-models', help='JSON {instrumento: [pesos, configuração]} com o modelo do app por instrumento')
     a = ap.parse_args()
     if a.song_metrics:
         if not a.song_candidates:

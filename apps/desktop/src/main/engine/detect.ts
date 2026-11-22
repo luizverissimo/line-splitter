@@ -159,15 +159,12 @@ const torchInfoSchema = z.object({
 });
 type TorchInfo = z.infer<typeof torchInfoSchema>;
 
-/**
- * Importa o que a separação usa (audio-separator, PyTorch e, até a troca do motor na T-905, o Demucs)
- * e informa versões e GPU.
- */
+/** Importa o que a separação usa (audio-separator, PyTorch, numpy e soundfile) e informa versões e GPU. */
 const PROBE_SCRIPT = [
   'import json, importlib.metadata as md, importlib.util',
   // Primeiro o separador: num motor antigo (ou incompleto) é ele que falta, e a mensagem tem de dizer isso.
   "if importlib.util.find_spec('audio_separator') is None: raise ModuleNotFoundError(\"No module named 'audio_separator'\")",
-  'import torch, numpy, demucs',
+  'import torch, numpy, soundfile',
   'import audio_separator.separator',
   'cuda = torch.cuda.is_available()',
   "print(json.dumps({'separator': md.version('audio-separator'), 'torch': torch.__version__, 'cuda': cuda,",

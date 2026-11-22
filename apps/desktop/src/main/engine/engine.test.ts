@@ -225,7 +225,7 @@ describe('detectEngine e canal engine:status', () => {
     expect(status.python.ok).toBe(true);
     expect(status.ffmpeg.ok).toBe(true);
     expect(status.separator.ok).toBe(false);
-    expect(status.models.map((m) => m.ok)).toEqual([false, false, false]);
+    expect(status.models.map((m) => m.ok)).toEqual([false, false]);
     expect(status.model.ok).toBe(false);
     expect(status.ready).toBe(false);
     expect(status.engineDir).toBe(paths.engineDir);

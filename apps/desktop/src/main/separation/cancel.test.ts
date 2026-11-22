@@ -22,13 +22,20 @@ describe('explainEngineFailure', () => {
       /Memória RAM/,
     );
     expect(explainEngineFailure('Could not load file /x.wav')).toMatch(/não conseguiu ler este arquivo/);
-    expect(explainEngineFailure("ModuleNotFoundError: No module named 'demucs'")).toMatch(
+    expect(explainEngineFailure("ModuleNotFoundError: No module named 'audio_separator'")).toMatch(
       /Reinstale o motor/,
     );
     expect(explainEngineFailure('python terminou com SIGKILL')).toMatch(/encerrado inesperadamente/);
-    expect(explainEngineFailure('demucs.repo.ModelLoadingError: Invalid checksum for file')).toMatch(
-      /modelo está corrompido/,
-    );
+    expect(
+      explainEngineFailure(
+        'RuntimeError: PytorchStreamReader failed reading zip archive: failed finding central directory',
+      ),
+    ).toMatch(/modelo está corrompido/);
+    expect(
+      explainEngineFailure(
+        'mdxc_separator - Failed to load Roformer model: Cannot use ``weights_only=True`` with files saved in the legacy .tar format.',
+      ),
+    ).toMatch(/modelo está corrompido/);
     expect(explainEngineFailure('WARNING: pip cache checksum mismatch, refetching wheel')).toMatch(
       /log técnico/,
     );
@@ -91,7 +98,7 @@ describe('cancelamento e falhas com o motor real (CPU)', () => {
   const posix = process.platform !== 'win32';
 
   it.runIf(posix)(
-    'cancelar durante o Demucs encerra a árvore de processos, apaga temporários e não grava nada',
+    'cancelar durante a separação encerra a árvore de processos, apaga temporários e não grava nada',
     async () => {
       let s: SeparationService | null = null;
       let pid: number | undefined;
@@ -108,7 +115,7 @@ describe('cancelamento e falhas com o motor real (CPU)', () => {
       const run = s.run('vocals');
       run.catch(() => undefined);
       await expect.poll(() => cancelledAt, { timeout: 60_000 }).toBeGreaterThan(0);
-      // O Demucs ainda teria vários segundos de trabalho: o grupo de processos tem de sumir já.
+      // O separador ainda teria vários segundos de trabalho: o grupo de processos tem de sumir já.
       await expect.poll(() => groupAlive(pid as number), { timeout: 800, interval: 20 }).toBe(false);
       await expect(run).rejects.toMatchObject({
         code: 'CANCELLED',
@@ -178,7 +185,7 @@ describe('cancelamento e falhas com o motor real (CPU)', () => {
     async () => {
       const s = service(engine, (p) => {
         if (p.phase === 'separating' && p.percent > 0) {
-          // Mata o Demucs como o sistema faria (OOM killer, por exemplo), sem usar o cancelar do app.
+          // Mata o separador como o sistema faria (OOM killer, por exemplo), sem usar o cancelar do app.
           const child = (s as unknown as { child: { pid?: number } | null }).child;
           if (child?.pid) process.kill(-child.pid, 'SIGKILL');
         }
@@ -196,7 +203,7 @@ describe('cancelamento e falhas com o motor real (CPU)', () => {
   );
 
   it(
-    'arquivo trocado por lixo depois de escolhido é recusado antes de chegar ao Demucs',
+    'arquivo trocado por lixo depois de escolhido é recusado antes de chegar ao separador',
     async () => {
       const swapped = path.join(work, 'trocado.wav');
       fs.copyFileSync(fixtures.wav, swapped);
@@ -213,14 +220,14 @@ describe('cancelamento e falhas com o motor real (CPU)', () => {
   );
 
   it.runIf(process.platform !== 'win32' && process.getuid?.() !== 0)(
-    'entrada que o Demucs rejeita: erro legível com o stderr do Demucs, sem saída nem histórico',
+    'entrada que não pode ser lida na conversão: erro legível com o stderr do FFmpeg, sem saída nem histórico',
     async () => {
       const locked = path.join(work, 'sem-leitura.wav');
       fs.copyFileSync(fixtures.wav, locked);
       input = locked;
-      // Passa na conferência do app e perde a permissão de leitura logo antes de o Demucs abrir o arquivo.
+      // Passa na conferência do app e perde a permissão de leitura logo antes da conversão para o separador.
       const s = service(engine, (p) => {
-        if (p.phase === 'separating' && p.percent === 0) fs.chmodSync(locked, 0o000);
+        if (p.phase === 'preparing' && p.percent === 2) fs.chmodSync(locked, 0o000);
       });
       const err = await s.run('vocals').catch((e: unknown) => e);
       fs.chmodSync(locked, 0o600);
@@ -229,25 +236,27 @@ describe('cancelamento e falhas com o motor real (CPU)', () => {
         code: 'ENGINE_FAILED',
         message: 'O motor não conseguiu ler este arquivo de áudio. Ele pode estar corrompido.',
       });
-      expect((err as { details?: string }).details).toMatch(/LoadAudioError/);
+      expect((err as { details?: string }).details).toMatch(/Permission denied/);
       expect(outputs()).toEqual([]);
       expect(new HistoryRepository(db).list()).toEqual([]);
     },
     10 * 60_000,
   );
 
-  it('motor incompleto (demucs removido do ambiente) é explicado', async () => {
+  it('motor incompleto (audio-separator removido do ambiente) é explicado', async () => {
     const broken = enginePaths(path.join(work, 'motor-quebrado'));
     fs.mkdirSync(path.dirname(broken.venvPython), { recursive: true });
     fs.writeFileSync(
       broken.venvPython,
-      '#!/bin/sh\necho "ModuleNotFoundError: No module named \'demucs\'" >&2\nexit 1\n',
+      '#!/bin/sh\necho "ModuleNotFoundError: No module named \'audio_separator\'" >&2\nexit 1\n',
       { mode: 0o755 },
     );
     const s = service(broken);
     await expect(s.run('vocals')).rejects.toMatchObject({
       code: 'ENGINE_MISSING',
-      details: expect.stringMatching(/Falha ao carregar o Demucs|não instalado/),
+      details: expect.stringContaining(
+        'O separador (audio-separator) não está instalado no ambiente do motor.',
+      ),
     });
   });
 });

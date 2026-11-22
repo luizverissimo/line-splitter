@@ -27,10 +27,3 @@ export function outputPaths(dir: string, sourceName: string, instrumentLabel: st
   const rest = uniquePath(dir, `${base} - sem ${instrumentLabel}`, 'mp3', new Set([instrument]));
   return { instrument, rest };
 }
-
-/** Lê a porcentagem da barra de progresso do Demucs (tqdm), ex.: " 50%|█████     | 5.85/11.7 [...]". */
-export function parseDemucsProgress(chunk: string): number | null {
-  let last: number | null = null;
-  for (const m of chunk.matchAll(/(\d{1,3})%\|/g)) last = Number(m[1]);
-  return last !== null && last >= 0 && last <= 100 ? last : null;
-}

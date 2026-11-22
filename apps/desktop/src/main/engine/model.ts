@@ -5,7 +5,13 @@ import path from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
-import { SEPARATION_MODELS, type EnginePaths, type ModelFile, type SeparationModel } from './paths';
+import {
+  LEGACY_MODEL_FILES,
+  SEPARATION_MODELS,
+  type EnginePaths,
+  type ModelFile,
+  type SeparationModel,
+} from './paths';
 
 /** Erros de disco ao gravar um modelo, com mensagem para o usuário. */
 const DISK_ERRORS: Record<string, string> = {
@@ -30,7 +36,7 @@ export function modelFilePresent(modelsDir: string, file: ModelFile): boolean {
   }
 }
 
-/** Arquivos gerados localmente (ex.: yaml do Demucs) presentes e com o conteúdo esperado. */
+/** Arquivos gerados localmente (se o modelo tiver algum) presentes e com o conteúdo esperado. */
 export function generatedFilesPresent(modelsDir: string, model: SeparationModel): boolean {
   return (model.generated ?? []).every((g) => {
     try {
@@ -130,6 +136,8 @@ export class ModelDownloader {
       for (const model of this.models) {
         for (const g of model.generated ?? []) fs.writeFileSync(path.join(modelsDir, g.file), g.content);
       }
+      // Sobras do motor anterior (htdemucs_6s), que não é mais usado.
+      for (const f of LEGACY_MODEL_FILES) fs.rmSync(path.join(modelsDir, f), { force: true });
       return { sizeBytes: transferred, models: done };
     } catch (err) {
       if (controller.signal.aborted) {

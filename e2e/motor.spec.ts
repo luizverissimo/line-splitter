@@ -17,8 +17,7 @@ test.describe('Tela Motor', () => {
       );
       await expect(items.nth(3)).toContainText('Não baixado (870,8 MB).');
       await expect(items.nth(4)).toContainText('Não baixado (667,0 MB).');
-      await expect(items.nth(5)).toContainText('Não baixado (52,4 MB).');
-      await expect(items).toHaveCount(6);
+      await expect(items).toHaveCount(5);
       await expect(page.getByText(/Dispositivo em uso:/)).toContainText(
         'definido depois de instalar o motor',
       );

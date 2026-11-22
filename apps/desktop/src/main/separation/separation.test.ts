@@ -11,7 +11,8 @@ import { openDatabase, type Db } from '../db/database';
 import { enginePaths } from '../engine/paths';
 import { HistoryRepository } from '../history/repository';
 import { MediaRegistry } from '../media/registry';
-import { outputPaths, parseDemucsProgress, safeFileName } from './naming';
+import { outputPaths, safeFileName } from './naming';
+import { parseSeparatorProgress } from './runner';
 import { SeparationService } from './service';
 
 const sha = (file: string) => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -35,10 +36,10 @@ describe('nomes e progresso', () => {
     expect(safeFileName('a/b:c*?.')).toBe('a_b_c__');
   });
 
-  it('lê a porcentagem do tqdm do Demucs', () => {
-    expect(parseDemucsProgress(' 50%|█████     | 5.85/11.7 [00:01<00:01]')).toBe(50);
-    expect(parseDemucsProgress('  0%|  | 0/11.7\r 33%|██ | 3.9/11.7\r 66%|████ |')).toBe(66);
-    expect(parseDemucsProgress('Separating track x.wav')).toBeNull();
+  it('lê a porcentagem do tqdm do separador', () => {
+    expect(parseSeparatorProgress(' 50%|█████     | 5.85/11.7 [00:01<00:01]')).toBe(50);
+    expect(parseSeparatorProgress('  0%|  | 0/11.7\r 33%|██ | 3.9/11.7\r 66%|████ |')).toBe(66);
+    expect(parseSeparatorProgress('Separating track x.wav')).toBeNull();
   });
 });
 
@@ -109,6 +110,7 @@ describe('SeparationService com Demucs e FFmpeg reais (CPU)', () => {
         bitrateKbps: 320,
         instrumentOutput: result.instrumentPath,
         restOutput: result.restPath,
+        model: 'MelBand-RoFormer Kim FT2 Bleedless',
         processingMs: result.processingMs,
       });
       expect(rows[0]?.audioDurationS).toBeCloseTo(8, 0);
@@ -116,7 +118,9 @@ describe('SeparationService com Demucs e FFmpeg reais (CPU)', () => {
       const percents = events.map((e) => e.percent);
       expect(percents).toEqual([...percents].sort((a, b) => a - b));
       expect(events.at(-1)).toEqual({ phase: 'saving', percent: 100 });
-      expect(events.some((e) => e.phase === 'separating' && e.percent > 0 && e.percent < 85)).toBe(true);
+      // Progresso real: além do 3% de início, valores intermediários vindos do tqdm do separador.
+      const separating = [...new Set(events.filter((e) => e.phase === 'separating').map((e) => e.percent))];
+      expect(separating.filter((p) => p > 3 && p < 85).length).toBeGreaterThanOrEqual(2);
       expect(fs.readdirSync(work).filter((f) => f.startsWith('line-splitter-sep-'))).toEqual([]);
     },
     10 * 60_000,
@@ -153,7 +157,10 @@ describe('SeparationService com Demucs e FFmpeg reais (CPU)', () => {
         code: 'CONFLICT',
         message: 'Já existe uma separação em andamento.',
       });
-      await first;
+      // Bateria é separada pelo BS-Roformer-SW (DEC-017), registrado no resultado e no histórico.
+      const result = await first;
+      expect(result.model).toBe('BS-Roformer-SW');
+      expect(new HistoryRepository(db).get(result.id)?.model).toBe('BS-Roformer-SW');
     },
     10 * 60_000,
   );

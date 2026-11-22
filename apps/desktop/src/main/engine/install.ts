@@ -15,10 +15,6 @@ export const ENGINE_PACKAGES = {
   separator: 'audio-separator[cpu]==0.48.0',
   /** O audio-separator importa o audioread (via librosa) sem declarar a dependência. */
   audioread: 'audioread>=3,<4',
-  /** Ainda usado pela separação até a troca do motor (T-905). */
-  demucs: 'demucs==4.1.0',
-  /** O Demucs 4.1 importa numpy sem declarar a dependência (DEC-011). */
-  numpy: 'numpy>=2,<3',
   /**
    * Restrições do pip: sem elas, as dependências do audio-separator trocariam o PyTorch 2.6 (com CUDA 12.4)
    * pela versão mais nova do PyPI.
@@ -187,8 +183,6 @@ export class EngineInstaller {
           constraints,
           ENGINE_PACKAGES.separator,
           ENGINE_PACKAGES.audioread,
-          ENGINE_PACKAGES.demucs,
-          ENGINE_PACKAGES.numpy,
         ],
         env,
       );

@@ -33,4 +33,12 @@ export const migrations: readonly Migration[] = [
       CREATE INDEX separations_created_at ON separations (created_at DESC);
     `,
   },
+  {
+    version: 2,
+    name: 'modelo usado em cada separação (DEC-017)',
+    sql: `
+      -- As separações anteriores a esta versão foram feitas com o htdemucs_6s.
+      ALTER TABLE separations ADD COLUMN model TEXT NOT NULL DEFAULT 'htdemucs_6s';
+    `,
+  },
 ];

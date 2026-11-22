@@ -15,6 +15,7 @@ const result: SeparationResult = {
   restUrl: 'media://audio/bbb',
   processingMs: 95_000,
   device: 'cuda',
+  model: 'BS-Roformer-SW',
 };
 
 function setup(handlers: Record<string, (p: unknown) => unknown> = {}) {

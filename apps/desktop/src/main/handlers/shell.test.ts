@@ -29,6 +29,7 @@ new HistoryRepository(db).insert({
   bitrateKbps: 320,
   instrumentOutput: instrument,
   restOutput: rest,
+  model: 'BS-Roformer-SW',
 });
 
 // O gerenciador de arquivos do sistema não abre durante o teste: registramos o que seria pedido a ele.

@@ -11,6 +11,8 @@ export interface NewSeparation {
   bitrateKbps: 192 | 256 | 320;
   instrumentOutput: string;
   restOutput: string;
+  /** Nome do modelo de separação usado. */
+  model: string;
 }
 
 export interface SeparationRow extends NewSeparation {
@@ -30,6 +32,7 @@ interface DbRow {
   bitrate_kbps: 192 | 256 | 320;
   instrument_output: string;
   rest_output: string;
+  model: string;
 }
 
 const fromDb = (r: DbRow): SeparationRow => ({
@@ -44,6 +47,7 @@ const fromDb = (r: DbRow): SeparationRow => ({
   bitrateKbps: r.bitrate_kbps,
   instrumentOutput: r.instrument_output,
   restOutput: r.rest_output,
+  model: r.model,
 });
 
 /** Separações concluídas (só entram aqui depois que os dois MP3 estão na pasta de saída — RN-13). */
@@ -54,8 +58,8 @@ export class HistoryRepository {
     const { lastInsertRowid } = this.db
       .prepare(
         `INSERT INTO separations (source_path, source_name, instrument, audio_duration_s, processing_ms, device,
-           bitrate_kbps, instrument_output, rest_output)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           bitrate_kbps, instrument_output, rest_output, model)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         s.sourcePath,
@@ -67,6 +71,7 @@ export class HistoryRepository {
         s.bitrateKbps,
         s.instrumentOutput,
         s.restOutput,
+        s.model,
       );
     const row = this.get(Number(lastInsertRowid));
     if (!row) throw new Error('Registro de separação não encontrado logo após gravar.');

@@ -79,7 +79,7 @@ export function buildMenuTemplate(deps: MenuDeps): MenuItemConstructorOptions[] 
               message: `Line Splitter ${app.getVersion()}`,
               detail:
                 'Separa um instrumento de uma música e gera dois MP3: só o instrumento e a música sem ele.\n' +
-                'Tudo roda neste computador, com o Demucs (htdemucs_6s) e o FFmpeg.\n' +
+                'Tudo roda neste computador, com modelos RoFormer (audio-separator) e o FFmpeg.\n' +
                 `Electron ${process.versions.electron ?? ''}`,
             };
             if (win) await dialog.showMessageBox(win, options);

@@ -45,7 +45,7 @@ function HistoryEntry({ item, onRemove }: { item: HistoryItem; onRemove: (item: 
           <p className="history-meta">
             {dateFormat.format(new Date(item.createdAt))} · áudio de {formatDuration(item.audioDurationS)} ·
             processado em {formatDuration(item.processingMs / 1000)} ({item.device === 'cuda' ? 'GPU' : 'CPU'}
-            , {item.bitrateKbps} kbps)
+            , {item.bitrateKbps} kbps) · modelo {item.model}
           </p>
           <p className="history-meta">
             Original: <span data-path>{item.sourcePath}</span>

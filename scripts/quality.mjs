@@ -11,6 +11,8 @@
 import { spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,6 +37,7 @@ const DATASETS = [
   },
 ];
 const ALL_CANDIDATES = [
+  'app',
   'htdemucs_6s',
   'htdemucs_6s_shifts',
   'htdemucs_ft',
@@ -127,6 +130,39 @@ function python() {
   return candidate;
 }
 
+/**
+ * O candidato "app" usa o executor da separação do próprio app e o modelo que ele escolhe por instrumento,
+ * lidos do código TypeScript do desktop (empacotado na hora com o esbuild do projeto).
+ */
+function appCandidateArgs() {
+  const require = createRequire(path.join(root, 'apps', 'desktop', 'package.json'));
+  const esbuild = require('esbuild');
+  const load = (entry) => {
+    const out = esbuild.buildSync({
+      entryPoints: [path.join(root, 'apps', 'desktop', 'src', 'main', ...entry)],
+      bundle: true,
+      write: false,
+      format: 'cjs',
+      platform: 'node',
+      logLevel: 'error',
+    }).outputFiles[0].text;
+    const mod = { exports: {} };
+    new Function('module', 'exports', 'require', out)(mod, mod.exports, require);
+    return mod.exports;
+  };
+  const { RUNNER_SCRIPT } = load(['separation', 'runner.ts']);
+  const { modelForStem } = load(['engine', 'paths.ts']);
+  const runner = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'ls-quality-app-')), 'executor.py');
+  fs.writeFileSync(runner, RUNNER_SCRIPT);
+  const models = Object.fromEntries(
+    ['vocals', 'drums', 'bass', 'guitar', 'piano'].map((s) => {
+      const m = modelForStem(s);
+      return [s, [m.checkpoint, m.config]];
+    }),
+  );
+  return ['--app-runner', runner, '--app-models', JSON.stringify(models)];
+}
+
 const fmt = (v) => (v === null || v === undefined ? '—' : v.toFixed(1).replace('.', ','));
 
 requireCommand('ffmpeg', ['-version']);
@@ -147,6 +183,7 @@ for (const c of candidates) {
   args.push('--musdb', dir, '--slakh', path.join(dir, 'babyslakh_16k'), '--models', path.join(dir, 'models'));
   args.push('--out', out, '--tracks', tracks);
   if (song) args.push('--song', path.resolve(song), '--song-out', songDir);
+  if (c === 'app') args.push(...appCandidateArgs());
   console.log(`\n== ${c} ==`);
   const r = spawnSync(py, args, { stdio: 'inherit' });
   if (r.status !== 0) fail(`a medição de ${c} falhou (código ${r.status}).`);
@@ -214,5 +251,34 @@ if (song) {
     );
   }
 }
+// O app tem de vazar menos que o motor anterior (htdemucs_6s) em todos os instrumentos (RF-26).
+const app = results.find((r) => r.candidato === 'app');
+const before = results.find((r) => r.candidato === 'htdemucs_6s');
+if (app && !before) fail('o candidato "app" precisa ser medido junto com o "htdemucs_6s" para a comparação.');
+const worse = [];
+if (app && before) {
+  lines.push(
+    '',
+    '## App × htdemucs_6s (motor anterior)',
+    '',
+    '| Instrumento | App | htdemucs_6s | Diferença |',
+    '|---|---|---|---|',
+  );
+  for (const key of Object.keys(LABELS)) {
+    const a = app.instrumentos[key]?.vazamento.mediana;
+    const b = before.instrumentos[key]?.vazamento.mediana;
+    if (a === undefined || b === undefined)
+      fail(`sem medição de ${LABELS[key]} para comparar o app com o htdemucs_6s.`);
+    lines.push(`| ${LABELS[key]} | ${fmt(a)} | ${fmt(b)} | ${fmt(a - b)} dB |`);
+    if (a >= b) worse.push(LABELS[key]);
+  }
+  lines.push(
+    '',
+    worse.length === 0
+      ? 'O app vaza menos que o htdemucs_6s em todos os instrumentos.'
+      : `O app NÃO vaza menos em: ${worse.join(', ')}.`,
+  );
+}
 fs.writeFileSync(path.join(root, 'fixtures', 'quality.md'), `${lines.join('\n')}\n`);
 console.log(`\n${lines.join('\n')}`);
+if (worse.length > 0) fail(`o app vaza mais que o htdemucs_6s em: ${worse.join(', ')}.`);

@@ -14,8 +14,8 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 | RF-08 | Enviar áudio pelo botão "Escolher arquivo" (diálogo nativo) | §5.2 "botão Escolher arquivo" | T-201, T-600 | feito |
 | RF-09 | Após carregar, mostrar nome, duração, formato e player do original | §5.2 "Após carregar, mostra nome, duração…" | T-201, T-600 | feito |
 | RF-10 | Pedir a escolha do instrumento: seleção única, cartões com ícone (Voz, Bateria, Baixo, Guitarra/Violão, Piano/Teclado) | §5.3 | T-300, T-600 | feito |
-| RF-11 | Executar o Demucs `htdemucs_6s` no modo `--two-stems=<stem>` gerando instrumento e "resto" | §5.4 "Executa o Demucs no modo de duas faixas" | T-301 | feito |
-| RF-12 | Barra de progresso real (lida da saída do Demucs) e tempo decorrido | §5.4 "Barra de progresso real" | T-303, T-600 | feito |
+| RF-11 | Separar o instrumento escolhido gerando instrumento e "resto" (originalmente Demucs `htdemucs_6s --two-stems`; desde a DEC-017, o melhor modelo por instrumento via audio-separator, com resto = mix − instrumento) | §5.4 "Executa o Demucs no modo de duas faixas" | T-301, T-905 | feito |
+| RF-12 | Barra de progresso real (lida da saída do separador) e tempo decorrido | §5.4 "Barra de progresso real" | T-303, T-600, T-905 | feito |
 | RF-13 | Botão "Cancelar": encerra o processo filho e apaga arquivos parciais | §5.4 "Botão Cancelar" | T-302, T-303, T-601 | feito |
 | RF-14 | Erros do motor (memória, arquivo inválido, processo encerrado) em mensagem legível, com opção de ver o log técnico | §5.4 "Erros do motor…" | T-302, T-303, T-601 | feito |
 | RF-15 | Gerar dois MP3: `<nome> - <Instrumento>.mp3` e `<nome> - sem <Instrumento>.mp3` | §1, §5.5 "Nomes dos arquivos" | T-301, T-304, T-600 | feito |

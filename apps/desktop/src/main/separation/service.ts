@@ -12,11 +12,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { inspectAudio } from '../audio/inspect';
 import { detectEngine } from '../engine/detect';
-import { HTDEMUCS_6S, type EnginePaths } from '../engine/paths';
+import { modelForStem, type EnginePaths } from '../engine/paths';
 import { killTree, spawnTree } from '../engine/process-tree';
 import type { HistoryRepository } from '../history/repository';
 import type { MediaRegistry } from '../media/registry';
-import { outputPaths, parseDemucsProgress } from './naming';
+import { outputPaths } from './naming';
+import { RUNNER_OK, RUNNER_SCRIPT, parseSeparatorProgress } from './runner';
 import { explainEngineFailure, isCorruptedModel } from './errors';
 
 export interface SeparationDeps {
@@ -34,8 +35,9 @@ export interface SeparationDeps {
 const MAX_LOG_CHARS = 64 * 1024;
 
 /**
- * Separação real: Demucs (htdemucs_6s, --two-stems, repositório local) numa pasta temporária,
- * FFmpeg para MP3 e só no fim os dois arquivos vão para a pasta de saída (DEC-002).
+ * Separação real (DEC-017): o melhor modelo para o instrumento, rodado pelo audio-separator com os pesos da
+ * pasta do motor, numa pasta temporária; FFmpeg para MP3; só no fim os dois arquivos vão para a pasta de
+ * saída (DEC-002).
  */
 export class SeparationService {
   private child: ChildProcess | null = null;
@@ -92,37 +94,56 @@ export class SeparationService {
       const device = engine.device.effective;
       tmp = fs.mkdtempSync(path.join(this.deps.tmpRoot ?? os.tmpdir(), 'line-splitter-sep-'));
 
-      this.progress('separating', 0);
+      // O FFmpeg converte a entrada (qualquer formato aceito) num WAV de ponto flutuante a 44,1 kHz estéreo:
+      // é o que o separador espera e o que torna exato o cálculo do "resto" (mix − instrumento).
+      const mixWav = path.join(tmp, 'mix.wav');
+      this.progress('preparing', 2);
+      await this.exec(engine.ffmpeg.path, [
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-y',
+        '-i',
+        input,
+        '-vn',
+        '-ac',
+        '2',
+        '-ar',
+        '44100',
+        '-c:a',
+        'pcm_f32le',
+        mixWav,
+      ]);
+      const model = modelForStem(stem);
+      let separatorStarted = false;
       await this.exec(
         this.deps.paths.venvPython,
-        [
-          '-m',
-          'demucs',
-          '-n',
-          HTDEMUCS_6S.name,
-          '--repo',
-          this.deps.paths.modelsDir,
-          '--two-stems',
-          stem,
-          '-d',
-          device,
-          '-o',
-          tmp,
-          '--filename',
-          '{stem}.{ext}',
-          input,
-        ],
+        ['-c', RUNNER_SCRIPT, model.checkpoint, model.config, this.deps.paths.modelsDir, tmp, mixWav, stem],
         (chunk) => {
-          const p = parseDemucsProgress(chunk);
-          if (p !== null) this.progress('separating', p * 0.85);
+          // A fase "separando" começa com a primeira saída do processo do separador.
+          if (!separatorStarted) {
+            separatorStarted = true;
+            this.progress('separating', 3);
+          }
+          const p = parseSeparatorProgress(chunk);
+          if (p !== null) this.progress('separating', 3 + p * 0.82);
+        },
+        {
+          // CPU forçada (Configurações): o PyTorch não enxerga a GPU.
+          ...(device === 'cpu' ? { CUDA_VISIBLE_DEVICES: '' } : {}),
+          // O audio-separator procura o FFmpeg no PATH: usamos o mesmo FFmpeg detectado pelo app.
+          PATH: [path.dirname(engine.ffmpeg.path), process.env.PATH ?? ''].join(path.delimiter),
         },
       );
-      const demucsDir = path.join(tmp, HTDEMUCS_6S.name);
-      const stemWav = path.join(demucsDir, `${stem}.wav`);
-      const restWav = path.join(demucsDir, `no_${stem}.wav`);
+      if (!this.log.includes(RUNNER_OK)) {
+        throw new AppError('ENGINE_FAILED', 'O separador terminou sem confirmar as duas faixas.', this.log);
+      }
+      const stemWav = path.join(tmp, 'instrumento.wav');
+      const restWav = path.join(tmp, 'resto.wav');
       for (const f of [stemWav, restWav]) {
-        if (!fs.existsSync(f))
-          throw new AppError('ENGINE_FAILED', 'O Demucs terminou sem gerar as duas faixas.', this.log);
+        if (!fs.existsSync(f)) {
+          throw new AppError('ENGINE_FAILED', 'O separador terminou sem gerar as duas faixas.', this.log);
+        }
       }
 
       this.progress('encoding', 85);
@@ -176,6 +197,7 @@ export class SeparationService {
         bitrateKbps: settings.bitrateKbps,
         instrumentOutput: target.instrument,
         restOutput: target.rest,
+        model: model.name,
       });
       this.progress('saving', 100);
       return {
@@ -188,6 +210,7 @@ export class SeparationService {
         restUrl: this.deps.media.register(target.rest),
         processingMs,
         device,
+        model: model.name,
       };
     } catch (err) {
       if (this.cancelled) throw new AppError('CANCELLED', 'Separação cancelada. Nenhum arquivo foi gerado.');
@@ -195,7 +218,7 @@ export class SeparationService {
       const technical = `${this.log}\n${err instanceof Error ? err.message : String(err)}`.trim();
       if (isCorruptedModel(technical)) {
         // Pesos corrompidos: tira o arquivo para a tela Motor oferecer o download de novo.
-        fs.rmSync(path.join(this.deps.paths.modelsDir, HTDEMUCS_6S.file), { force: true });
+        fs.rmSync(path.join(this.deps.paths.modelsDir, modelForStem(stem).checkpoint), { force: true });
       }
       throw new AppError('ENGINE_FAILED', explainEngineFailure(technical), technical);
     } finally {
@@ -231,7 +254,12 @@ export class SeparationService {
     ]);
   }
 
-  private exec(command: string, args: string[], onChunk?: (chunk: string) => void): Promise<void> {
+  private exec(
+    command: string,
+    args: string[],
+    onChunk?: (chunk: string) => void,
+    extraEnv: NodeJS.ProcessEnv = {},
+  ): Promise<void> {
     if (this.cancelled) return Promise.reject(new Error('cancelado'));
     return new Promise((resolve, reject) => {
       const child = spawnTree(command, args, {
@@ -239,10 +267,11 @@ export class SeparationService {
         PYTHONNOUSERSITE: '1',
         PYTHONUNBUFFERED: '1',
         TORCH_HOME: this.deps.paths.torchHome,
-        // Garantias extras de que nada é baixado: o Demucs roda com --repo local e o hub fica offline.
+        // Garantias extras de que nada é baixado: o modelo é carregado da pasta do motor e o hub fica offline.
         HF_HUB_OFFLINE: '1',
         HF_DATASETS_OFFLINE: '1',
         TRANSFORMERS_OFFLINE: '1',
+        ...extraEnv,
       });
       this.child = child;
       const collect = (d: Buffer) => {

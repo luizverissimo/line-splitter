@@ -258,3 +258,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Verificado: `pnpm verify` OK (306), com testes contra o espelho real (YAMLs com SHA-256; Content-Range dos `.ckpt`); motor de teste instalado pelo instalador do app e modelos (1,6 GB) baixados pelo `ModelDownloader` real; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 37 passed (DEC-008 pendente).
 - Revisor: REPROVADO (tamanho de modelo não baixado ausente; recomendações de Range, bytes reais e venv real) → APROVADO.
 - Commit: ver `git log` (T-904)
+
+### T-905 — Separação usa o melhor modelo por instrumento (2026-11-22)
+- Feito: executor `apps/desktop/src/main/separation/runner.ts` (audio-separator com os pesos da pasta do motor, sem rede; só a faixa pedida; resto = mix − faixa em ponto flutuante, sem normalização). Serviço converte a entrada com FFmpeg para WAV float 44,1 kHz e roda o modelo do instrumento: voz → MelBand-RoFormer Kim FT2 Bleedless; bateria/baixo/guitarra/piano → BS-Roformer-SW. Progresso real do tqdm, cancelamento da árvore de processos e erros legíveis (inclui falhas de carga do PyTorch 2.6). Demucs/htdemucs_6s removidos do motor; sobras apagadas após baixar os modelos. Histórico grava o modelo (migração 2) e a tela mostra. `pnpm quality` ganhou o candidato `app` (executor e escolha reais do app) e falha se o app vazar mais que o htdemucs_6s.
+- Verificado: reconstrução mix = faixa + resto com erro ~3e-8 (executor à mão, motor de teste); `pnpm verify` OK (309); `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 37 passed (22 min; DEC-008 pendente); `pnpm quality --candidates app,htdemucs_6s` (12 trechos, GPU): vazamento app × anterior — Voz −29,1 × −21,4; Bateria −24,2 × −20,4; Baixo −24,7 × −21,6; Guitarra −20,3 × −3,7; Piano −16,4 × −1,6 dB.
+- Revisor: REPROVADO (textos com Demucs, critérios/RF desatualizados, teste de progresso fraco, quality sem rigidez, testes faltando, sobras) → APROVADO.
+- Commit: ver `git log` (T-905)

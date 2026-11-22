@@ -8,7 +8,7 @@ import { Button, ErrorAlert, ProgressBar } from './ui';
 interface Props {
   /** Python do sistema disponível (sem ele não há como criar o ambiente). */
   pythonOk: boolean;
-  /** Demucs já instalado e funcionando. */
+  /** Separador (audio-separator + PyTorch) já instalado e funcionando. */
   installed: boolean;
 }
 
@@ -30,8 +30,8 @@ export function EngineInstallPanel({ pythonOk, installed }: Props) {
       <h2>Instalação do motor</h2>
       {!install.running && !installed && (
         <p className="page-intro">
-          Cria um ambiente Python só do Line Splitter e instala o PyTorch e o Demucs (alguns GB, exige
-          internet uma vez).
+          Cria um ambiente Python só do Line Splitter e instala o PyTorch e o separador (audio-separator). São
+          alguns GB e exige internet uma vez.
         </p>
       )}
       {install.running && (

@@ -30,5 +30,7 @@ export const separationResultSchema = z.object({
   restUrl: z.string().startsWith('media://'),
   processingMs: z.number().int().min(0),
   device: z.enum(['cuda', 'cpu']),
+  /** Modelo de separação usado (DEC-017). */
+  model: z.string().min(1),
 });
 export type SeparationResult = z.infer<typeof separationResultSchema>;

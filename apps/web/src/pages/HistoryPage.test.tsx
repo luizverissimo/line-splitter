@@ -15,6 +15,7 @@ const item = (id: number, over: Partial<HistoryItem> = {}): HistoryItem => ({
   processingMs: 95_000,
   device: 'cuda',
   bitrateKbps: 320,
+  model: 'MelBand-RoFormer Kim FT2 Bleedless',
   instrument: { path: '/s/Minha Música - Voz.mp3', exists: true, url: `media://audio/i${id}` },
   rest: { path: '/s/Minha Música - sem Voz.mp3', exists: true, url: `media://audio/r${id}` },
   ...over,
@@ -35,7 +36,9 @@ describe('Tela Histórico', () => {
     expect(entries).toHaveLength(2);
     expect(entries[0]).toHaveTextContent('Outra · Bateria');
     expect(entries[1]).toHaveTextContent('Minha Música · Voz');
-    expect(entries[1]).toHaveTextContent('áudio de 3:32 · processado em 1:35 (GPU, 320 kbps)');
+    expect(entries[1]).toHaveTextContent(
+      'áudio de 3:32 · processado em 1:35 (GPU, 320 kbps) · modelo MelBand-RoFormer Kim FT2 Bleedless',
+    );
     expect(entries[1]).toHaveTextContent('Original: /m/Minha Música.flac');
     expect(entries[1]).toHaveTextContent('/s/Minha Música - Voz.mp3');
     expect(entries[1]).toHaveTextContent('/s/Minha Música - sem Voz.mp3');

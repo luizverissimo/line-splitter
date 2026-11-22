@@ -1,3 +1,4 @@
+import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -90,6 +91,22 @@ describe('banco SQLite', () => {
     expect(() => insert.run({ ...sampleSeparation, instrument: 'flauta' })).toThrow(/CHECK/);
     expect(() => insert.run({ ...sampleSeparation, bitrate_kbps: 128 })).toThrow(/CHECK/);
     expect(() => insert.run({ ...sampleSeparation, device: 'tpu' })).toThrow(/CHECK/);
+  });
+
+  it('migração 2: separações antigas ficam registradas com o modelo htdemucs_6s', () => {
+    const dir = tmpDir();
+    fs.mkdirSync(dir, { recursive: true });
+    const raw = new Database(path.join(dir, DB_FILENAME));
+    migrate(raw, migrations.slice(0, 1));
+    raw
+      .prepare(
+        `INSERT INTO separations (source_path, source_name, instrument, audio_duration_s, processing_ms, device,
+           bitrate_kbps, instrument_output, rest_output) VALUES ('/a.wav', 'a', 'vocals', 8, 1000, 'cpu', 320, '/i.mp3', '/r.mp3')`,
+      )
+      .run();
+    expect(migrate(raw, migrations)).toBe(2);
+    expect(raw.prepare('SELECT model FROM separations').get()).toEqual({ model: 'htdemucs_6s' });
+    raw.close();
   });
 
   it('recusa banco de versão mais nova que o app', () => {

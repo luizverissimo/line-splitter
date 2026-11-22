@@ -43,6 +43,7 @@ function addSeparation(name: string, stem: NewSeparation['stem'] = 'vocals') {
     bitrateKbps: 320,
     instrumentOutput: instrument,
     restOutput: rest,
+    model: 'BS-Roformer-SW',
   });
 }
 const sha = (f: string) => createHash('sha256').update(fs.readFileSync(f)).digest('hex');
