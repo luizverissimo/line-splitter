@@ -344,7 +344,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Teste com interpretadores reais (scripts) cobrindo 3.8, 3.13 e 3.14
   - Verificar: `pnpm verify`
 
-- [ ] **T-903** Medição de vazamento e escolha dos modelos por instrumento — req: RF-26 · dep: T-902a
+- [x] **T-903** Medição de vazamento e escolha dos modelos por instrumento — req: RF-26 · dep: T-902a
   - Critérios:
     - Script `pnpm quality` mede, para cada instrumento, o vazamento do resto na faixa do instrumento (e vice-versa) com áudio sintético de stems conhecidos (SDR/razão de energia), com o motor real
     - Compara o atual (`htdemucs_6s`) com os candidatos (RoFormer para voz; `htdemucs_ft` para bateria/baixo; `htdemucs_6s` com `--shifts`/`--overlap` para guitarra/piano) e grava a tabela em `fixtures/quality.md`

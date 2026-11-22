@@ -118,6 +118,7 @@ pnpm install
 | `pnpm test:e2e` | Builda o desktop e roda os E2E com Playwright no Electron (`pnpm test:e2e envio` filtra por arquivo) |
 | `pnpm fixtures` | Gera os áudios de teste em `fixtures/` com o FFmpeg (os testes também geram sozinhos) |
 | `pnpm bench` | Benchmark: separa 4 min de áudio na CPU e, se houver GPU NVIDIA, também na GPU; imprime os tempos e grava `fixtures/benchmark.md` |
+| `pnpm quality` | Mede o vazamento de cada separador com músicas de faixas conhecidas (MUSDB18 e BabySlakh, CC-BY-4.0) e grava `fixtures/quality.md`; `--song arquivo` também compara numa música sua (DEC-017) |
 | `pnpm dist:linux` | Gera AppImage e .deb em `release/` |
 | `pnpm smoke:linux` | Executa o AppImage gerado e faz uma separação real (teste de fumaça do pacote) |
 | `pnpm dist:win` | Gera o instalador NSIS em `release/` (numa máquina Windows, ou no Linux com `wine`) |

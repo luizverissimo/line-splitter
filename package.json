@@ -20,7 +20,8 @@
     "bench": "pnpm --filter @line-splitter/desktop bench",
     "dist:linux": "pnpm --filter @line-splitter/desktop dist:linux",
     "dist:win": "pnpm --filter @line-splitter/desktop dist:win",
-    "smoke:linux": "playwright test --config playwright.pacote.config.ts"
+    "smoke:linux": "playwright test --config playwright.pacote.config.ts",
+    "quality": "node scripts/quality.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
