@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { detectDemucs, detectPython } from './detect';
+import { detectPython, detectSeparator } from './detect';
 import { spawnSync } from 'node:child_process';
 import { openDatabase } from '../db/database';
 import { engineHandlers } from '../handlers/engine';
@@ -150,7 +150,7 @@ describe('EngineInstaller (pip e venv reais)', () => {
   );
 
   it(
-    'cria o ambiente do zero numa pasta temporária, instala PyTorch (CPU) e Demucs e confere importando o Demucs',
+    'cria o ambiente do zero numa pasta temporária, instala PyTorch (CPU) e o separador e confere importando-o',
     async () => {
       // O venv é novo a cada execução; só os pacotes baixados ficam no cache do próprio pip (~/.cache/pip).
       const paths = enginePaths(tmp());
@@ -160,15 +160,18 @@ describe('EngineInstaller (pip e venv reais)', () => {
         reinstall: true,
         target: { systemPython: await systemPython(), cuda: false },
       });
-      expect(result).toMatchObject({ demucs: '4.1.0', cuda: false });
+      expect(result).toMatchObject({ separator: '0.48.0', cuda: false });
       expect(result.torch).toMatch(/^2\.6\.0/);
       expect(rec.steps.map((s) => s.step)).toEqual([1, 2, 3, 4, 5]);
       expect(rec.steps.every((s) => s.total === 5)).toBe(true);
       expect(rec.logs.length).toBeGreaterThan(3);
-      expect((await detectDemucs(paths)).ok).toBe(true);
+      expect((await detectSeparator(paths)).ok).toBe(true);
       expect(installer.isRunning).toBe(false);
       const fullLog = fs.readFileSync(path.join(paths.engineDir, 'install.log'), 'utf8');
-      expect(fullLog).toContain('== Instalando o Demucs');
+      expect(fullLog).toContain('== Instalando o separador (audio-separator)');
+      expect(fs.readFileSync(path.join(paths.engineDir, 'restricoes.txt'), 'utf8')).toBe(
+        'torch==2.6.0\ntorchaudio==2.6.0\n',
+      );
       expect(fullLog.split('\n').length).toBeGreaterThan(rec.logs.length);
     },
     30 * 60_000,

@@ -1,24 +1,28 @@
-import { AppError, formatBytes } from '@line-splitter/shared';
+import { AppError, formatBytes, type EngineModel } from '@line-splitter/shared';
 import { Download, RefreshCw, Square } from 'lucide-react';
 import { errorDetails, errorMessage } from '../api/errors';
 import { useModelDownload } from '../state/ModelDownloadContext';
 import { Button, ErrorAlert, ProgressBar } from './ui';
 
-/** Download dos pesos do htdemucs_6s com progresso real, cancelamento e nova tentativa. */
-export function ModelDownloadPanel({ downloaded }: { downloaded: boolean }) {
+/** Download dos modelos de separação com progresso real, cancelamento, retomada e nova tentativa. */
+export function ModelDownloadPanel({ downloaded, models }: { downloaded: boolean; models: EngineModel[] }) {
   const dl = useModelDownload();
   if (downloaded && !dl.running && !dl.result) return null;
 
   const cancelled = dl.error instanceof AppError && dl.error.code === 'CANCELLED';
   const failed = Boolean(dl.error) && !cancelled;
   const percent = dl.progress ? (dl.progress.receivedBytes / dl.progress.totalBytes) * 100 : null;
+  const missing = models.filter((m) => !m.ok);
+  const missingBytes = missing.reduce((sum, m) => sum + m.sizeBytes, 0);
 
   return (
     <div className="install-panel">
-      <h2>Modelo de separação</h2>
-      {!dl.running && !dl.result && (
+      <h2>Modelos de separação</h2>
+      {!dl.running && !dl.result && missing.length > 0 && (
         <p className="page-intro">
-          Baixa os pesos do modelo htdemucs_6s (cerca de 52 MB). Depois disso o app funciona sem internet.
+          Baixa {missing.length === 1 ? 'o modelo' : 'os modelos'} {missing.map((m) => m.name).join(', ')} (
+          {formatBytes(missingBytes)} no total). Se o download for interrompido, ele continua de onde parou.
+          Depois disso o app funciona sem internet.
         </p>
       )}
       {dl.running && (
@@ -26,14 +30,14 @@ export function ModelDownloadPanel({ downloaded }: { downloaded: boolean }) {
           value={percent}
           label={
             dl.progress
-              ? `Baixando o modelo: ${formatBytes(dl.progress.receivedBytes)} de ${formatBytes(dl.progress.totalBytes)}`
+              ? `Baixando ${dl.progress.model}: ${formatBytes(dl.progress.receivedBytes)} de ${formatBytes(dl.progress.totalBytes)}`
               : 'Conectando…'
           }
         />
       )}
       {dl.result && !dl.running && (
         <p className="save-ok" role="status">
-          Modelo baixado e conferido ({formatBytes(dl.result.sizeBytes)}).
+          Modelos baixados e conferidos ({formatBytes(dl.result.sizeBytes)}).
         </p>
       )}
       {cancelled && !dl.running && (
@@ -43,7 +47,7 @@ export function ModelDownloadPanel({ downloaded }: { downloaded: boolean }) {
       )}
       {failed && !dl.running && (
         <ErrorAlert
-          title="O download do modelo falhou"
+          title="O download dos modelos falhou"
           message={errorMessage(dl.error)}
           details={errorDetails(dl.error)}
         />
@@ -71,7 +75,7 @@ export function ModelDownloadPanel({ downloaded }: { downloaded: boolean }) {
               }
               onClick={dl.start}
             >
-              {failed ? 'Tentar de novo' : 'Baixar modelo'}
+              {failed ? 'Tentar de novo' : 'Baixar modelos'}
             </Button>
           )
         )}

@@ -69,16 +69,16 @@ export class SeparationService {
       this.progress('preparing', 0);
       const settings = this.deps.settings();
       const engine = await detectEngine(settings, this.deps.paths);
-      if (engine.demucs.ok && engine.ffmpeg.ok && !engine.model.ok) {
+      if (engine.separator.ok && engine.ffmpeg.ok && !engine.model.ok) {
         // Nunca baixamos nada durante a separação: sem o modelo local, explica e para.
         throw new AppError(
           'ENGINE_MISSING',
-          'O modelo de separação não foi baixado. Baixe-o na tela Motor (é preciso internet só nessa etapa).',
+          'Os modelos de separação não foram baixados. Baixe-os na tela Motor (é preciso internet só nessa etapa).',
           engine.model.detail,
         );
       }
       if (!engine.ready || !engine.ffmpeg.path || !engine.ffmpeg.ffprobePath) {
-        const problems = [engine.python, engine.ffmpeg, engine.demucs, engine.model]
+        const problems = [engine.python, engine.ffmpeg, engine.separator, engine.model]
           .filter((item) => !item.ok)
           .map((item) => item.detail)
           .join('\n');

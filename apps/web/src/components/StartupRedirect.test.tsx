@@ -7,13 +7,15 @@ import { App, AppRoutes } from '../App';
 import { createQueryClient } from '../api/queryClient';
 import { queryKeys } from '../api/queries';
 import { bridgeWith } from '../test/render';
+import { testModels } from '../test/engine';
 
 const notReady: EngineStatus = {
   ready: false,
   python: { ok: true, detail: 'Python 3.12.3', path: '/usr/bin/python3' },
   ffmpeg: { ok: true, detail: 'FFmpeg 6.1', path: '/usr/bin/ffmpeg', ffprobePath: '/usr/bin/ffprobe' },
-  demucs: { ok: false, detail: 'Motor não instalado.' },
+  separator: { ok: false, detail: 'Motor não instalado.' },
   model: { ok: false, detail: 'Pesos não baixados.' },
+  models: testModels(false),
   device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
   engineDir: '/dados/engine',
 };

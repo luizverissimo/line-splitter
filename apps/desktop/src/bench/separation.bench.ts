@@ -31,7 +31,7 @@ async function ensureCudaEngine(): Promise<EnginePaths> {
     ffmpegPath: '',
   } as const;
   const status = await detectEngine(settings, paths);
-  if (!status.demucs.ok || !status.device.cudaAvailable) {
+  if (!status.separator.ok || !status.device.cudaAvailable) {
     const python = await detectPython('');
     if (!python.path) throw new Error(python.detail);
     await new EngineInstaller(paths, { step: () => undefined, log: () => undefined }).install({

@@ -4,7 +4,7 @@ Gerado por `/planejar`. Tudo que o PRD menciona vira uma linha aqui. IDs: `RF-xx
 
 | ID | Requisito | Origem no PRD | Tarefas | Status |
 |---|---|---|---|---|
-| RF-01 | Ao abrir, verificar se o motor está pronto: Python ≥ 3.9, pacote `demucs`, FFmpeg e pesos do `htdemucs_6s` | §5.1 "Ao abrir, o app verifica…" | T-100 | feito |
+| RF-01 | Ao abrir, verificar se o motor está pronto: Python (3.10 a 3.13, DEC-017), separador no ambiente do app, FFmpeg e pesos dos modelos de separação (DEC-017; antes `htdemucs_6s`) | §5.1 "Ao abrir, o app verifica…" | T-100 | feito |
 | RF-02 | Tela de configuração do motor com status ✔/✖ de cada item | §5.1 "tela de configuração com o status de cada item" | T-101, T-601 | feito |
 | RF-03 | Botão "Instalar motor": cria venv gerenciado em `userData/engine` e instala `demucs` + `torch` via pip, com log ao vivo | §5.1 "Botão Instalar motor" | T-102 | feito |
 | RF-04 | Download dos pesos do modelo com barra de progresso | §5.1 "Download dos pesos do modelo" | T-103 | feito |

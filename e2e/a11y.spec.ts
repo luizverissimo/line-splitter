@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fixtures } from '../scripts/fixtures.mjs';
 import { expect, launchApp, test } from './app';
-import { ensureTestEngine, linkTestEngine } from './engine-fixture';
+import { ensureTestEngine, linkModelsExcept, linkTestEngine } from './engine-fixture';
 
 /** Auditoria axe (WCAG 2.1 A/AA, inclui contraste ≥ 4,5:1): nenhuma violação séria ou crítica. */
 async function audit(page: Page, label: string) {
@@ -21,7 +21,7 @@ async function audit(page: Page, label: string) {
 
 // Termos técnicos e nomes próprios permitidos; o resto do texto visível precisa estar em português.
 const ALLOWED =
-  /\b(MP3|GPU|CPU|FFmpeg|ffprobe|Python|PyTorch|Demucs|CUDA|htdemucs_6s|Line Splitter|Electron|Linux|Windows|macOS|kbps|kHz|MB|GB|WAV|FLAC|M4A|AAC|OGG|pcm_s16le|mp3|flac|vorbis|aac|NVIDIA|GeForce|RTX|Laptop|apt|winget|brew|sudo|install|python3|python3-venv|ffmpeg|Python\.Python\.3\.12|Gyan\.FFmpeg)\b/g;
+  /\b(MP3|GPU|CPU|FFmpeg|ffprobe|Python|PyTorch|Demucs|CUDA|htdemucs_6s|audio-separator|RoFormer|Roformer|MelBand|Bleedless|BS-Roformer-SW|Kim|FT2|Line Splitter|Electron|Linux|Windows|macOS|kbps|kHz|MB|GB|WAV|FLAC|M4A|AAC|OGG|pcm_s16le|mp3|flac|vorbis|aac|NVIDIA|GeForce|RTX|Laptop|apt|winget|brew|sudo|install|python3|python3-venv|ffmpeg|Python\.Python\.3\.12|Gyan\.FFmpeg)\b/g;
 const ENGLISH =
   /\b(Loading|Error|Cancel|Save|Settings|Home|History|Retry|Open|Choose|File|Files|Delete|Remove|Play|Pause|Mute|Submit|Close|Back|Next|Install|Installing|Engine|Model|Ready|Failed|Success|Separate|Separating|Result|Output|Folder|Browse|Select|Drop|Drag|Done|Processing|Elapsed|Time|Device|Quality|Path|Empty|Not found|Try again|Show|Copy|Details|About|Quit|Edit|Undo|Redo|Paste|Stop|Start|Warning|Help|Search|Instrument|Progress|Unknown|Missing|vocals|drums|bass|guitar|other|Vocals|Drums|Bass|Guitar)\b/;
 
@@ -234,7 +234,7 @@ test.describe('Acessibilidade e idioma', () => {
       // Primeira execução: itens com problema, painéis de instalação e de download.
       await expect(page.getByRole('heading', { level: 1, name: 'Motor de separação' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Instalar motor' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Baixar modelo' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Baixar modelos' })).toBeVisible();
       await check(page, 'Motor com problema');
 
       // Instalação em andamento (etapas e log) e cancelada.
@@ -249,11 +249,13 @@ test.describe('Acessibilidade e idioma', () => {
       await check(page, 'Instalação cancelada');
 
       // Download em andamento e cancelado.
-      await page.getByRole('button', { name: 'Baixar modelo' }).click();
-      await expect(page.getByText(/Baixando o modelo|Conectando/)).toBeVisible();
+      await page.getByRole('button', { name: 'Baixar modelos' }).click();
+      await expect(page.getByText(/Baixando |Conectando/)).toBeVisible();
       await check(page, 'Download em andamento');
       await page.getByRole('button', { name: 'Cancelar download' }).click();
-      await expect(page.getByText('Download do modelo cancelado.')).toBeVisible();
+      await expect(
+        page.getByText('Download dos modelos cancelado. O que já foi baixado é aproveitado na próxima vez.'),
+      ).toBeVisible();
       await check(page, 'Download cancelado');
 
       // Página inexistente.
@@ -290,6 +292,8 @@ test.describe('Acessibilidade e idioma', () => {
     const realEngine = await ensureTestEngine();
     const engineDir = path.join(userData, 'engine');
     fs.mkdirSync(path.join(engineDir, 'models'), { recursive: true });
+    // Os modelos novos (DEC-017) vêm íntegros do motor de teste; só o do Demucs é criado errado aqui.
+    await linkModelsExcept(userData, ['5c90dfd2-34c22ccb.th', 'htdemucs_6s.yaml']);
     fs.symlinkSync(path.join(realEngine, 'venv'), path.join(engineDir, 'venv'), 'dir');
     const fd = fs.openSync(path.join(engineDir, 'models', '5c90dfd2-34c22ccb.th'), 'w');
     fs.ftruncateSync(fd, 54_996_327);
@@ -443,14 +447,16 @@ test.describe('Acessibilidade e idioma', () => {
       await expect(page.getByText('Instalação cancelada. O ambiente parcial foi removido.')).toBeVisible({
         timeout: 30_000,
       });
-      await tabTo('Baixar modelo');
+      await tabTo('Baixar modelos');
       expect(await hasVisibleFocus(page)).toBe(true);
       await page.keyboard.press('Enter');
       await expect(page.getByRole('button', { name: 'Cancelar download' })).toBeVisible();
       await tabTo('Cancelar download');
       expect(await hasVisibleFocus(page)).toBe(true);
       await page.keyboard.press('Enter');
-      await expect(page.getByText('Download do modelo cancelado.')).toBeVisible();
+      await expect(
+        page.getByText('Download dos modelos cancelado. O que já foi baixado é aproveitado na próxima vez.'),
+      ).toBeVisible();
     } finally {
       await app.close();
     }

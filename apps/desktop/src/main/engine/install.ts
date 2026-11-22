@@ -2,17 +2,28 @@ import { AppError, type InstallLog, type InstallResult, type InstallStep } from 
 import type { ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { detectDemucs } from './detect';
+import { detectSeparator } from './detect';
 import { findInPath, run } from './exec';
 import type { EnginePaths } from './paths';
 import { killTree, spawnTree } from './process-tree';
 
-/** Versões fixadas do motor (DEC-011). */
+/** Versões fixadas do motor (DEC-011, DEC-017). */
 export const ENGINE_PACKAGES = {
   torch: 'torch==2.6.0',
+  torchaudio: 'torchaudio==2.6.0',
+  /** Separador dos modelos RoFormer (DEC-017); o extra "cpu" traz o onnxruntime que ele importa. */
+  separator: 'audio-separator[cpu]==0.48.0',
+  /** O audio-separator importa o audioread (via librosa) sem declarar a dependência. */
+  audioread: 'audioread>=3,<4',
+  /** Ainda usado pela separação até a troca do motor (T-905). */
   demucs: 'demucs==4.1.0',
   /** O Demucs 4.1 importa numpy sem declarar a dependência (DEC-011). */
-  numpy: 'numpy>=1.26,<3',
+  numpy: 'numpy>=2,<3',
+  /**
+   * Restrições do pip: sem elas, as dependências do audio-separator trocariam o PyTorch 2.6 (com CUDA 12.4)
+   * pela versão mais nova do PyPI.
+   */
+  constraints: ['torch==2.6.0', 'torchaudio==2.6.0'],
   torchIndex: {
     cuda: 'https://download.pytorch.org/whl/cu124',
     cpu: 'https://download.pytorch.org/whl/cpu',
@@ -68,7 +79,7 @@ export function explainInstallFailure(log: string): string {
     return 'Sem espaço em disco para instalar o motor (são necessários alguns GB).';
   }
   if (/No matching distribution found|Could not find a version that satisfies/i.test(log)) {
-    return 'Não há pacote do PyTorch/Demucs compatível com esta versão do Python. Use o Python 3.9 a 3.13.';
+    return 'Não há pacote do PyTorch/separador compatível com esta versão do Python. Use o Python 3.10 a 3.13.';
   }
   return 'A instalação do motor falhou. Veja o log técnico para os detalhes.';
 }
@@ -154,31 +165,46 @@ export class EngineInstaller {
           '--progress-bar',
           'off',
           ENGINE_PACKAGES.torch,
+          ENGINE_PACKAGES.torchaudio,
           '--index-url',
           ENGINE_PACKAGES.torchIndex[flavor],
         ],
         env,
       );
 
-      this.step(4, total, 'Instalando o Demucs');
+      this.step(4, total, 'Instalando o separador (audio-separator)');
+      const constraints = path.join(this.paths.engineDir, 'restricoes.txt');
+      fs.writeFileSync(constraints, `${ENGINE_PACKAGES.constraints.join('\n')}\n`);
       await this.exec(
         venvPython,
-        ['-m', 'pip', 'install', '--progress-bar', 'off', ENGINE_PACKAGES.demucs, ENGINE_PACKAGES.numpy],
+        [
+          '-m',
+          'pip',
+          'install',
+          '--progress-bar',
+          'off',
+          '--constraint',
+          constraints,
+          ENGINE_PACKAGES.separator,
+          ENGINE_PACKAGES.audioread,
+          ENGINE_PACKAGES.demucs,
+          ENGINE_PACKAGES.numpy,
+        ],
         env,
       );
 
       this.step(5, total, 'Conferindo a instalação');
-      const check = await detectDemucs(this.paths);
+      const check = await detectSeparator(this.paths);
       if (this.cancelled) throw new Error('cancelado durante a conferência');
       if (!check.ok || !check.torch) {
         throw new AppError(
           'ENGINE_FAILED',
-          'O motor foi instalado, mas o Demucs não carregou.',
+          'O motor foi instalado, mas o separador não carregou.',
           check.detail,
         );
       }
       this.log(check.detail, 'info');
-      return { demucs: check.torch.demucs, torch: check.torch.torch, cuda: check.torch.cuda };
+      return { separator: check.torch.separator, torch: check.torch.torch, cuda: check.torch.cuda };
     } catch (err) {
       if (this.cancelled) {
         try {

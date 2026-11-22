@@ -352,7 +352,7 @@ Status: [ ] pendente · [~] em andamento · [x] feito · [!] bloqueado (com "- B
     - Modelos, URLs, tamanhos e SHA-256 escolhidos registrados na DEC-017
   - Verificar: `pnpm quality`
 
-- [ ] **T-904** Motor: instala o separador RoFormer e baixa todos os modelos escolhidos — req: RF-26, RF-01, RF-04 · dep: T-903
+- [x] **T-904** Motor: instala o separador RoFormer e baixa todos os modelos escolhidos — req: RF-26, RF-01, RF-04 · dep: T-903
   - Critérios:
     - Instalação do motor inclui o pacote do separador RoFormer (versão fixa) além do Demucs, com o mesmo progresso/log/cancelamento
     - Tela Motor mostra cada modelo (nome, tamanho, baixado ou não) e "Baixar modelos" baixa todos com progresso, retomada, cancelamento e verificação SHA-256

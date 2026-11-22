@@ -8,16 +8,16 @@ import { engineHandlers } from '../handlers/engine';
 import { openDatabase } from '../db/database';
 import { SettingsRepository } from '../settings/repository';
 import {
-  detectDemucs,
   detectEngine,
   detectFfmpeg,
-  detectModel,
   detectPython,
+  detectSeparator,
   parseVersion,
   resolveDevice,
 } from './detect';
 import { findInPath } from './exec';
-import { HTDEMUCS_6S, enginePaths } from './paths';
+import { ensureTestEngine } from '../../../../../e2e/engine-fixture';
+import { enginePaths } from './paths';
 import { EngineInstaller } from './install';
 import { ModelDownloader } from './model';
 
@@ -92,7 +92,9 @@ describe('Python', () => {
     fs.writeFileSync(old, '#!/bin/sh\necho 3.8.10\n', { mode: 0o755 });
     const r = await detectPython(old);
     expect(r.ok).toBe(false);
-    expect(r.detail).toBe('Python 3.8.10 encontrado; o motor (PyTorch 2.6) precisa do Python 3.9 a 3.13.');
+    expect(r.detail).toBe(
+      'Python 3.8.10 encontrado; o motor (PyTorch 2.6 e audio-separator) precisa do Python 3.10 a 3.13.',
+    );
   });
 });
 
@@ -145,9 +147,9 @@ describe('FFmpeg', () => {
   });
 });
 
-describe('Demucs e modelo', () => {
+describe('separador do motor', () => {
   it('sem ambiente do motor', async () => {
-    const r = await detectDemucs(enginePaths(path.join(tmp, 'vazio')));
+    const r = await detectSeparator(enginePaths(path.join(tmp, 'vazio')));
     expect(r).toEqual({
       ok: false,
       torch: null,
@@ -160,47 +162,44 @@ describe('Demucs e modelo', () => {
     fs.mkdirSync(path.dirname(paths.venvPython), { recursive: true });
     fs.writeFileSync(
       paths.venvPython,
-      '#!/bin/sh\necho \'{"demucs":"4.1.0","torch":"2.6.0","cuda":"sim","gpu":null}\'\n',
-      {
-        mode: 0o755,
-      },
+      '#!/bin/sh\necho \'{"separator":"0.48.0","torch":"2.6.0","cuda":"sim","gpu":null}\'\n',
+      { mode: 0o755 },
     );
-    expect(await detectDemucs(paths)).toEqual({
+    expect(await detectSeparator(paths)).toEqual({
       ok: false,
       torch: null,
-      detail: 'Resposta inesperada ao verificar o Demucs.',
+      detail: 'Resposta inesperada ao verificar o separador.',
     });
   });
 
-  it('ambiente Python real sem o pacote demucs', async () => {
-    const userData = path.join(tmp, 'venv-sem-demucs');
+  it('motor antigo ou incompleto (venv real sem o audio-separator): explica que é preciso instalar/atualizar', async () => {
+    const userData = path.join(tmp, 'venv-sem-separador');
     const paths = enginePaths(userData);
     const python = (await detectPython('')).path as string;
     const created = spawnSync(python, ['-m', 'venv', '--without-pip', paths.venvDir], { encoding: 'utf8' });
     expect({ status: created.status, stderr: created.stderr }).toMatchObject({ status: 0 });
-    const r = await detectDemucs(paths);
-    expect(r.ok).toBe(false);
-    expect(r.detail).toBe('Pacote "demucs" não instalado no ambiente do motor.');
+    expect(await detectSeparator(paths)).toEqual({
+      ok: false,
+      torch: null,
+      detail:
+        'O separador (audio-separator) não está instalado no ambiente do motor. Clique em "Instalar motor" para instalar ou atualizar.',
+    });
   });
 
-  it('pesos do modelo: ausentes, incompletos, sem yaml e completos', () => {
-    const paths = enginePaths(path.join(tmp, 'modelo'));
-    const weights = path.join(paths.modelsDir, HTDEMUCS_6S.file);
-    expect(detectModel(paths)).toEqual({ ok: false, detail: 'Pesos do modelo htdemucs_6s não baixados.' });
-    fs.mkdirSync(paths.modelsDir, { recursive: true });
-    fs.writeFileSync(weights, Buffer.alloc(1024));
-    expect(detectModel(paths).detail).toBe('Pesos do modelo htdemucs_6s incompletos; baixe de novo.');
-    fs.truncateSync(weights, HTDEMUCS_6S.sizeBytes);
-    expect(detectModel(paths).detail).toBe('Descrição do modelo htdemucs_6s ausente; baixe de novo.');
-    fs.writeFileSync(path.join(paths.modelsDir, HTDEMUCS_6S.yamlFile), "models: ['955717e8']\n");
-    expect(detectModel(paths).detail).toBe('Descrição do modelo htdemucs_6s alterada; baixe de novo.');
-    fs.writeFileSync(path.join(paths.modelsDir, HTDEMUCS_6S.yamlFile), HTDEMUCS_6S.yaml);
-    expect(detectModel(paths)).toEqual({ ok: true, detail: 'Modelo htdemucs_6s (52 MB)' });
-  });
+  it(
+    'o motor de teste real (instalado pelo instalador do app) passa na sonda',
+    async () => {
+      const engine = await ensureTestEngine();
+      const r = await detectSeparator(enginePaths(path.dirname(engine)));
+      expect(r.ok).toBe(true);
+      expect(r.detail).toMatch(/^audio-separator 0\.48\.0 · PyTorch 2\.6\.0/);
+    },
+    60 * 60_000,
+  );
 });
 
 describe('dispositivo', () => {
-  const withGpu = { demucs: '4.0.1', torch: '2.5.1', cuda: true, gpu: 'RTX 3050' };
+  const withGpu = { separator: '0.48.0', torch: '2.6.0', cuda: true, gpu: 'RTX 3050' };
   const noGpu = { ...withGpu, cuda: false, gpu: null };
 
   it('automático usa GPU quando há CUDA, senão CPU', () => {
@@ -225,7 +224,8 @@ describe('detectEngine e canal engine:status', () => {
     const status = await detectEngine(settings(), paths);
     expect(status.python.ok).toBe(true);
     expect(status.ffmpeg.ok).toBe(true);
-    expect(status.demucs.ok).toBe(false);
+    expect(status.separator.ok).toBe(false);
+    expect(status.models.map((m) => m.ok)).toEqual([false, false, false]);
     expect(status.model.ok).toBe(false);
     expect(status.ready).toBe(false);
     expect(status.engineDir).toBe(paths.engineDir);

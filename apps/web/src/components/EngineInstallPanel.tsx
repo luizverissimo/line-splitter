@@ -51,7 +51,7 @@ export function EngineInstallPanel({ pythonOk, installed }: Props) {
       )}
       {install.result && !install.running && (
         <p className="save-ok" role="status">
-          Motor instalado: Demucs {install.result.demucs}, PyTorch {install.result.torch}
+          Motor instalado: audio-separator {install.result.separator}, PyTorch {install.result.torch}
           {install.result.cuda ? ' com GPU (CUDA).' : ' (CPU).'}
         </p>
       )}

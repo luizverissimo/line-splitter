@@ -89,7 +89,8 @@ describe('detectPython no Windows', () => {
     expect(r).toEqual({
       ok: false,
       path: path.join(only, 'python.exe'),
-      detail: 'Python 3.8.10 encontrado; o motor (PyTorch 2.6) precisa do Python 3.9 a 3.13.',
+      detail:
+        'Python 3.8.10 encontrado; o motor (PyTorch 2.6 e audio-separator) precisa do Python 3.10 a 3.13.',
     });
   });
 
@@ -115,7 +116,8 @@ describe('faixa de versões do Python (PyTorch 2.6: 3.9 a 3.13)', () => {
     expect(await detectPython('', { platform: 'linux', env: { PATH: novo } })).toEqual({
       ok: false,
       path: path.join(novo, 'python3'),
-      detail: 'Python 3.14.0 encontrado; o motor (PyTorch 2.6) precisa do Python 3.9 a 3.13.',
+      detail:
+        'Python 3.14.0 encontrado; o motor (PyTorch 2.6 e audio-separator) precisa do Python 3.10 a 3.13.',
     });
   });
 
@@ -128,6 +130,16 @@ describe('faixa de versões do Python (PyTorch 2.6: 3.9 a 3.13)', () => {
       ok: true,
       path: path.join(bom, 'python3'),
       detail: 'Python 3.12.8',
+    });
+  });
+
+  it('3.9 também é recusado (o audio-separator exige 3.10)', async () => {
+    const d = dir('py39');
+    script(d, 'python3', 'echo 3.9.18');
+    expect(await detectPython('', { platform: 'linux', env: { PATH: d } })).toMatchObject({
+      ok: false,
+      detail:
+        'Python 3.9.18 encontrado; o motor (PyTorch 2.6 e audio-separator) precisa do Python 3.10 a 3.13.',
     });
   });
 

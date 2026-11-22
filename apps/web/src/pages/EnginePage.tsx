@@ -120,7 +120,9 @@ export function EnginePage() {
   return (
     <section aria-labelledby="page-title">
       <h1 id="page-title">Motor de separação</h1>
-      <p className="page-intro">Situação do Python, do Demucs, do FFmpeg e do modelo usados na separação.</p>
+      <p className="page-intro">
+        Situação do Python, do FFmpeg, do separador e dos modelos usados na separação.
+      </p>
 
       {status.isPending && <LoadingState message="Verificando o motor…" />}
       {status.isError && (
@@ -140,10 +142,12 @@ export function EnginePage() {
           <ul className="engine-list" aria-label="Itens do motor">
             <StatusRow label="Python" item={status.data.python} />
             <StatusRow label="FFmpeg" item={status.data.ffmpeg} />
-            <StatusRow label="Demucs" item={status.data.demucs} />
-            <StatusRow label="Modelo htdemucs_6s" item={status.data.model} />
+            <StatusRow label="Separador" item={status.data.separator} />
+            {status.data.models.map((m) => (
+              <StatusRow key={m.id} label={`Modelo ${m.name} · ${m.instruments.join(', ')}`} item={m} />
+            ))}
           </ul>
-          <DeviceInfo device={status.data.device} engineReady={status.data.demucs.ok} />
+          <DeviceInfo device={status.data.device} engineReady={status.data.separator.ok} />
           {info.isError && (!status.data.python.ok || !status.data.ffmpeg.ok) && (
             <p className="engine-warning" role="status">
               Não foi possível identificar o sistema operacional; seguem as instruções para Linux e Windows.
@@ -153,8 +157,8 @@ export function EnginePage() {
             platforms.map((p) => <InstallHelp key={`python-${p}`} which="python" platform={p} />)}
           {!status.data.ffmpeg.ok &&
             platforms.map((p) => <InstallHelp key={`ffmpeg-${p}`} which="ffmpeg" platform={p} />)}
-          <EngineInstallPanel pythonOk={status.data.python.ok} installed={status.data.demucs.ok} />
-          <ModelDownloadPanel downloaded={status.data.model.ok} />
+          <EngineInstallPanel pythonOk={status.data.python.ok} installed={status.data.separator.ok} />
+          <ModelDownloadPanel downloaded={status.data.model.ok} models={status.data.models} />
         </div>
       )}
 

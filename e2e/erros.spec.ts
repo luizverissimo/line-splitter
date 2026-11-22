@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fixtures } from '../scripts/fixtures.mjs';
 import { expect, launchApp, test } from './app';
 import { openAppDb } from './db';
-import { ensureTestEngine, linkTestEngine } from './engine-fixture';
+import { ensureTestEngine, linkModelsExcept, linkTestEngine } from './engine-fixture';
 
 /** Responde pelo diálogo nativo com o arquivo informado. */
 async function answer(app: Awaited<ReturnType<typeof launchApp>>['app'], file: string) {
@@ -52,6 +52,8 @@ test.describe('Erros, limites e cancelamento', () => {
     const realEngine = await ensureTestEngine();
     const engineDir = path.join(userData, 'engine');
     fs.mkdirSync(path.join(engineDir, 'models'), { recursive: true });
+    // Os modelos novos (DEC-017) vêm íntegros do motor de teste; só o do Demucs é criado errado aqui.
+    await linkModelsExcept(userData, ['5c90dfd2-34c22ccb.th', 'htdemucs_6s.yaml']);
     fs.symlinkSync(path.join(realEngine, 'venv'), path.join(engineDir, 'venv'), 'dir');
     const weights = path.join(engineDir, 'models', '5c90dfd2-34c22ccb.th');
     const fd = fs.openSync(weights, 'w');
@@ -84,9 +86,12 @@ test.describe('Erros, limites e cancelamento', () => {
       // Seguindo a instrução: na tela Motor o modelo aparece como não baixado e o download está disponível.
       await page.getByRole('link', { name: 'Motor' }).click();
       await page.getByRole('button', { name: 'Verificar de novo' }).click();
-      const model = page.getByRole('list', { name: 'Itens do motor' }).getByRole('listitem').nth(3);
-      await expect(model).toContainText('Modelo htdemucs_6s: com problema');
-      await expect(page.getByRole('button', { name: 'Baixar modelo' })).toBeEnabled();
+      const model = page
+        .getByRole('list', { name: 'Itens do motor' })
+        .getByRole('listitem')
+        .filter({ hasText: 'Modelo htdemucs_6s' });
+      await expect(model).toContainText('com problema');
+      await expect(page.getByRole('button', { name: 'Baixar modelos' })).toBeEnabled();
     } finally {
       await app.close();
     }

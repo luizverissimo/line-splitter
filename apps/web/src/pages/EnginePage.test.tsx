@@ -3,6 +3,7 @@ import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { bridgeWith, renderApp } from '../test/render';
+import { testModels } from '../test/engine';
 
 const info = (platform: string) => ({
   name: 'Line Splitter',
@@ -13,8 +14,9 @@ const info = (platform: string) => ({
 const ready: EngineStatus = {
   python: { ok: true, detail: 'Python 3.12.3', path: '/usr/bin/python3' },
   ffmpeg: { ok: true, detail: 'FFmpeg 6.1.1', path: '/usr/bin/ffmpeg', ffprobePath: '/usr/bin/ffprobe' },
-  demucs: { ok: true, detail: 'Demucs 4.0.1 · PyTorch 2.5.1' },
-  model: { ok: true, detail: 'Modelo htdemucs_6s (80 MB)' },
+  separator: { ok: true, detail: 'Demucs 4.0.1 · PyTorch 2.5.1' },
+  model: { ok: true, detail: '2 modelos baixados.' },
+  models: testModels(true),
   device: { preference: 'auto', effective: 'cuda', cudaAvailable: true, gpuName: 'RTX 3050', warning: null },
   engineDir: '/home/u/.config/Line Splitter/engine',
   ready: true,
@@ -23,8 +25,9 @@ const missing: EngineStatus = {
   ...ready,
   python: { ok: false, detail: 'Python não encontrado no sistema.', path: null },
   ffmpeg: { ok: false, detail: 'FFmpeg não encontrado no sistema.', path: null, ffprobePath: null },
-  demucs: { ok: false, detail: 'Motor não instalado (ambiente Python do app ausente).' },
-  model: { ok: false, detail: 'Pesos do modelo htdemucs_6s não baixados.' },
+  separator: { ok: false, detail: 'Motor não instalado (ambiente Python do app ausente).' },
+  model: { ok: false, detail: 'Falta baixar: MelBand-RoFormer Kim FT2 Bleedless, BS-Roformer-SW (1,5 GB).' },
+  models: testModels(false),
   device: {
     preference: 'cuda',
     effective: 'cpu',
@@ -51,7 +54,13 @@ describe('Tela Motor', () => {
     expect(screen.getByText('Verificando o motor…')).toBeInTheDocument();
     expect(await screen.findByText('Tudo pronto para separar.')).toBeInTheDocument();
     const list = screen.getByRole('list', { name: 'Itens do motor' });
-    expect(within(list).getAllByRole('listitem')).toHaveLength(4);
+    expect(within(list).getAllByRole('listitem')).toHaveLength(5);
+    expect(within(list).getAllByRole('listitem')[3]).toHaveTextContent(
+      'Modelo MelBand-RoFormer Kim FT2 Bleedless · Voz: pronto',
+    );
+    expect(within(list).getAllByRole('listitem')[4]).toHaveTextContent(
+      'Modelo BS-Roformer-SW · Bateria, Baixo, Guitarra/Violão, Piano/Teclado: pronto',
+    );
     expect(within(list).getByText('Python 3.12.3')).toBeInTheDocument();
     expect(within(list).getAllByRole('listitem')[0]).toHaveTextContent('Python: pronto');
     expect(screen.getByText('GPU: RTX 3050')).toBeInTheDocument();
@@ -63,8 +72,10 @@ describe('Tela Motor', () => {
     expect(await screen.findByText(/O motor ainda não está pronto/)).toBeInTheDocument();
     const items = within(screen.getByRole('list', { name: 'Itens do motor' })).getAllByRole('listitem');
     expect(items[0]).toHaveTextContent('Python: com problema');
-    expect(items[3]).toHaveTextContent('Modelo htdemucs_6s: com problema');
-    expect(screen.getByText('Pesos do modelo htdemucs_6s não baixados.')).toBeInTheDocument();
+    expect(items[2]).toHaveTextContent('Separador: com problema');
+    expect(items[3]).toHaveTextContent('Modelo MelBand-RoFormer Kim FT2 Bleedless · Voz: com problema');
+    expect(within(items[3] as HTMLElement).getByText('Não baixado (870,8 MB).')).toBeInTheDocument();
+    expect(within(items[4] as HTMLElement).getByText('Não baixado (667,0 MB).')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Instalar o Python no Linux' })).toBeInTheDocument();
     expect(screen.getByText('sudo apt install python3 python3-venv')).toBeInTheDocument();
     expect(screen.getByText('sudo apt install ffmpeg')).toBeInTheDocument();

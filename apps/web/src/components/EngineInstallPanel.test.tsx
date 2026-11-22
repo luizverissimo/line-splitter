@@ -3,6 +3,7 @@ import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { eventBridge, renderApp } from '../test/render';
+import { testModels } from '../test/engine';
 
 const info = { name: 'Line Splitter', version: '0.1.0', platform: 'linux', electron: '45.4.1' };
 const notInstalled: EngineStatus = {
@@ -13,15 +14,16 @@ const notInstalled: EngineStatus = {
     path: '/usr/bin/ffmpeg',
     ffprobePath: '/usr/bin/ffprobe',
   },
-  demucs: { ok: false, detail: 'Motor não instalado (ambiente Python do app ausente).' },
-  model: { ok: false, detail: 'Pesos do modelo htdemucs_6s não baixados.' },
+  separator: { ok: false, detail: 'Motor não instalado (ambiente Python do app ausente).' },
+  model: { ok: false, detail: 'Falta baixar: MelBand-RoFormer Kim FT2 Bleedless, BS-Roformer-SW (1,5 GB).' },
+  models: testModels(false),
   device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
   engineDir: '/dados/engine',
   ready: false,
 };
 const installed: EngineStatus = {
   ...notInstalled,
-  demucs: { ok: true, detail: 'Demucs 4.1.0 · PyTorch 2.6.0+cu124' },
+  separator: { ok: true, detail: 'Demucs 4.1.0 · PyTorch 2.6.0+cu124' },
   device: { preference: 'auto', effective: 'cuda', cudaAvailable: true, gpuName: 'RTX 3050', warning: null },
 };
 
@@ -68,10 +70,10 @@ describe('Instalação do motor', () => {
 
     status = installed;
     await act(async () => {
-      pending.resolve({ ok: true, data: { demucs: '4.1.0', torch: '2.6.0+cu124', cuda: true } });
+      pending.resolve({ ok: true, data: { separator: '0.48.0', torch: '2.6.0+cu124', cuda: true } });
     });
     expect(
-      await screen.findByText('Motor instalado: Demucs 4.1.0, PyTorch 2.6.0+cu124 com GPU (CUDA).'),
+      await screen.findByText('Motor instalado: audio-separator 0.48.0, PyTorch 2.6.0+cu124 com GPU (CUDA).'),
     ).toBeInTheDocument();
     expect(await screen.findByText('GPU: RTX 3050')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Instalar motor' })).not.toBeInTheDocument();

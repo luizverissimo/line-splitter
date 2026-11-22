@@ -252,3 +252,9 @@ Uma entrada por tarefa concluída ou bloqueada, a mais recente no fim. Modelo:
 - Revisor: REPROVADO ×3 (cobertura de guitarra/piano, candidatos faltando, resultados desfavoráveis omitidos, custo de CPU sem aprovação, bug do `--song-metrics`) → APROVADO.
 - Observação: o disco encheu durante a pesquisa; foram apagados só artefatos criados aqui (modelos descartados, intermediários de empacotamento, cache do pip).
 - Commit: ver `git log` (T-903)
+
+### T-904 — Motor: instala o separador RoFormer e baixa todos os modelos (2026-11-22)
+- Feito: instalador com `audio-separator[cpu]==0.48.0` (+ audioread) e `torch`/`torchaudio` 2.6.0 fixados por `--constraint`; o Demucs continua até a T-905. Contrato: `separator`, `models` (nome, instrumentos, tamanho, situação) e `model` (resumo); Python mínimo 3.10. Registro dos modelos (Kim FT2 Bleedless, BS-Roformer-SW, htdemucs_6s legado). `ModelDownloader` de vários arquivos com progresso somado, retomada por HTTP Range (valida `Content-Range`), SHA-256 por arquivo, cancelamento que guarda o parcial. Tela Motor lista separador e cada modelo com tamanho; painel "Modelos de separação". Motor antigo/incompleto: mensagem para "Instalar motor". Bug corrigido no caminho: a retomada travava lendo um parcial que era arquivo especial. E2E: trava entre processos na preparação do motor de teste.
+- Verificado: `pnpm verify` OK (306), com testes contra o espelho real (YAMLs com SHA-256; Content-Range dos `.ckpt`); motor de teste instalado pelo instalador do app e modelos (1,6 GB) baixados pelo `ModelDownloader` real; `LINE_SPLITTER_DEV_NO_SANDBOX=1 pnpm test:e2e` 37 passed (DEC-008 pendente).
+- Revisor: REPROVADO (tamanho de modelo não baixado ausente; recomendações de Range, bytes reais e venv real) → APROVADO.
+- Commit: ver `git log` (T-904)

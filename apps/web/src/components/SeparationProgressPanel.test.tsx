@@ -3,6 +3,7 @@ import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { eventBridge, renderApp } from '../test/render';
+import { testModels } from '../test/engine';
 
 const info = { name: 'Line Splitter', version: '0.1.0', platform: 'linux', electron: '45.4.1' };
 const audio: AudioInfo = {
@@ -21,8 +22,9 @@ const audio: AudioInfo = {
 const ready = {
   python: { ok: true, detail: 'x', path: '/p' },
   ffmpeg: { ok: true, detail: 'x', path: '/f', ffprobePath: '/fp' },
-  demucs: { ok: true, detail: 'Demucs' },
+  separator: { ok: true, detail: 'Demucs' },
   model: { ok: true, detail: 'Modelo' },
+  models: testModels(true),
   device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
   engineDir: '/d',
   ready: true,

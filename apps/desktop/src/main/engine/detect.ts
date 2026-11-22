@@ -1,7 +1,10 @@
 import {
+  formatBytes,
+  instrumentOf,
   MAX_PYTHON,
   MIN_PYTHON,
   type EngineDevice,
+  type EngineModel,
   type EngineStatus,
   type Settings,
 } from '@line-splitter/shared';
@@ -9,7 +12,8 @@ import fs from 'node:fs';
 import { z } from 'zod';
 import path from 'node:path';
 import { findAllInPath, findInPath, run } from './exec';
-import { HTDEMUCS_6S, type EnginePaths } from './paths';
+import { generatedFilesPresent, modelFilePresent } from './model';
+import { modelSizeBytes, SEPARATION_MODELS, type EnginePaths, type SeparationModel } from './paths';
 
 type Item = { ok: boolean; detail: string };
 
@@ -52,7 +56,7 @@ async function probePython(python: string): Promise<Item & { path: string | null
     return {
       ok: false,
       path: python,
-      detail: `Python ${text} encontrado; o motor (PyTorch 2.6) precisa do Python ${MIN_PYTHON.join('.')} a ${MAX_PYTHON.join('.')}.`,
+      detail: `Python ${text} encontrado; o motor (PyTorch 2.6 e audio-separator) precisa do Python ${MIN_PYTHON.join('.')} a ${MAX_PYTHON.join('.')}.`,
     };
   }
   return { ok: true, path: python, detail: `Python ${text}` };
@@ -148,36 +152,52 @@ export async function detectFfmpeg(
 
 /** Resposta da sonda Python; validada porque vem de um processo externo. */
 const torchInfoSchema = z.object({
-  demucs: z.string().min(1),
+  separator: z.string().min(1),
   torch: z.string().min(1),
   cuda: z.boolean(),
   gpu: z.string().nullable(),
 });
 type TorchInfo = z.infer<typeof torchInfoSchema>;
 
+/**
+ * Importa o que a separação usa (audio-separator, PyTorch e, até a troca do motor na T-905, o Demucs)
+ * e informa versões e GPU.
+ */
 const PROBE_SCRIPT = [
-  'import json, demucs, numpy, torch',
+  'import json, importlib.metadata as md, importlib.util',
+  // Primeiro o separador: num motor antigo (ou incompleto) é ele que falta, e a mensagem tem de dizer isso.
+  "if importlib.util.find_spec('audio_separator') is None: raise ModuleNotFoundError(\"No module named 'audio_separator'\")",
+  'import torch, numpy, demucs',
+  'import audio_separator.separator',
   'cuda = torch.cuda.is_available()',
-  "print(json.dumps({'demucs': demucs.__version__, 'torch': torch.__version__, 'cuda': cuda,",
+  "print(json.dumps({'separator': md.version('audio-separator'), 'torch': torch.__version__, 'cuda': cuda,",
   "  'gpu': torch.cuda.get_device_name(0) if cuda else None}))",
 ].join('\n');
 
-export async function detectDemucs(paths: EnginePaths): Promise<Item & { torch: TorchInfo | null }> {
+export async function detectSeparator(paths: EnginePaths): Promise<Item & { torch: TorchInfo | null }> {
   if (!fs.existsSync(paths.venvPython)) {
     return { ok: false, torch: null, detail: 'Motor não instalado (ambiente Python do app ausente).' };
   }
   const r = await run(paths.venvPython, ['-c', PROBE_SCRIPT], {
-    timeoutMs: 60_000,
+    timeoutMs: 120_000,
     env: { ...process.env, TORCH_HOME: paths.torchHome, PYTHONNOUSERSITE: '1' },
   });
   if (r.code !== 0) {
-    const missing = /No module named '(\w+)'/.exec(r.stderr)?.[1];
+    const missing = /No module named '([\w.]+)'/.exec(r.stderr)?.[1];
+    if (missing?.startsWith('audio_separator')) {
+      return {
+        ok: false,
+        torch: null,
+        detail:
+          'O separador (audio-separator) não está instalado no ambiente do motor. Clique em "Instalar motor" para instalar ou atualizar.',
+      };
+    }
     return {
       ok: false,
       torch: null,
       detail: missing
-        ? `Pacote "${missing}" não instalado no ambiente do motor.`
-        : `Falha ao carregar o Demucs: ${(r.error?.message ?? r.stderr).trim().split('\n').pop() ?? 'erro desconhecido'}`,
+        ? `Pacote "${missing}" não instalado no ambiente do motor. Clique em "Instalar motor" para corrigir.`
+        : `Falha ao carregar o separador: ${(r.error?.message ?? r.stderr).trim().split('\n').pop() ?? 'erro desconhecido'}`,
     };
   }
   let parsed: unknown;
@@ -187,32 +207,55 @@ export async function detectDemucs(paths: EnginePaths): Promise<Item & { torch: 
     parsed = null;
   }
   const info = torchInfoSchema.safeParse(parsed);
-  if (!info.success) return { ok: false, torch: null, detail: 'Resposta inesperada ao verificar o Demucs.' };
-  return { ok: true, torch: info.data, detail: `Demucs ${info.data.demucs} · PyTorch ${info.data.torch}` };
+  if (!info.success)
+    return { ok: false, torch: null, detail: 'Resposta inesperada ao verificar o separador.' };
+  return {
+    ok: true,
+    torch: info.data,
+    detail: `audio-separator ${info.data.separator} · PyTorch ${info.data.torch}`,
+  };
 }
 
-export function detectModel(paths: EnginePaths): Item {
-  const weights = path.join(paths.modelsDir, HTDEMUCS_6S.file);
-  const yamlFile = path.join(paths.modelsDir, HTDEMUCS_6S.yamlFile);
-  let size: number;
-  try {
-    size = fs.statSync(weights).size;
-  } catch {
-    return { ok: false, detail: `Pesos do modelo ${HTDEMUCS_6S.name} não baixados.` };
-  }
-  if (size !== HTDEMUCS_6S.sizeBytes) {
-    return { ok: false, detail: `Pesos do modelo ${HTDEMUCS_6S.name} incompletos; baixe de novo.` };
-  }
-  let yamlText: string;
-  try {
-    yamlText = fs.readFileSync(yamlFile, 'utf8');
-  } catch {
-    return { ok: false, detail: `Descrição do modelo ${HTDEMUCS_6S.name} ausente; baixe de novo.` };
-  }
-  if (yamlText !== HTDEMUCS_6S.yaml) {
-    return { ok: false, detail: `Descrição do modelo ${HTDEMUCS_6S.name} alterada; baixe de novo.` };
-  }
-  return { ok: true, detail: `Modelo ${HTDEMUCS_6S.name} (${(size / 1024 / 1024).toFixed(0)} MB)` };
+/** Cada modelo de separação: baixado com o tamanho certo (e arquivos gerados íntegros)? */
+export function detectModels(
+  paths: EnginePaths,
+  models: readonly SeparationModel[] = SEPARATION_MODELS,
+): EngineModel[] {
+  return models.map((model) => {
+    const sizeBytes = modelSizeBytes(model);
+    const missing = model.files.filter((f) => !modelFilePresent(paths.modelsDir, f));
+    const base = {
+      id: model.id,
+      name: model.name,
+      instruments: model.stems.map((s) => instrumentOf(s).label),
+      sizeBytes,
+    };
+    const size = formatBytes(sizeBytes);
+    if (missing.length === model.files.length)
+      return { ...base, ok: false, detail: `Não baixado (${size}).` };
+    if (missing.length > 0) {
+      return { ...base, ok: false, detail: `Download incompleto (${size}); baixe de novo.` };
+    }
+    if (!generatedFilesPresent(paths.modelsDir, model)) {
+      return {
+        ...base,
+        ok: false,
+        detail: `Arquivo de descrição ausente ou alterado (${size}); baixe de novo.`,
+      };
+    }
+    return { ...base, ok: true, detail: `Baixado (${formatBytes(sizeBytes)})` };
+  });
+}
+
+/** Resumo de todos os modelos num item só. */
+export function summarizeModels(models: readonly EngineModel[]): Item {
+  const missing = models.filter((m) => !m.ok);
+  if (missing.length === 0) return { ok: true, detail: `${models.length} modelos baixados.` };
+  const total = missing.reduce((sum, m) => sum + m.sizeBytes, 0);
+  return {
+    ok: false,
+    detail: `Falta baixar: ${missing.map((m) => m.name).join(', ')} (${formatBytes(total)}).`,
+  };
 }
 
 export function resolveDevice(preference: Settings['device'], torch: TorchInfo | null): EngineDevice {
@@ -236,20 +279,22 @@ export function resolveDevice(preference: Settings['device'], torch: TorchInfo |
 
 /** Situação completa do motor, item por item. */
 export async function detectEngine(settings: Settings, paths: EnginePaths): Promise<EngineStatus> {
-  const [python, ffmpeg, demucs] = await Promise.all([
+  const [python, ffmpeg, separator] = await Promise.all([
     detectPython(settings.pythonPath),
     detectFfmpeg(settings.ffmpegPath),
-    detectDemucs(paths),
+    detectSeparator(paths),
   ]);
-  const model = detectModel(paths);
-  const { torch, ...demucsItem } = demucs;
+  const models = detectModels(paths);
+  const model = summarizeModels(models);
+  const { torch, ...separatorItem } = separator;
   return {
     python,
     ffmpeg,
-    demucs: demucsItem,
+    separator: separatorItem,
     model,
+    models,
     device: resolveDevice(settings.device, torch),
     engineDir: paths.engineDir,
-    ready: python.ok && ffmpeg.ok && demucs.ok && model.ok,
+    ready: python.ok && ffmpeg.ok && separator.ok && model.ok,
   };
 }

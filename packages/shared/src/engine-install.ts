@@ -19,8 +19,8 @@ export const installInputSchema = z.object({
 });
 
 export const installResultSchema = z.object({
-  /** Versões instaladas e conferidas importando o Demucs no ambiente novo. */
-  demucs: z.string().min(1),
+  /** Versões instaladas e conferidas importando o separador no ambiente novo. */
+  separator: z.string().min(1),
   torch: z.string().min(1),
   cuda: z.boolean(),
 });

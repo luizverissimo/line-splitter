@@ -5,9 +5,9 @@ Aplicativo desktop (Electron) que separa **um instrumento** de uma música e ger
 - `<música> - <Instrumento>.mp3` — só a linha do instrumento escolhido;
 - `<música> - sem <Instrumento>.mp3` — a música com todo o resto, sem o instrumento.
 
-Instrumentos: **Voz, Bateria, Baixo, Guitarra/Violão e Piano/Teclado** (modelo `htdemucs_6s` do [Demucs](https://github.com/facebookresearch/demucs)).
+Instrumentos: **Voz, Bateria, Baixo, Guitarra/Violão e Piano/Teclado**. Cada instrumento usa o modelo que menos deixou vazar o resto da música nas medições (`pnpm quality`, DEC-017): **MelBand-RoFormer Kim FT2 Bleedless** para a voz e **BS-Roformer-SW** para os demais, rodados pelo [audio-separator](https://github.com/nomadkaraoke/python-audio-separator).
 
-É de uso pessoal e roda **100% no seu computador**: sem conta, sem login, sem nuvem, sem cobrança. A internet só é usada uma vez, para instalar o motor (PyTorch + Demucs) e baixar o modelo (~55 MB). Depois disso funciona offline.
+É de uso pessoal e roda **100% no seu computador**: sem conta, sem login, sem nuvem, sem cobrança. A internet só é usada uma vez, para instalar o motor (PyTorch + audio-separator) e baixar os modelos (~1,6 GB). Depois disso funciona offline.
 
 Plataformas: **Linux** (principal) e **Windows**.
 
@@ -19,7 +19,7 @@ Plataformas: **Linux** (principal) e **Windows**.
 
 | | Linux (Ubuntu/Debian) | Windows |
 |---|---|---|
-| Python 3.9 a 3.13, com `venv` (o PyTorch 2.6 usado pelo motor não tem pacotes para o 3.14) | `sudo apt install python3 python3-venv` | [python.org](https://www.python.org/downloads/) (marque "Add python.exe to PATH") ou `winget install Python.Python.3.12` |
+| Python 3.10 a 3.13, com `venv` (faixa suportada pelo PyTorch 2.6 e pelo audio-separator usados no motor) | `sudo apt install python3 python3-venv` | [python.org](https://www.python.org/downloads/) (marque "Add python.exe to PATH") ou `winget install Python.Python.3.12` |
 | FFmpeg (com `ffprobe`) | `sudo apt install ffmpeg` | `winget install -e --id Gyan.FFmpeg` |
 | GPU (opcional) | NVIDIA com driver instalado (`nvidia-smi` funcionando) | NVIDIA com driver instalado |
 
@@ -68,9 +68,9 @@ No Ubuntu 24.04+ há dois obstáculos conhecidos do formato AppImage (DEC-015):
 
 ### Primeiro uso: instalar o motor
 
-1. Ao abrir pela primeira vez, o app vai para a tela **Motor** e mostra o que falta (Python, FFmpeg, Demucs, modelo).
-2. Clique em **Instalar motor**. O app cria um ambiente Python só dele (na pasta de dados do app) e instala o PyTorch — com CUDA se houver GPU NVIDIA, senão a versão de CPU — e o Demucs. São alguns GB; o progresso e o log aparecem na tela, e dá para cancelar.
-3. Clique em **Baixar modelo** (~55 MB, com verificação de integridade).
+1. Ao abrir pela primeira vez, o app vai para a tela **Motor** e mostra o que falta (Python, FFmpeg, separador, modelos).
+2. Clique em **Instalar motor**. O app cria um ambiente Python só dele (na pasta de dados do app) e instala o PyTorch — com CUDA se houver GPU NVIDIA, senão a versão de CPU — e o separador (audio-separator). São alguns GB; o progresso e o log aparecem na tela, e dá para cancelar.
+3. Clique em **Baixar modelos** (~1,6 GB, com verificação de integridade; se cair a conexão ou você cancelar, o download continua de onde parou).
 4. Quando aparecer **"Tudo pronto para separar."**, vá para **Início**.
 
 ### Separar um instrumento
@@ -101,7 +101,7 @@ Tudo fica num banco SQLite local, na pasta de dados do app (Linux: `~/.config/Li
 ### Pré-requisitos
 
 - **Node.js 22.5+** e **pnpm 10** (`npm install -g pnpm@10`; nos Node.js até a 24 também dá para usar `corepack enable`).
-- Python 3.9 a 3.13 com `venv` e FFmpeg (como acima) — os testes usam o motor e o FFmpeg reais.
+- Python 3.10 a 3.13 com `venv` e FFmpeg (como acima) — os testes usam o motor e o FFmpeg reais.
 - Linux: no Ubuntu 24.04+ o Electron de `node_modules` precisa do sandbox do Chromium. Rode uma vez o comando que `pnpm dev` mostra (`sudo chown root:root …/chrome-sandbox && sudo chmod 4755 …/chrome-sandbox`) ou, só em desenvolvimento, defina `LINE_SPLITTER_DEV_NO_SANDBOX=1` (DEC-008).
 
 ```bash
@@ -114,7 +114,7 @@ pnpm install
 |---|---|
 | `pnpm dev` | Vite com recarga + Electron apontando para ele |
 | `pnpm verify` | typecheck + lint + Prettier + testes (Vitest) + varredura anti-mock — o portão de toda tarefa |
-| `pnpm test` | Só os testes Vitest (unidade e integração, com Demucs e FFmpeg reais num trecho curto) |
+| `pnpm test` | Só os testes Vitest (unidade e integração, com o separador e o FFmpeg reais num trecho curto) |
 | `pnpm test:e2e` | Builda o desktop e roda os E2E com Playwright no Electron (`pnpm test:e2e envio` filtra por arquivo) |
 | `pnpm fixtures` | Gera os áudios de teste em `fixtures/` com o FFmpeg (os testes também geram sozinhos) |
 | `pnpm bench` | Benchmark: separa 4 min de áudio na CPU e, se houver GPU NVIDIA, também na GPU; imprime os tempos e grava `fixtures/benchmark.md` |

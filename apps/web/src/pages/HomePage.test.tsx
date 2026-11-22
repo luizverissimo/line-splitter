@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { bridgeWith, renderApp } from '../test/render';
+import { testModels } from '../test/engine';
 
 const info = { name: 'Line Splitter', version: '0.1.0', platform: 'linux', electron: '45.4.1' };
 const audio: AudioInfo = {
@@ -202,8 +203,9 @@ describe('Tela Início', () => {
         path: '/usr/bin/ffmpeg',
         ffprobePath: '/usr/bin/ffprobe',
       },
-      demucs: { ok: true, detail: 'Demucs 4.1.0' },
-      model: { ok: true, detail: 'Modelo htdemucs_6s (52 MB)' },
+      separator: { ok: true, detail: 'Demucs 4.1.0' },
+      model: { ok: true, detail: '2 modelos baixados.' },
+      models: testModels(true),
       device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
       engineDir: '/d/engine',
       ready: true,
@@ -235,8 +237,9 @@ describe('Tela Início', () => {
         data: {
           python: { ok: true, detail: 'x', path: '/p' },
           ffmpeg: { ok: true, detail: 'x', path: '/f', ffprobePath: '/fp' },
-          demucs: { ok: false, detail: 'Motor não instalado.' },
+          separator: { ok: false, detail: 'Motor não instalado.' },
           model: { ok: false, detail: 'Sem modelo.' },
+          models: testModels(false),
           device: {
             preference: 'auto',
             effective: 'cpu',
@@ -286,8 +289,9 @@ describe('Tela Início', () => {
     const engineReady = {
       python: { ok: true, detail: 'x', path: '/p' },
       ffmpeg: { ok: true, detail: 'x', path: '/f', ffprobePath: '/fp' },
-      demucs: { ok: true, detail: 'Demucs 4.1.0' },
+      separator: { ok: true, detail: 'Demucs 4.1.0' },
       model: { ok: true, detail: 'Modelo' },
+      models: testModels(true),
       device: { preference: 'auto', effective: 'cpu', cudaAvailable: false, gpuName: null, warning: null },
       engineDir: '/d/engine',
       ready: true,

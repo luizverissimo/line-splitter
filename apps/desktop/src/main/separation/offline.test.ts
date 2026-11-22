@@ -115,7 +115,7 @@ describe.runIf(bwrap)('separação com a rede do processo do motor bloqueada (bw
       });
       await expect(service.run('drums')).rejects.toMatchObject({
         code: 'ENGINE_MISSING',
-        message: expect.stringContaining('O modelo de separação não foi baixado'),
+        message: expect.stringContaining('Os modelos de separação não foram baixados'),
       });
       expect(fs.existsSync(noModel.modelsDir)).toBe(false);
     },

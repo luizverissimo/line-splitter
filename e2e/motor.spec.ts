@@ -12,7 +12,13 @@ test.describe('Tela Motor', () => {
       await expect(items.nth(0)).toContainText(/Python: pronto\s*Python 3\.\d+\.\d+/);
       await expect(items.nth(1)).toContainText(/FFmpeg: pronto\s*FFmpeg \S+ · ffprobe \S+/);
       await expect(items.nth(2)).toContainText('Motor não instalado (ambiente Python do app ausente).');
-      await expect(items.nth(3)).toContainText('Pesos do modelo htdemucs_6s não baixados.');
+      await expect(items.nth(3)).toContainText(
+        'Modelo MelBand-RoFormer Kim FT2 Bleedless · Voz: com problema',
+      );
+      await expect(items.nth(3)).toContainText('Não baixado (870,8 MB).');
+      await expect(items.nth(4)).toContainText('Não baixado (667,0 MB).');
+      await expect(items.nth(5)).toContainText('Não baixado (52,4 MB).');
+      await expect(items).toHaveCount(6);
       await expect(page.getByText(/Dispositivo em uso:/)).toContainText(
         'definido depois de instalar o motor',
       );
